@@ -1,0 +1,16 @@
+SUBUR MUJUR TANI — PERBAIKAN ADMIN FINAL V10
+
+Perbaikan utama:
+1. Akses data Admin sensitif tetap melalui /.netlify/functions/admin-data.
+2. adminRef() tidak pernah mengganti database.ref Firebase Client SDK.
+3. Pembuatan key push Admin tidak bergantung pada ref() root sensitif.
+4. Pembacaan section Admin tidak lagi semuanya otomatis berjalan bersamaan saat halaman dibuka. Section dimuat saat dipilih dan dijaga single-flight.
+5. Notifikasi toko Admin memakai jalur admin-data, bukan database.ref client.
+6. Duplikasi loader dan implementasi refund yang bertabrakan dibersihkan.
+7. Service worker dinaikkan ke v10 dan admin.html memakai no-store.
+8. Firebase Rules tidak dibuat publik.
+
+Validasi lokal:
+- Semua inline script admin.html lolos node --check.
+- Semua netlify/functions/*.js lolos node --check.
+- Tidak ada monkey-patch database.ref di admin.html.
