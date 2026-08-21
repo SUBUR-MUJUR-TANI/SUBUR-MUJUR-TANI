@@ -1,0 +1,2 @@
+FIX 3: Perbaiki format Google OAuth access token dari google-auth-library v11.
+getAccessToken() mengembalikan object {token,...}; admin-data sekarang mengambil access.token sebelum membuat Authorization: Bearer. Ini memperbaiki Unauthorized request dari Firebase REST.
