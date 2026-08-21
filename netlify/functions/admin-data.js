@@ -40,7 +40,7 @@ exports.handler = async (event) => {
       // Jangan materialize root collection besar sekaligus dari Admin SDK.
       // Root pesanan/pembayaran dibatasi ke 500 item terakhir; child path penuh.
       const isRoot = path === root;
-      const snap = (isRoot && ['pesanan','pembayaran'].includes(root))
+      const snap = (isRoot && ['pesanan','pembayaran','penarikan','pengembalian','pelacakan','notifikasiToko'].includes(root))
         ? await ref.orderByKey().limitToLast(500).once('value')
         : await ref.once('value');
       return json(200, {success:true,data:snap.val()});
