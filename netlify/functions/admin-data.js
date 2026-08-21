@@ -1,7 +1,7 @@
 const { getFirebaseAdmin } = require('./firebaseAdmin');
 const { JWT } = require('google-auth-library');
 
-const ALLOWED_ROOTS = new Set(['pesanan','pembayaran','penarikan','pengembalian','pelacakan','notifikasiToko']);
+const ALLOWED_ROOTS = new Set(['pesanan','pembayaran','penarikan','pengembalian','pelacakan','notifikasiToko','produk','ulasan']);
 const DB_SCOPES = ['https://www.googleapis.com/auth/firebase.database','https://www.googleapis.com/auth/userinfo.email'];
 let googleJwt = null;
 let googleTokenPromise = null;
@@ -71,8 +71,8 @@ async function restRequest(path, method, body){
 }
 
 async function getData(path, root){
-  // Keep root collection reads bounded. REST avoids the recursive DataSnapshot
-  // materialization path that can overflow the JS call stack on large/deep data.
+  // Keep root collection reads bounded. REST avoids recursive DataSnapshot
+  // materialization on large/deep collections and keeps Admin reads server-side.
   const token = await getGoogleAccessToken();
   const base = databaseUrl() + '/' + dbPath(path) + '.json';
   const isRoot = path === root;
