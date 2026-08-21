@@ -34,7 +34,13 @@ async function getGoogleAccessToken(){
   googleTokenPromise = (async () => {
     const sa = getServiceAccount();
     if (!googleJwt) googleJwt = new JWT({email: sa.email, key: sa.key, scopes: DB_SCOPES});
-    const token = await googleJwt.getAccessToken();
+    const access = await googleJwt.getAccessToken();
+    // google-auth-library v11 returns an object such as { token, res }.
+    // Passing that object directly into the Authorization header produces
+    // 'Bearer [object Object]' and Firebase responds with Unauthorized request.
+    const token = typeof access === 'string'
+      ? access
+      : String(access?.token || access?.access_token || '').trim();
     if (!token) throw new Error('Gagal mendapatkan Google access token untuk Firebase Database.');
     return token;
   })();
