@@ -935,10 +935,6 @@ function mulaiAutoSinkronBiteship() {
     sinkronkanSemuaBiteship(true);
 }
 
-async function getAdminIdToken() {
-    return await window.getAdminIdToken();
-}
-
 async function hitungTarifPengiriman(id) {
     const box = document.getElementById("rate-result-" + id);
     if (!box) return;
