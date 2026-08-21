@@ -1,0 +1,19 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+    // Foto produk hanya boleh di-upload oleh pengguna yang sudah login.
+    match /produk/{productId}/{fileName} {
+      allow read: if true;
+      allow write: if request.auth != null
+                   && request.resource.size < 10 * 1024 * 1024
+                   && request.resource.contentType.matches('image/.*');
+      allow delete: if request.auth != null;
+    }
+
+    // Jangan mengubah aturan folder lain dari website yang sudah ada.
+    match /{allPaths=**} {
+      allow read, write: if request.auth != null;
+    }
+  }
+}

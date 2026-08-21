@@ -1,0 +1,48 @@
+SUBUR MUJUR TANI — FIX FIREBASE REALTIME DATABASE TEST MODE
+
+Masalah:
+Firebase memberi peringatan bahwa Realtime Database masih memakai Test Mode dan
+akan menolak request setelah masa 30 hari berakhir.
+
+Perbaikan yang sudah ditambahkan ke project:
+- database.rules.json  = aturan produksi Realtime Database.
+- firebase.json        = menghubungkan project dengan file rules.
+- .firebaserc          = project Firebase subur-mujur-tani-6ff54.
+- storage.rules tetap digunakan untuk Firebase Storage.
+
+ATURAN UTAMA
+1. Produk, ulasan, posting beranda, notifikasi toko, voucher dan tracking dapat
+dibaca oleh pengunjung karena memang dipakai oleh halaman toko.
+2. Perubahan admin memerlukan Firebase Authentication.
+3. Checkout pengunjung tetap dapat membuat pesanan dan pembayaran.
+4. Pengunjung hanya dapat mengurangi stok produk, bukan mengubah harga/nama/gambar.
+5. Data pembayaran, pengembalian, penarikan dan event webhook tidak dibuka untuk
+pengunjung.
+
+PENTING — RULES HARUS DI-PUBLISH KE FIREBASE
+File rules di dalam ZIP tidak otomatis mengubah rules di server Firebase.
+Setelah project di-upload/deploy, jalankan dari folder project:
+
+  firebase login
+  firebase use subur-mujur-tani-6ff54
+  firebase deploy --only database,storage
+
+Jika Firebase CLI belum terpasang:
+  npm install -g firebase-tools
+
+Alternatif tanpa CLI:
+Firebase Console -> Realtime Database -> Rules -> ganti isi rules dengan isi
+file database.rules.json -> Publish.
+
+SETELAH PUBLISH
+- Refresh website.
+- Coba login Admin.
+- Coba membuka produk.
+- Coba membuat pesanan percobaan.
+- Pastikan tidak lagi muncul error permission denied.
+
+Catatan keamanan:
+Checkout saat ini memang menerima pesanan dari pengunjung tanpa login, sehingga
+rules harus tetap mengizinkan pembuatan pesanan. Untuk keamanan yang lebih tinggi,
+checkout dapat dipindahkan ke Netlify Function/Firebase Admin agar stok dan pesanan
+sepenuhnya diproses server-side.

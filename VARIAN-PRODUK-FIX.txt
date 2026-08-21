@@ -1,0 +1,22 @@
+SUBUR MUJUR TANI - VARIAN PRODUK FIX
+========================================
+
+Perubahan:
+1. Modal varian dibuat seperti tampilan marketplace/mobile sheet.
+2. Setiap varian memiliki harga sendiri.
+3. Saat varian diklik, harga dan stok di bagian atas otomatis berubah.
+4. Varian terpilih diberi tanda/border.
+5. Jumlah dapat diatur sebelum masuk keranjang atau Beli Sekarang.
+6. Stok varian dicek langsung dari Firebase sebelum ditambahkan.
+7. Keranjang dan checkout tetap menyimpan variantId + variantNama + harga varian.
+8. Produk tanpa varian tetap memakai sistem lama.
+
+PENTING:
+- Di admin.html, tambahkan varian pada produk:
+  Nama pilihan + Harga + Berat + Stok.
+- Contoh:
+  Kyojay   -> Rp108.000
+  Kyosawe(y) -> Rp126.000
+  Lalijiwo -> Rp140.000
+  dst.
+- Harga yang tampil di pembeli akan mengikuti varian yang dipilih.

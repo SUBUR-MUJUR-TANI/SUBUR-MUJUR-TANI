@@ -1,0 +1,15 @@
+PENGATURAN PENGIRIMAN INSTANT / KENDARAAN
+
+Tambahkan Environment Variables di Netlify:
+
+BITESHIP_ORIGIN_LATITUDE=latitude lokasi toko
+BITESHIP_ORIGIN_LONGITUDE=longitude lokasi toko
+
+GPS pelanggan hanya diminta ketika checkout memilih INSTANT / KENDARAAN dan menekan “Gunakan Lokasi Saya”.
+Reguler dan Cargo tetap menggunakan alamat + kode pos tanpa meminta GPS pelanggan.
+
+Contoh:
+BITESHIP_ORIGIN_LATITUDE=-6.xxxxxxx
+BITESHIP_ORIGIN_LONGITUDE=108.xxxxxxx
+
+Jangan masukkan BITESHIP_API_KEY ke HTML. Tetap simpan API key hanya di Environment Variables Netlify.

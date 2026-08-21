@@ -1,0 +1,43 @@
+SUBUR MUJUR TANI — PRO FINAL ALL FEATURES
+==========================================
+
+FITUR PEMBELI
+- Varian profesional: nama varian hitam jelas.
+- Harga, stok, dan berat mengikuti varian terpilih.
+- Filter harga: termurah / termahal.
+- Filter terlaris.
+- Filter stok: semua / tersedia / hampir habis / habis.
+- Pencarian produk berdasarkan nama, kategori, dan deskripsi.
+- Favorit produk tersimpan di perangkat.
+- Filter Favorit Saya.
+- Skeleton loading katalog.
+- Cache katalog localStorage agar produk dapat tampil lebih cepat.
+- Lazy loading dan decoding async untuk gambar produk.
+- Notifikasi / informasi toko dari Firebase.
+- Galeri produk.
+- Ulasan / rating.
+- Checkout, voucher, riwayat, tracking, WhatsApp, Biteship, PWA.
+- Harga, varian, berat, dan stok dikonfirmasi ulang dari Firebase sebelum order dibuat.
+- Stok varian dikurangi memakai transaction Firebase untuk mencegah perebutan stok secara bersamaan.
+
+FITUR ADMIN PRO
+- Control Center / Dashboard PRO.
+- Ringkasan pesanan, produk, pembayaran, omzet, pengembalian, dan pengiriman aktif.
+- Tombol akses cepat Produk & Varian, Pesanan, Pembayaran, Keuangan, Pengiriman, Pengembalian, Voucher, Ulasan, Notifikasi.
+- Kelola produk dan varian.
+- Kelola pembayaran.
+- Keuangan.
+- Biteship center.
+- Voucher.
+- Ulasan.
+- Pengembalian dan status refund.
+- Notifikasi / informasi toko: tambah, aktif/nonaktif, hapus.
+
+VALIDASI
+- Semua inline JavaScript pada halaman utama yang dimodifikasi telah diperiksa dengan Node --check.
+- ZIP hasil diperiksa ulang dengan unzip -t.
+
+CATATAN KEAMANAN
+- Harga/stok order dinormalisasi ulang dari Firebase sebelum checkout.
+- Transaksi stok menggunakan Firebase transaction.
+- Firebase Security Rules produksi tetap harus disesuaikan dengan struktur akun/admin dan kebijakan akses project Firebase pemilik.

@@ -1,0 +1,20 @@
+PERBAIKAN FIREBASE permission_denied SAAT CHECKOUT
+
+Masalah yang diperbaiki:
+- Checkout pelanggan tidak login melakukan transaction pada /produk/<id> untuk mengurangi stok.
+- Rule sebelumnya terlalu bergantung pada field nama/harga tertentu.
+
+Perbaikan terbaru:
+- Pengunjung tanpa login boleh menurunkan stok yang sudah ada, tidak boleh menaikkan stok.
+- Admin/login tetap dapat mengelola produk.
+- Pesanan COD dibuat sebagai Menunggu Konfirmasi COD.
+- Pesanan non-COD/transfer langsung masuk Dikemas.
+- Review token + produkIds disimpan pada pesanan agar ulasan hanya dapat dibuat oleh pembeli yang benar-benar memiliki pesanan Selesai.
+
+PENTING:
+1. Firebase Console > Realtime Database > Rules.
+2. Paste isi database.rules.json.
+3. Klik Publish.
+4. Deploy ZIP ini ke Netlify.
+
+Jangan mengubah .write menjadi true untuk seluruh database.

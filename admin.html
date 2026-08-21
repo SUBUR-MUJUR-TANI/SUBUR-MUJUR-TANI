@@ -1,0 +1,3536 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>
+Admin SUBUR MAJUR TANI
+</title>
+
+
+<style>
+
+body{
+
+font-family:Arial, sans-serif;
+
+background:#f1f8e9;
+
+margin:0;
+
+}
+
+
+
+header{
+
+background:#1b5e20;
+
+color:white;
+
+padding:20px;
+
+text-align:center;
+
+}
+
+
+
+.container{
+
+width:95%;
+
+max-width:1200px;
+
+margin:auto;
+
+padding:20px;
+
+}
+
+
+
+.box{
+
+background:white;
+
+padding:20px;
+
+margin-bottom:20px;
+
+border-radius:12px;
+
+box-shadow:0 3px 10px rgba(0,0,0,.15);
+
+}
+
+
+
+h2{
+
+color:#1b5e20;
+
+}
+
+
+
+input,
+select,
+textarea{
+
+width:100%;
+
+padding:12px;
+
+margin:8px 0;
+
+border-radius:8px;
+
+border:1px solid #ccc;
+
+}
+
+
+
+button{
+
+background:#1b5e20;
+
+color:white;
+
+border:0;
+
+padding:12px 18px;
+
+border-radius:8px;
+
+cursor:pointer;
+
+}
+
+
+
+button:hover{
+
+background:#388e3c;
+
+}
+
+
+
+.card{
+
+border:1px solid #ddd;
+
+padding:15px;
+
+border-radius:10px;
+
+margin-bottom:15px;
+
+}
+
+
+
+.status{
+
+font-weight:bold;
+
+color:#1b5e20;
+
+}
+
+
+
+
+.status-select{width:100%;margin:8px 0;padding:10px;border:1px solid #d8d8d8;border-radius:9px;background:#fff;font-size:14px;}
+.status-tools{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;margin-top:8px;}
+.status-tools button{width:auto;margin:0;padding:10px 14px;}
+.status-badge{display:inline-block;padding:5px 9px;border-radius:999px;background:#f2ead6;color:#6b5422;font-weight:800;font-size:12px;}
+/* ===== PESANAN MASUK MINIMALIS ===== */
+#pesanan{display:grid;gap:10px;}
+#pesanan .order-card{padding:12px 14px;margin:0;border:1px solid #e7ece8;border-radius:14px;box-shadow:0 2px 8px rgba(0,0,0,.05);background:#fff;}
+#pesanan .order-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:6px;}
+#pesanan .order-head h3{margin:0;color:#0b3d2e;font-size:17px;}
+#pesanan .order-meta{display:grid;grid-template-columns:1fr 1fr;gap:3px 12px;font-size:13px;color:#66716c;margin:6px 0 8px;}
+#pesanan .order-total{font-size:17px;font-weight:800;color:#123f30;margin:7px 0;}
+#pesanan .order-actions{display:flex;flex-wrap:wrap;gap:7px;margin-top:9px;}
+#pesanan .order-actions button{padding:9px 11px;font-size:12px;border-radius:9px;margin:0;}
+#pesanan .order-danger{background:#c62828!important;}
+#pesanan .order-danger:hover{background:#a51f1f!important;}
+#pesanan .status-tools{display:flex;flex-wrap:wrap;gap:7px;align-items:center;margin-top:7px;}
+#pesanan .status-tools select{flex:1;min-width:170px;margin:0;}
+@media(max-width:600px){#pesanan .order-meta{grid-template-columns:1fr;}#pesanan .status-tools select{min-width:100%;}}
+
+#pemilihFotoProdukWrap label{
+  user-select:none;
+  -webkit-user-select:none;
+}
+#pemilihFotoProdukWrap label:active{
+  transform:scale(.98);
+}
+@media(max-width:600px){
+  #pemilihFotoProdukWrap{flex-direction:column;align-items:stretch !important;}
+  #pemilihFotoProdukWrap label{width:100%;font-size:16px;}
+  #previewProdukThumbs img{width:92px !important;height:92px !important;}
+}
+
+<style id="biteship-admin-styles">
+.biteship-admin-box{margin-top:12px;padding:13px;border:1px solid #dcebe2;border-radius:12px;background:#f8fcf9}
+.biteship-admin-title{font-weight:800;color:#0b3d2e;margin-bottom:9px}
+.biteship-admin-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-bottom:9px}
+.biteship-admin-grid>div{background:#fff;border:1px solid #e8eee9;border-radius:9px;padding:8px}
+.biteship-admin-grid small{display:block;color:#718078;font-size:11px;margin-bottom:3px}
+.biteship-admin-grid b{display:block;color:#153d30;font-size:13px}
+.biteship-controls{display:grid;gap:8px}
+.btn-rate{background:#245f46!important;width:100%}
+.btn-create{background:#0b3d2e!important;width:100%;margin-top:8px}
+.rate-result{display:grid;gap:7px}
+.rate-result select{margin:0!important;background:#fff}
+.rate-hint{font-size:12px;color:#68746e;padding:9px;background:#fff;border-radius:9px}
+.selected-rate{padding:10px;border:1px solid #cfe4d5;border-radius:9px;background:#eef8f1;font-size:12px}
+.biteship-result{margin-top:8px;padding:10px;border:1px solid #cfe4d5;border-radius:9px;background:#eef8f1;display:grid;gap:4px;font-size:12px}
+.track-link{display:inline-block;margin-top:5px;color:#0b5d39;font-weight:800;text-decoration:none}
+@media(max-width:600px){.biteship-admin-grid{grid-template-columns:1fr}}
+</style>
+
+</style>
+
+
+<style id="sm-cross-platform-fix">
+/* Cross-platform compatibility: Android, iOS/iPadOS and desktop */
+*,*::before,*::after{box-sizing:border-box}
+html{width:100%;max-width:100%;overflow-x:hidden;-webkit-text-size-adjust:100%;text-size-adjust:100%;scroll-behavior:smooth}
+body{width:100%;max-width:100%;min-height:100%;margin:0;overflow-x:hidden;-webkit-tap-highlight-color:transparent}
+img,video,canvas,svg{max-width:100%;height:auto}
+button,a,input,select,textarea{font:inherit}
+button,a{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+input,select,textarea{max-width:100%;font-size:16px}
+button{cursor:pointer}
+@media (hover:none){button,a{outline:none}}
+/* iPhone safe areas */
+body{padding-bottom:env(safe-area-inset-bottom,0px)}
+.fixed-bottom,.bottom-nav,.mobile-bottom-nav,.nav-bottom,[class*="bottom-nav"]{padding-bottom:max(0px,env(safe-area-inset-bottom,0px))}
+/* Prevent fixed UI from covering content on notched phones */
+@supports (height:100dvh){.full-height,.min-vh{min-height:100dvh}}
+/* Flexible media/cards */
+.container,.content,.section,.card,.product-card,.cart-card{max-width:100%}
+/* Small Android phones */
+@media (max-width:480px){
+  body{font-size:15px}
+  h1{line-height:1.15}
+  h2,h3{line-height:1.2}
+  table{display:block;max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}
+}
+/* Tablets / desktop: keep the app centered and readable */
+@media (min-width:769px){
+  body{min-width:320px}
+}
+/* iOS standalone / Safari */
+@supports (-webkit-touch-callout:none){
+  input,select,textarea{font-size:16px}
+  select{background-color:#fff}
+}
+</style>
+<meta name="theme-color" content="#063b2d"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="default">
+
+<style id="sm-social-post-admin">
+.social-post-admin{background:linear-gradient(135deg,#fffdf8,#f7f4ec);border:1px solid #e7e1d4;border-radius:18px;padding:22px;margin-top:20px}
+.social-post-admin .composer-head{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.social-post-admin .composer-avatar{width:46px;height:46px;border-radius:50%;display:grid;place-items:center;background:#0b3d2e;color:#e4cc91;font-size:22px}
+.social-post-admin textarea{min-height:110px;resize:vertical;background:#fff;border:1px solid #ddd}
+.social-post-admin .post-file{display:flex;align-items:center;gap:10px;padding:12px;border:1px dashed #c7a15a;border-radius:12px;background:#fff;cursor:pointer}
+.social-post-admin .post-file input{display:none}
+.social-post-admin .post-preview{display:none;max-width:100%;width:100%;max-height:360px;object-fit:cover;border-radius:14px;margin-top:12px}
+.social-post-admin .post-actions{display:flex;gap:10px;flex-wrap:wrap}
+.social-post-admin .post-actions button{width:auto;min-width:150px}
+.social-post-admin .post-status{display:none;margin-top:10px;padding:10px 12px;border-radius:10px;background:#eef7f1;color:#0b3d2e;font-weight:700}
+.admin-social-list{display:grid;gap:16px;margin-top:18px}
+.admin-social-card{background:#fff;border:1px solid #e7e1d4;border-radius:16px;overflow:hidden}
+.admin-social-card .body{padding:16px}
+.admin-social-card img{display:block;width:100%;max-height:420px;object-fit:cover}
+.admin-social-card .meta{color:#777;font-size:12px;margin-top:8px}
+.admin-social-card .delete-post{background:#b3261e;width:auto;margin-top:12px}
+@media(max-width:600px){
+ .social-post-admin{padding:16px}
+ .social-post-admin .post-actions button{width:100%}
+}
+</style>
+
+
+<style id="admin-pro-control-center">.pro-dash-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:15px 0}.pro-dash-card{background:#fff;border:1px solid #e1e9e3;border-radius:16px;padding:15px;box-shadow:0 5px 18px rgba(20,42,32,.05)}.pro-dash-card small{display:block;color:#66736d;font-weight:700}.pro-dash-card b{display:block;font-size:25px;color:#0b3d2e;margin:7px 0}.pro-dash-card span{font-size:12px;color:#777}.pro-quick-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}.pro-quick-grid button{background:#f7faf7;color:#0b3d2e;border:1px solid #d9e5dc;border-radius:12px;padding:12px;font-weight:800;cursor:pointer}.pro-notif-form{display:grid;gap:9px;padding:14px;background:#f8faf8;border:1px solid #e2e9e4;border-radius:14px}.pro-notif-form textarea{resize:vertical}.pro-notif-item{border:1px solid #e4e8e5;border-radius:13px;padding:12px;margin:9px 0;background:#fff}.pro-notif-item .row{display:flex;justify-content:space-between;gap:10px;align-items:center}.pro-notif-badge{display:inline-block;padding:4px 8px;border-radius:999px;background:#e8f5e9;color:#1b5e20;font-size:11px;font-weight:800}.pro-notif-item p{white-space:pre-wrap;color:#555;line-height:1.45}.pro-notif-item small{color:#888}.pro-notif-item button{width:auto;background:#b3261e;margin-top:7px}@media(max-width:800px){.pro-dash-grid{grid-template-columns:1fr 1fr}.pro-quick-grid{grid-template-columns:1fr 1fr}}@media(max-width:520px){.pro-dash-grid{grid-template-columns:1fr}.pro-quick-grid{grid-template-columns:1fr}}</style>
+<style id="admin-organizer-styles">
+.admin-section-nav{position:sticky;top:0;z-index:50;display:flex;gap:8px;flex-wrap:wrap;padding:12px;margin:0 0 18px;background:rgba(255,255,255,.96);backdrop-filter:blur(10px);border:1px solid #e7e1d4;border-radius:16px;box-shadow:0 8px 24px rgba(20,42,32,.08)}
+.admin-tab{border:1px solid #d8d2c5;background:#fff;border-radius:12px;padding:11px 14px;font-weight:700;color:#214b3b;cursor:pointer;min-height:44px}
+.admin-tab.active{background:#0b3d2e;color:#fff;border-color:#0b3d2e}
+
+.keuangan-summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:14px 0}
+.keuangan-stat{background:#fff;border:1px solid #e2e9e4;border-radius:14px;padding:13px;box-shadow:0 2px 7px rgba(0,0,0,.04)}
+.keuangan-stat small{display:block;color:#68746e;font-size:12px;margin-bottom:5px}
+.keuangan-stat b{display:block;color:#0b3d2e;font-size:19px}
+.keuangan-toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:10px 0 14px}
+.keuangan-toolbar select,.keuangan-toolbar input{margin:0;max-width:210px}
+.keuangan-table-wrap{overflow-x:auto;border:1px solid #e5ebe7;border-radius:12px;background:#fff}
+.keuangan-table{width:100%;border-collapse:collapse;min-width:760px;font-size:13px}
+.keuangan-table th,.keuangan-table td{padding:10px;border-bottom:1px solid #edf0ee;text-align:left;vertical-align:top}
+.keuangan-table th{background:#f5f9f6;color:#355c4c;font-weight:800}
+.keuangan-badge{display:inline-block;padding:4px 8px;border-radius:999px;background:#e8f5e9;color:#1b5e20;font-weight:800;font-size:11px}
+.keuangan-note{padding:11px 13px;border-radius:10px;background:#fff8e8;border:1px solid #ead49b;color:#66521e;font-size:12px;line-height:1.45;margin-top:10px}
+@media(max-width:700px){.keuangan-summary{grid-template-columns:1fr 1fr}.keuangan-stat b{font-size:16px}.keuangan-toolbar input,.keuangan-toolbar select{max-width:100%;flex:1;min-width:130px}}
+.biteship-center-summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:14px 0}.biteship-center-stat{background:#fff;border:1px solid #dfe9e3;border-radius:14px;padding:13px}.biteship-center-stat small{display:block;color:#68746e;font-size:11px}.biteship-center-stat b{display:block;color:#0b3d2e;font-size:19px;margin-top:4px}.biteship-toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:10px 0}.biteship-toolbar input,.biteship-toolbar select{margin:0;max-width:220px}.biteship-table-wrap{overflow-x:auto;border:1px solid #e5ebe7;border-radius:12px;background:#fff}.biteship-table{width:100%;border-collapse:collapse;min-width:980px;font-size:12px}.biteship-table th,.biteship-table td{padding:9px;border-bottom:1px solid #edf0ee;text-align:left;vertical-align:top}.biteship-table th{background:#f5f9f6;color:#355c4c;font-weight:800}.biteship-raw{display:inline-block;padding:3px 7px;border-radius:999px;background:#eef3ff;color:#34528f;font-weight:800;font-size:10px}.biteship-balance-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:12px 0}.biteship-balance-card{padding:12px;border:1px solid #e5e0d5;border-radius:12px;background:#fff}.biteship-balance-card small{display:block;color:#68746e}.biteship-balance-card b{display:block;font-size:17px;color:#0b3d2e;margin-top:4px}.biteship-warning{padding:11px 13px;border-radius:10px;background:#fff8e8;border:1px solid #ead49b;color:#66521e;font-size:12px;line-height:1.45;margin:10px 0}.biteship-ok{padding:10px 12px;border-radius:10px;background:#eef8f1;border:1px solid #cfe4d5;color:#245f46;font-size:12px;margin:10px 0}@media(max-width:800px){.biteship-center-summary,.biteship-balance-grid{grid-template-columns:1fr 1fr}}@media(max-width:480px){.biteship-center-summary,.biteship-balance-grid{grid-template-columns:1fr}}
+.admin-tab:hover{transform:translateY(-1px)}
+.post-live-preview{margin:16px 0;padding:14px;border:1px solid #e6dfd0;border-radius:16px;background:#f8f7f1}
+.post-live-label{font-weight:800;color:#0b3d2e;margin-bottom:10px}
+.post-live-preview .home-social-card{margin:0}
+.post-preview{max-width:100%;max-height:360px;object-fit:cover;border-radius:14px;margin-top:12px;display:none}
+@media(max-width:640px){.admin-section-nav{overflow-x:auto;flex-wrap:nowrap;scrollbar-width:none}.admin-section-nav::-webkit-scrollbar{display:none}.admin-tab{white-space:nowrap}.post-live-preview{padding:10px}}
+</style>
+
+
+
+<link rel="stylesheet" href="navigasi.css">
+<link rel="manifest" href="/manifest.webmanifest">
+<meta name="theme-color" content="#0b3d2e">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="SUBUR MUJUR TANI">
+<link rel="icon" href="/icons/icon-192.png">
+<link rel="apple-touch-icon" href="/icons/icon-192.png">
+</head>
+
+
+
+<body>
+
+
+<header>
+
+<h1>
+🌱 Dashboard Admin
+</h1>
+
+<p>
+SUBUR MUJUR TANI
+</p>
+
+</header>
+
+
+
+<div class="container">
+
+<div class="admin-section-nav" id="adminSectionNav">
+  <button type="button" class="admin-tab active" data-section="dashboard">📊 Dashboard PRO</button>
+  <button type="button" class="admin-tab" data-section="pesanan">📦 Pesanan Masuk</button>
+  <button type="button" class="admin-tab" data-section="status">⚙️ Status Pesanan</button>
+  <button type="button" class="admin-tab" data-section="postingan">📣 Postingan Beranda</button>
+  <button type="button" class="admin-tab" data-section="produk">📦 Kelola Produk</button>
+  <button type="button" class="admin-tab" data-section="pembayaran">💳 Pembayaran Masuk</button>
+  <button type="button" class="admin-tab" data-section="keuangan">💰 Keuangan</button>
+  <button type="button" class="admin-tab" data-section="biteship">🚚 Biteship</button>
+  <button type="button" class="admin-tab" data-section="voucher">🏷️ Kelola Voucher Diskon</button>
+  <button type="button" class="admin-tab" data-section="ulasan">⭐ Ulasan</button>
+  <button type="button" class="admin-tab" data-section="pengembalian">🔄 Pengembalian</button>
+  <button type="button" class="admin-tab" data-section="notifikasi">🔔 Notifikasi Toko</button>
+</div>
+
+<div class="box" id="adminProDashboard">
+<h2>📊 Control Center PRO</h2>
+<p style="color:#666;margin-top:0">Pusat ringkasan toko: pesanan, produk, pembayaran, pengembalian, dan omzet.</p>
+<div class="pro-dash-grid">
+<div class="pro-dash-card"><small>📦 Total Pesanan</small><b id="proDashOrders">0</b><span id="proDashNew">0 pesanan baru</span></div>
+<div class="pro-dash-card"><small>🌱 Produk</small><b id="proDashProducts">0</b><span id="proDashLowStock">0 stok rendah</span></div>
+<div class="pro-dash-card"><small>💳 Pembayaran</small><b id="proDashPayments">0</b><span id="proDashPaid">0 lunas</span></div>
+<div class="pro-dash-card"><small>💰 Omzet</small><b id="proDashRevenue">Rp 0</b><span>Pesanan selesai/lunas</span></div>
+<div class="pro-dash-card"><small>🔄 Pengembalian</small><b id="proDashReturns">0</b><span id="proDashRefund">0 refund selesai</span></div>
+<div class="pro-dash-card"><small>🚚 Pengiriman</small><b id="proDashShipping">0</b><span>Pesanan aktif</span></div>
+</div>
+<h3 style="margin-top:20px">⚡ Akses Cepat</h3>
+<div class="pro-quick-grid">
+<button onclick="showAdminProSection('produk')">🌱 Produk & Varian</button><button onclick="showAdminProSection('pesanan')">📦 Pesanan</button><button onclick="showAdminProSection('pembayaran')">💳 Pembayaran</button><button onclick="showAdminProSection('keuangan')">💰 Keuangan</button><button onclick="showAdminProSection('biteship')">🚚 Pengiriman</button><button onclick="showAdminProSection('pengembalian')">🔄 Pengembalian</button><button onclick="showAdminProSection('voucher')">🏷️ Voucher</button><button onclick="showAdminProSection('ulasan')">⭐ Ulasan</button><button onclick="showAdminProSection('notifikasi')">🔔 Notifikasi</button>
+</div>
+<div id="proDashUpdated" style="margin-top:12px;color:#777;font-size:12px">Memuat ringkasan...</div>
+</div>
+<div class="box" id="adminProNotifications">
+<h2>🔔 Notifikasi & Informasi Toko</h2><p style="color:#666;margin-top:0">Informasi di sini tampil di halaman Produk untuk pelanggan.</p>
+<div class="pro-notif-form"><input id="proNotifTitle" placeholder="Judul informasi, contoh: Promo Bibit Mangga"><select id="proNotifType"><option>Info</option><option>Promo</option><option>Pengiriman</option><option>Penting</option></select><textarea id="proNotifMessage" rows="3" placeholder="Isi informasi untuk pelanggan"></textarea><label><input id="proNotifActive" type="checkbox" checked style="width:auto"> Tampilkan ke pelanggan</label><button type="button" onclick="simpanNotifikasiToko()">🔔 Publikasikan Informasi</button></div>
+<div id="proNotifList" style="margin-top:16px">Memuat notifikasi...</div>
+</div>
+<div class="box">
+<h2>
+📦 Pesanan Masuk
+</h2>
+
+<input
+id="cariPesanan"
+placeholder="Cari nama pelanggan..."
+onkeyup="filterPesanan()"><div id="pesanan">
+
+Memuat data pesanan...
+
+</div>
+
+
+</div>
+
+<div class="box" id="statusPanduanAdmin">
+<h2>⚙️ Status Pesanan</h2>
+<p style="margin:0 0 12px;color:#666;">Sekarang bagian ini <b>aktif</b>: lihat jumlah pesanan per status dan tekan status untuk langsung memfilter pesanan.</p>
+<div id="statusOrderSummary" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;">
+  <div style="padding:14px;border:1px solid #e5e8e6;border-radius:12px;background:#fafcfb;">⏳ Memuat status...</div>
+</div>
+<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;">
+  <button type="button" onclick="bukaPesananDenganFilter('')" style="background:#0b3d2e;color:#fff;">📦 Lihat Semua Pesanan</button>
+  <button type="button" onclick="resetFilterStatusPesanan()" style="background:#e8f0eb;color:#174b38;">↩️ Reset Filter</button>
+</div>
+<div id="statusOrderInfo" style="margin-top:12px;font-size:12px;color:#66716c;">Status mengikuti data pesanan Firebase dan pembaruan Biteship/webhook.</div>
+</div>
+<div class="box" id="pengembalian" style="display:none;">
+<h2>🔄 Pengembalian & Pengembalian Dana</h2>
+<p style="color:#666;margin-top:0;">Kelola permintaan pengembalian. <b>Pengiriman uang tetap dilakukan manual oleh admin</b>; sistem ini hanya mencatat status dan bukti refund.</p>
+<div id="daftarPengembalian">Memuat pengajuan...</div>
+</div>
+
+<!-- FIREBASE -->
+
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
+
+
+
+
+<script>
+
+
+/* =========================
+   KONFIGURASI FIREBASE
+========================= */
+
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCAnApRscAHXJF-NWt3P_BivrvWzGt996U",
+  authDomain: "subur-mujur-tani-6ff54.firebaseapp.com",
+  databaseURL: "https://subur-mujur-tani-6ff54-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "subur-mujur-tani-6ff54",
+  storageBucket: "subur-mujur-tani-6ff54.firebasestorage.app",
+  messagingSenderId: "338009458768",
+  appId: "1:338009458768:web:c562a610cee4940b856955"
+};
+
+firebase.initializeApp(firebaseConfig);
+
+
+
+const database = firebase.database();
+const storage = firebase.storage();
+
+// Expose service ke window agar fitur-toko.js dan script lain dapat
+// menggunakan instance Firebase yang sama. const database sendiri berada
+// di global lexical scope dan tidak otomatis menjadi window.database.
+window.database = database;
+window.storage = storage;
+window.FirebaseApp = window.FirebaseApp || {};
+window.FirebaseApp.database = database;
+window.FirebaseApp.storage = storage;
+
+
+
+
+
+/* =========================
+   CEK LOGIN ADMIN
+========================= */
+
+
+firebase.auth()
+
+.onAuthStateChanged(
+
+function(user){
+
+  let loginVerified = false;
+  try {
+    loginVerified = sessionStorage.getItem("smt_admin_login_verified") === "1";
+  } catch(e) {}
+
+  // Dashboard admin hanya boleh dibuka setelah login berhasil
+  // melalui login.html pada tab browser ini. Sesi Firebase lama
+  // tidak boleh membuat admin terbuka otomatis.
+  if(!user || !loginVerified){
+    try { sessionStorage.removeItem("smt_admin_login_verified"); } catch(e) {}
+    if (user) firebase.auth().signOut().catch(function(){});
+    window.location.replace("login.html");
+  }
+
+}
+
+);
+
+
+
+
+
+/* =========================
+   TAMPIL PESANAN
+========================= */
+
+
+
+database.ref("pesanan").on("value", function(snapshot) {
+    const data = snapshot.val();
+    let hasil = "";
+
+    if (!data) {
+        hasil = "<p>Belum ada pesanan.</p>";
+    } else {
+        Object.keys(data).reverse().forEach(function(id) {
+            const order = data[id] || {};
+            const orderStatus = order.status || "Menunggu Pembayaran";
+            const isCOD = String(order.metodePembayaran || "").toUpperCase() === "COD";
+            // Hapus pesanan tersedia untuk SEMUA pesanan.
+            // Jika sudah ada resi Biteship, yang dihapus hanya data pesanan
+            // di website/Firebase; pengiriman Biteship tidak dibatalkan.
+            const bolehHapus = true;
+
+            const selectedShipping =
+                order.kurirNama || order.biteshipCourier || order.kurir || "-";
+            const selectedService =
+                order.layananNama || order.biteshipCourierType || order.layananPengiriman || "-";
+            const shippingPrice = Number(order.ongkir || order.biteshipShippingPrice || 0);
+
+            let shippingBox = "";
+            if (["Dikemas", "Buat Pengiriman", "Resi", "Dikirim", "COD Lunas", "Beri Penilaian", "Selesai"].includes(orderStatus)) {
+                const hasCreated = Boolean(order.biteshipOrderId || order.resi);
+
+                shippingBox = `
+                <div class="biteship-admin-box" id="shipping-panel-${id}">
+                  <div class="biteship-admin-title">🚚 Pengiriman Biteship</div>
+                  <div class="biteship-admin-grid">
+                    <div><small>Kurir</small><b>${escapeAdmin(selectedShipping)}</b></div>
+                    <div><small>Layanan</small><b>${escapeAdmin(selectedService)}</b></div>
+                    <div><small>Ongkir</small><b>Rp ${shippingPrice.toLocaleString("id-ID")}</b></div>
+                    <div><small>${isCOD ? "Total COD" : "Total Pesanan"}</small><b>Rp ${Number(order.total || 0).toLocaleString("id-ID")}</b></div>
+                  </div>
+                  ${hasCreated ? `
+                    <div class="biteship-result">
+                      <div>✅ <b>Pengiriman berhasil dibuat</b></div>
+                      <div>Kurir: <b>${escapeAdmin(order.biteshipCourier || selectedShipping)}</b></div>
+                      <div>Layanan: <b>${escapeAdmin(order.biteshipCourierType || selectedService)}</b></div>
+                      <div>Ongkir: <b>Rp ${Number(order.biteshipShippingPrice || order.ongkir || 0).toLocaleString("id-ID")}</b></div>
+                      <div>Resi: <b>${escapeAdmin(order.resi || order.biteshipTrackingId || "Menunggu penerbitan")}</b></div>
+                      <div>Status Biteship: <b>${escapeAdmin(order.statusPengiriman || "confirmed")}</b></div>
+                      <div>Status Admin: <b>${escapeAdmin(orderStatus)}</b></div>
+                      <div style="font-size:11px;color:#68746e;">${order.biteshipLastWebhookAt ? "Webhook: " + escapeAdmin(order.biteshipLastWebhookAt) : "Webhook belum tercatat"}${order.biteshipLastSyncAt ? " · Sync: " + escapeAdmin(order.biteshipLastSyncAt) : ""}</div>
+                      <button type="button" onclick="sinkronkanStatusBiteship('${id}', false).then(()=>location.reload())" style="margin-top:7px;background:#245f46;">🔄 Sinkronkan Status Biteship</button>
+                      ${order.biteshipTrackingUrl ? `<a href="${escapeAdminAttr(order.biteshipTrackingUrl)}" target="_blank" rel="noopener" class="track-link">🔗 Lacak Pengiriman</a>` : ""}
+                      ${(order.resi || order.biteshipTrackingId || order.biteshipWaybillId) ? `<div style="margin-top:10px;text-align:center;padding:10px;background:#fff;border:1px solid #dcebe2;border-radius:10px;"><div style="font-size:11px;font-weight:800;color:#555;margin-bottom:6px;">🔳 QR RESI</div><img src="https://quickchart.io/qr?text=${encodeURIComponent(order.biteshipTrackingUrl || order.resi || order.biteshipTrackingId || order.biteshipWaybillId)}&size=180&margin=2" alt="QR Resi" style="width:150px;height:150px;max-width:100%;image-rendering:auto" loading="lazy"><div style="font-size:11px;color:#666;margin-top:5px;word-break:break-all;">${escapeAdmin(order.resi || order.biteshipTrackingId || order.biteshipWaybillId)}</div></div>` : ""}
+                      <button type="button" class="btn-print-label" onclick="cetakLabelPengiriman('${id}')">🖨️ Cetak Label Pengiriman + QR</button>
+                    </div>
+                  ` : `
+                    <div class="biteship-controls">
+                      <button type="button" onclick="hitungTarifPengiriman('${id}')" class="btn-rate">💰 Hitung Tarif Biteship</button>
+                      <div id="rate-result-${id}" class="rate-result"></div>
+                      ${order.kurirKode && order.layananKode ? `
+                        <div class="selected-rate">
+                          <div>✅ Layanan dipilih: <b>${escapeAdmin(order.kurirNama || order.kurirKode)}</b> — <b>${escapeAdmin(order.layananNama || order.layananKode)}</b></div>
+                          <div>Ongkir: <b>Rp ${shippingPrice.toLocaleString("id-ID")}</b></div>
+                          <div>${isCOD ? "Total COD" : "Total Pesanan"}: <b>Rp ${Number(order.total || 0).toLocaleString("id-ID")}</b></div>
+                          <div class="pickup-schedule-box" style="margin-top:12px;padding:12px;background:#f7fbf8;border:1px solid #dcebe2;border-radius:12px;">
+                            <div style="font-weight:800;margin-bottom:7px;">📅 Jadwal Pickup</div>
+                            <label style="display:flex;align-items:center;gap:8px;font-size:12px;margin-bottom:9px;">
+                              <input type="checkbox" id="pickup-scheduled-${id}" onchange="togglePickupSchedule('${id}')">
+                              <span>Atur pickup terjadwal</span>
+                            </label>
+                            <div id="pickup-fields-${id}" style="display:none;grid-template-columns:1fr 1fr;gap:8px;">
+                              <label style="font-size:11px;color:#66716c;">Tanggal pickup
+                                <input type="date" id="pickup-date-${id}" style="width:100%;margin-top:4px;padding:8px;border:1px solid #ccdcd3;border-radius:8px;box-sizing:border-box;">
+                              </label>
+                              <label style="font-size:11px;color:#66716c;">Jam pickup
+                                <input type="time" id="pickup-time-${id}" style="width:100%;margin-top:4px;padding:8px;border:1px solid #ccdcd3;border-radius:8px;box-sizing:border-box;">
+                              </label>
+                            </div>
+                            <div id="pickup-help-${id}" style="font-size:10px;color:#68746e;margin-top:7px;">Jika layanan/kurir tidak mendukung pickup terjadwal, Biteship dapat menolak jadwal tersebut; sistem tidak akan menganggap pickup sudah terjadwal sebelum order berhasil dibuat.</div>
+                          </div>
+                          <button type="button" onclick="buatPengiriman('${id}')" class="btn-create">🚚 Buat Pengiriman</button>
+                        </div>
+                      ` : `<div class="rate-hint">Pilih kurir dan layanan terlebih dahulu, lalu tombol Buat Pengiriman akan muncul.</div>`}
+                    </div>
+                  `}
+                </div>`;
+            }
+
+            hasil += `
+            <div class="card order-card">
+              <div class="order-head">
+                <h3>${escapeAdmin(order.nama || "Pelanggan")}</h3>
+                <span class="status-badge">${escapeAdmin(orderStatus)}</span>
+              </div>
+              <div class="order-meta">
+                <span>📱 ${escapeAdmin(order.whatsapp || "-")}</span>
+                <span>💳 ${isCOD ? "COD" : escapeAdmin(order.metodePembayaran || "-")}</span>
+              </div>
+              <div class="order-total">Rp ${Number(order.total || 0).toLocaleString("id-ID")}</div>
+
+              <label for="status-${id}" style="font-size:12px;color:#66716c;">Atur status</label>
+              <div class="status-tools">
+                <select class="status-select" id="status-${id}">
+                  <option value="Belum Bayar" ${orderStatus === "Belum Bayar" || orderStatus === "Menunggu Pembayaran" ? "selected" : ""}>💳 Belum Bayar</option>
+                  <option value="Menunggu Konfirmasi COD" ${orderStatus === "Menunggu Konfirmasi COD" ? "selected" : ""}>🤝 Menunggu Konfirmasi COD</option>
+                  <option value="Dikemas" ${orderStatus === "Dikemas" || orderStatus === "Diproses" || orderStatus === "Lunas" ? "selected" : ""}>📦 Dikemas</option>
+                  <option value="Buat Pengiriman" ${orderStatus === "Buat Pengiriman" ? "selected" : ""}>🚚 Buat Pengiriman</option>
+                  <option value="Dikirim" ${orderStatus === "Dikirim" ? "selected" : ""}>🚚 Dikirim</option>
+                  <option value="COD Lunas" ${orderStatus === "COD Lunas" ? "selected" : ""}>💰 COD Lunas</option>
+                  <option value="Beri Penilaian" ${orderStatus === "Beri Penilaian" ? "selected" : ""}>⭐ Beri Penilaian</option>
+                  <option value="Selesai" ${orderStatus === "Selesai" ? "selected" : ""}>✅ Selesai</option>
+                  <option value="Dibatalkan" ${orderStatus === "Dibatalkan" || orderStatus === "Ditolak" ? "selected" : ""}>❌ Dibatalkan</option>
+                  <option value="Dikembalikan" ${orderStatus === "Dikembalikan" ? "selected" : ""}>↩️ Dikembalikan</option>
+                  <option value="Ditahan" ${orderStatus === "Ditahan" ? "selected" : ""}>⏸️ Ditahan</option>
+                </select>
+                <button onclick="ubahStatus('${id}', document.getElementById('status-${id}').value)">📝 Simpan</button>
+              </div>
+
+              ${shippingBox}
+
+              <div class="order-actions">
+                ${isCOD ? (
+                  orderStatus === "Menunggu Konfirmasi COD"
+                    ? `<button onclick="window.konfirmasiCOD('${id}')">🤝 Konfirmasi COD</button>`
+                    : orderStatus === "Dikirim"
+                      ? `<button onclick="tandaiCODLunas('${id}')">💰 COD Lunas</button>`
+                      : ""
+                ) : (!/lunas/i.test(String(order.statusPembayaran || "")) ? `<button onclick="verifikasiBayar('${id}')">✅ Lunas</button>` : "")}
+                <button onclick="tolakPembayaran('${id}')">❌ Tolak</button>
+                ${bolehHapus ? `<button class="order-danger" onclick="hapusPesanan('${id}')">🗑️ Hapus Pesanan</button>` : ""}
+              </div>
+            </div>`;
+        });
+    }
+
+    document.getElementById("pesanan").innerHTML = hasil;
+    if (typeof window.muatKeuanganAdmin === "function") window.muatKeuanganAdmin();
+    mulaiAutoSinkronBiteship();
+});
+
+function escapeAdmin(v) {
+    return String(v == null ? "" : v).replace(/[&<>"']/g, function(m) {
+        return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m];
+    });
+}
+function escapeAdminAttr(v) {
+    return escapeAdmin(v).replace(/`/g, "&#096;");
+}
+</script>
+<script>
+
+
+/* =========================
+   UBAH STATUS PESANAN
+========================= */
+
+
+async function ubahStatus(id, selectedStatus){
+    try {
+        const ref = database.ref("pesanan/" + id);
+        const snap = await ref.once("value");
+        const order = snap.val();
+        if(!order) return alert("Pesanan tidak ditemukan.");
+
+        const current = order.status || "Menunggu Pembayaran";
+        const isCOD = String(order.metodePembayaran || "").toUpperCase() === "COD";
+        const nextMap = isCOD ? {
+            "Menunggu Konfirmasi COD":"Dikemas",
+            "Dikemas":"Buat Pengiriman",
+            "Buat Pengiriman":"Resi",
+            "Resi":"Dikirim",
+            "Dikirim":"COD Lunas",
+            "COD Lunas":"Selesai",
+            "Beri Penilaian":"Selesai",
+            "Selesai":"Selesai"
+        } : {
+            "Belum Bayar":"Dikemas",
+            "Menunggu Pembayaran":"Dikemas",
+            "Dikemas":"Buat Pengiriman",
+            "Buat Pengiriman":"Resi",
+            "Resi":"Dikirim",
+            "Dikirim":"Selesai",
+            "Beri Penilaian":"Selesai",
+            "Selesai":"Selesai"
+        };
+        const next = nextMap[current];
+        const allowedSpecial = ["Dibatalkan","Dikembalikan","Ditahan"];
+        if (allowedSpecial.includes(selectedStatus)) {
+            if (current === "Dikirim" && selectedStatus !== "Ditahan") {
+                return alert("⛔ Pesanan yang sudah Dikirim tidak boleh dibatalkan/dikembalikan dari menu status ini.");
+            }
+        } else if (selectedStatus !== current && selectedStatus !== next) {
+            return alert(`⛔ Alur tidak boleh dilompati.\n\nStatus sekarang: ${current}\nStatus berikutnya: ${next || "tidak tersedia"}`);
+        }
+
+        const waktu = new Date().toLocaleString("id-ID");
+        await ref.update({status:selectedStatus,statusKategori:selectedStatus,statusTerakhirDiperbarui:waktu});
+        if(order.invoice){
+            const trackRef = database.ref("pelacakan/" + order.invoice);
+            const trackSnap = await trackRef.once("value");
+            const track = trackSnap.val() || {};
+            const history = Array.isArray(track.riwayatStatus) ? track.riwayatStatus : [];
+            history.push({status:selectedStatus,waktu});
+            await trackRef.update({invoice:order.invoice,nama:order.nama||"",total:Number(order.total||0),status:selectedStatus,statusKategori:selectedStatus,resi:order.resi||track.resi||"",whatsappLast4:String(order.whatsapp||"").replace(/\D/g,"").slice(-4),updatedAt:waktu,riwayatStatus:history.slice(-20)});
+        }
+        alert("✅ Status pesanan diperbarui.");
+        location.reload();
+    } catch(e) { alert("❌ Gagal mengubah status: " + e.message); }
+}
+
+
+/* ==========================================================
+   BITESHIP ADMIN — HITUNG TARIF, PILIH LAYANAN, BUAT RESI
+========================================================== */
+
+window.adminBiteshipRates = window.adminBiteshipRates || {};
+
+// Sinkronisasi status Biteship: webhook adalah jalur utama, GET Order menjadi
+// fallback agar admin tetap ikut berubah walaupun webhook belum terkirim.
+let adminBiteshipSyncBusy = false;
+async function sinkronkanStatusBiteship(id, silent = true) {
+    if (adminBiteshipSyncBusy) return;
+    try {
+        adminBiteshipSyncBusy = true;
+        const idToken = await getAdminIdToken();
+        const res = await fetch("/.netlify/functions/biteship-sync-order", {
+            method: "POST",
+            headers: {"Content-Type":"application/json"},
+            body: JSON.stringify({orderId:id, idToken})
+        });
+        const raw = await res.text();
+        let data = {};
+        try { data = raw ? JSON.parse(raw) : {}; } catch (_) { throw new Error("Respons sinkronisasi bukan JSON."); }
+        if (!res.ok || data.success === false) throw new Error(data.message || `Sinkronisasi gagal (HTTP ${res.status}).`);
+        if (!silent) alert("✅ Status Biteship: " + (data.result?.biteshipStatus || "-") + "\nAdmin: " + (data.result?.status || "-"));
+        return data.result;
+    } catch (e) {
+        console.warn("Sinkronisasi Biteship:", e.message || e);
+        if (!silent) alert("❌ Gagal sinkronisasi Biteship: " + (e.message || e));
+    } finally {
+        adminBiteshipSyncBusy = false;
+    }
+}
+
+async function sinkronkanSemuaBiteship(silent = true) {
+    try {
+        const snap = await database.ref("pesanan").once("value");
+        const data = snap.val() || {};
+        const aktif = Object.entries(data).filter(([_,o]) => {
+            if (!o?.biteshipOrderId) return false;
+            const st = String(o.status || "");
+            return !["COD Lunas","Beri Penilaian","Dibatalkan","Dikembalikan"].includes(st);
+        }).slice(0, 20);
+        for (const [id] of aktif) await sinkronkanStatusBiteship(id, true);
+        if (aktif.length && !silent) location.reload();
+    } catch (e) {
+        console.warn("Sinkronisasi semua Biteship:", e.message || e);
+    }
+}
+
+function mulaiAutoSinkronBiteship() {
+    if (window.__smtBiteshipSyncTimer) return;
+    window.__smtBiteshipSyncTimer = setInterval(() => sinkronkanSemuaBiteship(true), 20000);
+    sinkronkanSemuaBiteship(true);
+}
+
+async function getAdminIdToken() {
+    const user = firebase.auth().currentUser;
+    if (!user) throw new Error("Sesi admin sudah habis. Silakan login ulang.");
+    return await user.getIdToken(true);
+}
+
+async function hitungTarifPengiriman(id) {
+    const box = document.getElementById("rate-result-" + id);
+    if (!box) return;
+
+    box.innerHTML = "⏳ Mengambil tarif Biteship...";
+    try {
+        const idToken = await getAdminIdToken();
+        const res = await fetch("/.netlify/functions/biteship-rates", {
+            method: "POST",
+            headers: {"Content-Type":"application/json"},
+            body: JSON.stringify({orderId:id, idToken})
+        });
+
+        const raw = await res.text();
+        let data = {};
+        try { data = raw ? JSON.parse(raw) : {}; }
+        catch (_) { throw new Error("Server mengirim respons yang bukan JSON."); }
+
+        if (!res.ok || data.success === false) {
+            throw new Error(data.message || `Gagal mengambil tarif (HTTP ${res.status}).`);
+        }
+
+        const rates = Array.isArray(data.pricing) ? data.pricing : [];
+        window.adminBiteshipRates[id] = rates;
+
+        if (!rates.length) {
+            box.innerHTML = '<div class="rate-hint">❌ Tidak ada layanan Biteship yang tersedia untuk tujuan ini.</div>';
+            return;
+        }
+
+        const current = await database.ref("pesanan/" + id).once("value");
+        const order = current.val() || {};
+        const selectedIndex = rates.findIndex(r =>
+            String(r.courier_code) === String(order.kurirKode || "") &&
+            String(r.courier_service_code) === String(order.layananKode || "")
+        );
+
+        box.innerHTML = `
+          <label style="font-size:12px;font-weight:800;color:#355c4c;">Pilih Kurir & Layanan</label>
+          <select id="rate-select-${id}" onchange="pilihTarifPengiriman('${id}', this.value)">
+            <option value="">Pilih layanan pengiriman</option>
+            ${rates.map((r, i) => `
+              <option value="${i}" ${i === selectedIndex ? "selected" : ""}>
+                ${escapeAdmin(r.courier_name)} — ${escapeAdmin(r.courier_service_name)}
+                | Rp ${Number(r.price || 0).toLocaleString("id-ID")}
+                | ${escapeAdmin(r.duration || "-")}
+                ${r.available_for_cash_on_delivery ? " | COD ✓" : " | COD ✕"}
+              </option>
+            `).join("")}
+          </select>
+          ${selectedIndex >= 0 ? `<div class="rate-hint">Layanan yang tersimpan saat ini sudah dipilih.</div>` : ""}
+        `;
+
+        if (selectedIndex >= 0) {
+            await pilihTarifPengiriman(id, String(selectedIndex), true);
+        }
+    } catch (error) {
+        console.error("Tarif Biteship Admin:", error);
+        box.innerHTML = `<div class="rate-hint">❌ ${escapeAdmin(error.message || error)}</div>`;
+    }
+}
+
+async function pilihTarifPengiriman(id, index, silent) {
+    const rates = window.adminBiteshipRates[id] || [];
+    const rate = rates[Number(index)];
+    if (!rate) return;
+
+    try {
+        const ref = database.ref("pesanan/" + id);
+        const snap = await ref.once("value");
+        const order = snap.val();
+        if (!order) throw new Error("Pesanan tidak ditemukan.");
+        if (order.biteshipOrderId || order.resi) throw new Error("Pengiriman Biteship sudah dibuat.");
+
+        // Tarif boleh ditampilkan semua. Namun pesanan COD hanya boleh
+        // memakai layanan yang memang mendukung COD.
+        if (String(order.metodePembayaran || "").toUpperCase() === "COD" &&
+            rate.available_for_cash_on_delivery !== true) {
+            throw new Error("Layanan ini tidak mendukung COD. Pilih layanan lain yang bertanda COD ✓.");
+        }
+
+        const base = Math.max(0, Math.round(Number(order.totalProduk || 0)));
+        const shipping = Math.max(0, Math.round(Number(rate.price || 0)));
+        const totalCOD = base + shipping;
+        const waktu = new Date().toLocaleString("id-ID");
+
+        await ref.update({
+            kurirKode: rate.courier_code,
+            kurirNama: rate.courier_name,
+            layananKode: rate.courier_service_code,
+            layananNama: rate.courier_service_name,
+            layananPengiriman: `${rate.courier_name} - ${rate.courier_service_name}`,
+            shippingDuration: rate.duration || "",
+            ongkir: shipping,
+            total: totalCOD,
+            statusTerakhirDiperbarui: waktu
+        });
+
+        if (order.invoice) {
+            await database.ref("pelacakan/" + order.invoice).update({
+                ongkir: shipping,
+                total: totalCOD,
+                kurir: rate.courier_code,
+                layanan: rate.courier_service_code,
+                updatedAt: waktu
+            });
+        }
+
+        if (!silent) {
+            const box = document.getElementById("rate-result-" + id);
+            if (box) box.innerHTML += `<div class="rate-hint">✅ ${escapeAdmin(rate.courier_name)} ${escapeAdmin(rate.courier_service_name)} dipilih — Ongkir Rp ${shipping.toLocaleString("id-ID")}. Total COD Rp ${totalCOD.toLocaleString("id-ID")}.</div>`;
+        }
+    } catch (error) {
+        alert("❌ Gagal menyimpan layanan: " + (error.message || error));
+    }
+}
+
+function togglePickupSchedule(id) {
+    const cb = document.getElementById("pickup-scheduled-" + id);
+    const fields = document.getElementById("pickup-fields-" + id);
+    if (!cb || !fields) return;
+    fields.style.display = cb.checked ? "grid" : "none";
+    if (cb.checked) {
+        const date = document.getElementById("pickup-date-" + id);
+        const time = document.getElementById("pickup-time-" + id);
+        const now = new Date();
+        if (date && !date.value) {
+            const y = now.getFullYear(), m = String(now.getMonth()+1).padStart(2,"0"), d = String(now.getDate()).padStart(2,"0");
+            date.min = `${y}-${m}-${d}`;
+            date.value = `${y}-${m}-${d}`;
+        }
+        if (time && !time.value) time.value = "09:00";
+    }
+}
+
+async function buatPengiriman(id) {
+    try {
+        const snap = await database.ref("pesanan/" + id).once("value");
+        const order = snap.val();
+
+        if (!order) return alert("Pesanan tidak ditemukan.");
+        if (order.status !== "Dikemas" && order.status !== "Buat Pengiriman") return alert("⛔ Buat Pengiriman hanya bisa dilakukan setelah tahap Dikemas.");
+        if (order.biteshipOrderId || order.resi) return alert("Pesanan ini sudah memiliki pengiriman/resi.");
+        if (!order.kurirKode || !order.layananKode) return alert("Pilih kurir dan layanan Biteship terlebih dahulu.");
+
+        const pickupScheduled = !!document.getElementById("pickup-scheduled-" + id)?.checked;
+        const pickupDate = String(document.getElementById("pickup-date-" + id)?.value || "").trim();
+        const pickupTime = String(document.getElementById("pickup-time-" + id)?.value || "").trim();
+        if (pickupScheduled && (!pickupDate || !pickupTime)) return alert("Pilih tanggal dan jam pickup terlebih dahulu.");
+        if (pickupScheduled) {
+            const pickupAt = new Date(`${pickupDate}T${pickupTime}:00`);
+            if (!Number.isFinite(pickupAt.getTime()) || pickupAt.getTime() <= Date.now()) return alert("Jadwal pickup harus berada di masa depan.");
+        }
+
+        const jadwalText = pickupScheduled ? ` dengan pickup terjadwal ${pickupDate} ${pickupTime}` : " dengan pickup sesuai jadwal kurir";
+        if (!confirm(`Buat pengiriman ${order.kurirNama || order.kurirKode} ${order.layananNama || order.layananKode}${jadwalText} dengan ongkir Rp ${Number(order.ongkir || 0).toLocaleString("id-ID")} dan ${String(order.metodePembayaran || "").toUpperCase() === "COD" ? "COD " : "total Rp "}${Number(order.total || 0).toLocaleString("id-ID")}?`)) return;
+
+        const panel = document.getElementById("shipping-panel-" + id);
+        const createBtn = panel ? panel.querySelector(".btn-create") : null;
+        if (createBtn) {
+            createBtn.disabled = true;
+            createBtn.dataset.oldText = createBtn.innerHTML;
+            createBtn.innerHTML = "⏳ Membuat pengiriman...";
+        }
+
+        const idToken = await getAdminIdToken();
+        const res = await fetch("/.netlify/functions/create-biteship-order", {
+            method:"POST",
+            headers:{"Content-Type":"application/json"},
+            body:JSON.stringify({orderId:id,idToken,pickupScheduled,pickupDate:pickupScheduled?pickupDate:"",pickupTime:pickupScheduled?pickupTime:""})
+        });
+
+        const raw = await res.text();
+        let data = {};
+        try { data = raw ? JSON.parse(raw) : {}; }
+        catch (_) { throw new Error("Server mengirim respons yang bukan JSON."); }
+
+        if (!res.ok || data.success === false) {
+            throw new Error(data.message || `Gagal membuat pengiriman (HTTP ${res.status}).`);
+        }
+
+        alert("✅ Pengiriman berhasil dibuat.\n\nKurir: " + (data.courier_company || order.kurirNama || "-") +
+              "\nLayanan: " + (data.courier_type || order.layananNama || "-") +
+              "\nResi: " + (data.waybill_id || "Menunggu penerbitan") +
+              "\nStatus: " + (data.status || "confirmed") +
+              (data.delivery_type === "scheduled" ? "\nPickup: " + (data.pickup_time || pickupDate + " " + pickupTime) : "\nPickup: mengikuti jadwal kurir"));
+
+        location.reload();
+    } catch (error) {
+        console.error("Buat pengiriman:", error);
+        alert("❌ Gagal membuat pengiriman: " + (error.message || error));
+    }
+}
+
+// Alias lama agar kode/halaman lain yang masih memanggil nama COD tetap berfungsi.
+window.hitungTarifCOD = hitungTarifPengiriman;
+window.pilihTarifCOD = pilihTarifPengiriman;
+window.buatPengirimanCOD = buatPengiriman;
+
+
+async function cetakLabelPengiriman(id){
+    try {
+        const snap = await database.ref("pesanan/" + id).once("value");
+        const order = snap.val();
+        if(!order) return alert("Pesanan tidak ditemukan.");
+
+        const esc = (value) => String(value ?? "")
+            .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")
+            .replace(/"/g,"&quot;").replace(/'/g,"&#039;");
+
+        const nama = order.nama || "Pelanggan";
+        const alamat = order.alamat || "-";
+        const rt = order.rt || "";
+        const rw = order.rw || "";
+        const desa = order.desa || order.desaNama || "";
+        const kecamatan = order.kecamatan || order.kecamatanNama || "";
+        const kabupaten = order.kabupaten || order.kabupatenNama || "";
+        const provinsi = order.provinsi || order.provinsiNama || "";
+        const kodePos = order.kodePos || order.kode_pos || "";
+        const whatsapp = order.whatsapp || order.phone || "-";
+        const resi = order.resi || order.biteshipTrackingId || order.biteshipWaybillId || "-";
+        const trackingTarget = order.biteshipTrackingUrl || resi;
+        const qrUrl = "https://quickchart.io/qr?text=" + encodeURIComponent(trackingTarget) + "&size=260&margin=1";
+        const kurir = order.biteshipCourier || order.kurirNama || order.kurir || "-";
+        const layanan = order.biteshipCourierType || order.layananNama || order.layananPengiriman || "-";
+        const routing = order.biteshipRoutingCode || order.routingCode || order.routing_code || "";
+        const ongkir = Number(order.biteshipShippingPrice || order.ongkir || 0);
+        const total = Number(order.total || 0);
+        const invoice = order.invoice || id;
+        const berat = Number(order.berat || order.totalBerat || order.weight || 0);
+        const metode = String(order.metodePembayaran || "").toUpperCase();
+        const isCOD = metode === "COD";
+        // Normalisasi isi paket agar array/object Firebase tidak tampil sebagai [object Object].
+        const formatPackageItems = (value) => {
+            if (value == null || value === "") return "";
+            if (Array.isArray(value)) {
+                return value.map((item) => {
+                    if (item == null) return "";
+                    if (typeof item === "string" || typeof item === "number") return String(item);
+                    if (typeof item === "object") {
+                        const name = item.name || item.nama || item.productName || item.produkNama || item.title || item.product || "Produk";
+                        const qty = Number(item.quantity ?? item.jumlah ?? item.qty ?? 0);
+                        const variant = item.variantNama || item.variantName || item.varian || "";
+                        return String(name) + (variant ? " - " + String(variant) : "") + (qty > 0 ? " × " + qty : "");
+                    }
+                    return String(item);
+                }).filter(Boolean).join(", ");
+            }
+            if (typeof value === "object") {
+                const name = value.name || value.nama || value.productName || value.produkNama || value.title || value.product || "Produk";
+                const qty = Number(value.quantity ?? value.jumlah ?? value.qty ?? 0);
+                const variant = value.variantNama || value.variantName || value.varian || "";
+                return String(name) + (variant ? " - " + String(variant) : "") + (qty > 0 ? " × " + qty : "");
+            }
+            return String(value);
+        };
+        const itemNames = formatPackageItems(order.items) || formatPackageItems(order.produk) || formatPackageItems(order.namaProduk);
+
+        const wilayah = [desa, kecamatan, kabupaten, provinsi].filter(Boolean).join(", ");
+        const rtRw = [rt ? "RT " + rt : "", rw ? "RW " + rw : ""].filter(Boolean).join(" / ");
+
+        const win = window.open("", "_blank", "width=900,height=1000");
+        if(!win) return alert("Popup diblokir browser. Izinkan popup untuk mencetak label.");
+
+        // Buat barcode Code 128-B di halaman admin sebelum membuka jendela cetak.
+        // Barcode ditanam langsung ke HTML label agar tidak membutuhkan <script> di jendela cetak.
+        const barcodeSvg = (() => {
+            const patterns = ["212222","222122","222221","121223","121322","131222","122213","122312","132212","221213","221312","231212","112232","122132","122231","113222","123122","123221","223211","221132","221231","213212","223112","312131","311222","321122","321221","312212","322112","322211","212123","212321","232121","111323","131123","131321","112313","132113","132311","211313","231113","231311","112133","112331","132131","113123","113321","133121","313121","211331","231131","213113","213311","213131","311123","311321","331121","312113","312311","332111","314111","221411","431111","111224","111422","121124","121421","141122","141221","112214","112412","122114","122411","142112","142211","241211","221114","413111","241112","134111","111242","121142","121241","114212","124112","124211","411212","421112","421211","212141","214121","412121","111143","111341","131141","114113","114311","411113","411311","113141","114131","311141","411131","211412","211214","211232","2331112"];
+            let text = String(resi || "");
+            if (!text || text === "-") return "";
+            text = [...text].map(c => { const n = c.charCodeAt(0); return n >= 32 && n <= 126 ? c : "?"; }).join("");
+            const vals = [104];
+            let checksum = 104;
+            for (let i = 0; i < text.length; i++) {
+                const v = text.charCodeAt(i) - 32;
+                vals.push(v);
+                checksum += v * (i + 1);
+            }
+            vals.push(checksum % 103, 106);
+            let x = 0;
+            let bars = "";
+            vals.forEach(v => {
+                const pattern = patterns[v];
+                for (let i = 0; i < pattern.length; i++) {
+                    const w = Number(pattern[i]);
+                    if (i % 2 === 0) bars += `<rect x="${x}" y="0" width="${w}" height="60" fill="#000"/>`;
+                    x += w;
+                }
+            });
+            return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${x} 60" preserveAspectRatio="none">${bars}</svg>`;
+        })();
+
+        win.document.open();
+        win.document.write(`<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Label Pengiriman - ${esc(resi)}</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#e9e9e9;font-family:Arial,Helvetica,sans-serif;color:#111}
+.sheet{width:100mm;min-height:150mm;margin:8mm auto;background:#fff;padding:4mm;border:1px solid #111}
+.header{display:grid;grid-template-columns:1fr auto;gap:3mm;align-items:start}
+.shop{font-size:16px;font-weight:900;letter-spacing:.2px}
+.small{font-size:8px;color:#444;font-weight:700}
+.courier{font-size:17px;font-weight:900;text-align:right;text-transform:uppercase}
+.routing{font-size:9px;font-weight:900;text-align:right;margin-top:1mm}
+.line{border-top:2px solid #111;margin:2.5mm 0}
+.route{display:grid;grid-template-columns:1fr 1fr;gap:2mm}
+.box{border:1px solid #111;padding:2mm;min-height:14mm}
+.box small{display:block;font-size:7px;font-weight:900;color:#555;text-transform:uppercase}
+.box b{display:block;font-size:11px;margin-top:1mm;line-height:1.2}
+.receiver{font-size:18px;font-weight:900;margin-top:1mm}
+.address{font-size:10.5px;line-height:1.35;margin-top:1.5mm;word-break:break-word}
+.phone{font-size:10px;margin-top:1.5mm;font-weight:700}
+.resi{margin-top:3mm;padding:2.5mm;border:2px solid #111;text-align:center}
+.resi-label{font-size:8px;font-weight:900;text-transform:uppercase}
+.resi-number{font-size:18px;font-weight:900;letter-spacing:1px;margin-top:1mm;word-break:break-all}
+.barcode-wrap{margin:2mm 0 1mm;text-align:center}
+.barcode-wrap svg{width:88mm;height:17mm;max-width:100%;display:block;margin:auto}
+.barcode-text{font-family:monospace;font-size:8px;font-weight:900;letter-spacing:.5px}
+.qrrow{display:grid;grid-template-columns:1fr 34mm;gap:3mm;align-items:center;margin-top:2mm}
+.qr img{width:30mm;height:30mm;display:block;margin:auto;image-rendering:auto}
+.qr small{display:block;text-align:center;font-size:7px;color:#555;margin-top:1mm}
+.items{font-size:8px;line-height:1.35;margin-top:2mm;padding-top:2mm;border-top:1px dashed #777}
+.cod{margin-top:3mm;padding:3mm;border:3px solid #111;text-align:center}
+.cod small{font-size:8px;font-weight:900}
+.cod strong{display:block;font-size:20px;margin-top:1mm}
+.footer{margin-top:2.5mm;font-size:7px;line-height:1.35;color:#444}
+.no-print{font-family:Arial}
+@page{size:100mm 150mm;margin:0}
+@media print{body{background:#fff}.sheet{margin:0;width:100mm;min-height:150mm;border:0}.no-print{display:none!important}}
+</style>
+</head>
+<body>
+<div class="sheet">
+  <div class="header">
+    <div><div class="shop">🌱 SUBUR MUJUR TANI</div><div class="small">LABEL PENGIRIMAN</div></div>
+    <div><div class="courier">${esc(kurir)}</div><div class="routing">${esc(routing || layanan)}</div></div>
+  </div>
+  <div class="line"></div>
+
+  <div class="route">
+    <div class="box"><small>PENGIRIM</small><b>SUBUR MUJUR TANI</b><span style="font-size:8px">Indonesia</span></div>
+    <div class="box"><small>LAYANAN</small><b>${esc(layanan)}</b></div>
+  </div>
+
+  <div style="margin-top:3mm">
+    <div class="small">PENERIMA</div>
+    <div class="receiver">${esc(nama)}</div>
+    <div class="phone">📱 ${esc(whatsapp)}</div>
+    <div class="address">${esc(alamat)}${rtRw ? `<br>${esc(rtRw)}` : ""}${wilayah ? `<br>${esc(wilayah)}` : ""}${kodePos ? `<br><b>${esc(kodePos)}</b>` : ""}</div>
+  </div>
+
+  <div class="resi">
+    <div class="resi-label">NO. RESI / AWB</div>
+    <div class="resi-number">${esc(resi)}</div>
+    ${resi !== "-" ? `<div class="barcode-wrap">${barcodeSvg}<div class="barcode-text">${esc(resi)}</div></div>` : ""}
+    <div class="qrrow">
+      <div>
+        <div style="font-size:8px;font-weight:900;text-align:left">INVOICE: ${esc(invoice)}</div>
+        <div style="font-size:8px;text-align:left;margin-top:1mm">Berat: ${berat ? berat.toLocaleString("id-ID") + " gram" : "-"}</div>
+        <div style="font-size:8px;text-align:left;margin-top:1mm">Ongkir: Rp ${ongkir.toLocaleString("id-ID")}</div>
+        <div style="font-size:8px;text-align:left;margin-top:1mm">${isCOD ? "METODE: COD" : "METODE: TRANSFER BRI"}</div>
+      </div>
+      ${resi !== "-" ? `<div class="qr"><img src="${qrUrl}" alt="QR Resi"><small>SCAN TRACKING</small></div>` : ""}
+    </div>
+  </div>
+
+  ${itemNames ? `<div class="items"><b>ISI PAKET:</b> ${esc(itemNames)}</div>` : ""}
+  ${isCOD ? `<div class="cod"><small>COD — UANG YANG HARUS DITERIMA</small><strong>Rp ${total.toLocaleString("id-ID")}</strong></div>` : ""}
+
+  <div class="footer">
+    Pengirim: SUBUR MUJUR TANI<br>
+    Harap pastikan label menempel kuat, barcode dan QR tidak tertutup selotip/kerusakan cetak.
+  </div>
+
+  <button class="no-print" onclick="window.print()" style="margin-top:4mm;width:100%;padding:12px;font-size:16px;font-weight:800;border:0;background:#0b4d3b;color:#fff;border-radius:8px">🖨️ CETAK LABEL</button>
+</div>
+<script src="/pwa-register.js"><\/script>
+
+
+
+</body>
+</html>`);
+        win.document.close();
+        setTimeout(function(){
+            try { win.focus(); win.print(); } catch(_) {}
+        }, 700);
+    } catch(e) {
+        console.error("Cetak label pengiriman:", e);
+        alert("❌ Gagal membuat label: " + (e.message || e));
+    }
+}
+
+window.konfirmasiCOD = async function konfirmasiCOD(id){
+    try {
+        const ref = database.ref("pesanan/" + id);
+        const snap = await ref.once("value");
+        const order = snap.val();
+        if (!order) return alert("Pesanan tidak ditemukan.");
+        if (String(order.metodePembayaran || "").toUpperCase() !== "COD") {
+            return alert("Pesanan ini bukan COD.");
+        }
+        if (order.status !== "Menunggu Konfirmasi COD") {
+            return alert("⛔ Konfirmasi COD hanya bisa dilakukan pada tahap Menunggu Konfirmasi COD.");
+        }
+
+        // Nama variabel sengaja dibuat unik agar tidak terkena temporal-dead-zone
+        // error seperti: Cannot access 'waktuKonfirmasi' before initialization.
+        const konfirmasiWaktu = new Date().toLocaleString("id-ID");
+        const konfirmasiAt = Date.now();
+
+        await ref.update({
+            status: "Dikemas",
+            statusKategori: "Dikemas",
+            statusPembayaran: "COD Dikonfirmasi",
+            dikonfirmasiPada: konfirmasiWaktu,
+            dikonfirmasiAt: konfirmasiAt,
+            danaSelesaiAt: konfirmasiAt,
+            statusTerakhirDiperbarui: konfirmasiWaktu
+        });
+
+        if (order.invoice) {
+            const trackRef = database.ref("pelacakan/" + order.invoice);
+            const trackSnap = await trackRef.once("value");
+            const track = trackSnap.val() || {};
+            const history = Array.isArray(track.riwayatStatus) ? track.riwayatStatus : [];
+            history.push({status: "Dikemas", waktu: konfirmasiWaktu});
+            await trackRef.update({
+                status: "Dikemas",
+                statusKategori: "Dikemas",
+                updatedAt: konfirmasiWaktu,
+                riwayatStatus: history.slice(-20)
+            });
+        }
+
+        const pembayaranRef = database.ref("pembayaran/" + id);
+        const pembayaranSnap = await pembayaranRef.once("value");
+        if (pembayaranSnap.exists()) {
+            await pembayaranRef.update({
+                status: "Lunas (COD)",
+                dikonfirmasiPada: konfirmasiWaktu,
+                dikonfirmasiAt: konfirmasiAt
+            });
+        }
+
+        alert("✅ COD dikonfirmasi. Pesanan masuk tahap Dikemas.");
+        location.reload();
+    } catch (e) {
+        console.error("Konfirmasi COD:", e);
+        alert("❌ Gagal konfirmasi COD: " + (e && e.message ? e.message : e));
+    }
+}
+
+async function tandaiResiDikirim(id){
+    try {
+        const ref=database.ref("pesanan/"+id); const snap=await ref.once("value"); const order=snap.val();
+        if(!order) return alert("Pesanan tidak ditemukan.");
+        if(order.status!=="Resi" || !order.resi) return alert("⛔ Pesanan harus berada di tahap Resi dan memiliki nomor resi.");
+        const waktu=new Date().toLocaleString("id-ID");
+        await ref.update({status:"Dikirim",statusKategori:"Dikirim",statusTerakhirDiperbarui:waktu});
+        if(order.invoice) await database.ref("pelacakan/"+order.invoice).update({status:"Dikirim",statusKategori:"Dikirim",updatedAt:waktu});
+        alert("✅ Pesanan sekarang berstatus Dikirim."); location.reload();
+    } catch(e){ alert("❌ Gagal mengubah status menjadi Dikirim: " + e.message); }
+}
+
+async function tandaiCODLunas(id){
+    if(!confirm("Apakah uang COD sudah diterima dari pembeli?")) return;
+    try {
+        const orderRef=database.ref("pesanan/"+id); const snap=await orderRef.once("value"); const order=snap.val();
+        if(!order) return alert("Pesanan tidak ditemukan.");
+        if(order.metodePembayaran!=="COD") return alert("Pesanan ini bukan COD.");
+        if(order.status!=="Dikirim") return alert("⛔ COD hanya bisa dilunasi setelah status Dikirim.");
+        const waktu=new Date().toLocaleString("id-ID");
+        const waktuAt=Date.now();
+        await orderRef.update({status:"COD Lunas",statusKategori:"COD Lunas",statusPembayaran:"Lunas (COD)",codDibayarPada:waktu,codDibayarAt:waktuAt,danaSelesaiAt:waktuAt,statusTerakhirDiperbarui:waktu});
+        await database.ref("pembayaran/"+id).update({status:"Lunas (COD)",dikonfirmasiPada:waktu});
+        if(order.invoice) await database.ref("pelacakan/"+order.invoice).update({status:"COD Lunas",statusKategori:"COD Lunas",updatedAt:waktu});
+        alert("✅ Pembayaran COD diterima. Status pesanan menjadi COD Lunas."); location.reload();
+    } catch(error){ console.error(error); alert("❌ Gagal memperbarui pembayaran COD: " + error.message); }
+}
+
+
+async function verifikasiBayar(id){
+    try {
+        const orderRef = database.ref("pesanan/" + id);
+        const snap = await orderRef.once("value");
+        const order = snap.val();
+        if (!order) { alert("Pesanan tidak ditemukan."); return; }
+
+        const waktuKonfirmasi = new Date().toLocaleString("id-ID");
+        const waktuKonfirmasiAt = Date.now();
+        await orderRef.update({
+            status: "Dikemas",
+            statusKategori: "Dikemas",
+            statusPembayaran: "Lunas",
+            dikonfirmasiPada: waktuKonfirmasi,
+            dikonfirmasiAt: waktuKonfirmasiAt,
+            danaSelesaiAt: waktuKonfirmasiAt
+        });
+
+        if (order.invoice) {
+            const trackRef = database.ref("pelacakan/" + order.invoice);
+            const trackSnap = await trackRef.once("value");
+            const track = trackSnap.val() || {};
+            const history = Array.isArray(track.riwayatStatus) ? track.riwayatStatus : [];
+            history.push({status:"Dikemas", waktu:waktuKonfirmasi});
+            await trackRef.update({
+                invoice: order.invoice,
+                nama: order.nama || "",
+                total: Number(order.total || 0),
+                status: "Dikemas",
+                statusKategori: "Dikemas",
+                resi: order.resi || "",
+                whatsappLast4: String(order.whatsapp || "").replace(/\D/g, "").slice(-4),
+                updatedAt: waktuKonfirmasi,
+                riwayatStatus: history.slice(-20)
+            });
+        }
+
+        const pembayaranRef = database.ref("pembayaran/" + id);
+        const pembayaranSnap = await pembayaranRef.once("value");
+        if (pembayaranSnap.exists()) {
+            await pembayaranRef.update({status:"Lunas", dikonfirmasiPada:waktuKonfirmasi});
+        }
+        alert("✅ Pembayaran dikonfirmasi. Stok tidak dikurangi lagi.");
+    } catch(error) {
+        console.error(error);
+        alert("❌ Gagal mengonfirmasi pembayaran: " + error.message);
+    }
+}
+
+async function hapusPesanan(id){
+    try {
+        const ref = database.ref("pesanan/" + id);
+        const snap = await ref.once("value");
+        const order = snap.val();
+        if(!order) return alert("Pesanan tidak ditemukan.");
+
+        const status = String(order.status || "Menunggu Pembayaran");
+        const sudahDiproses = Boolean(order.biteshipOrderId || order.resi || order.statusPengiriman);
+
+        let pesan = "Hapus pesanan " + (order.invoice || id) + "?";
+        if(sudahDiproses){
+            pesan += "\n\n⚠️ Pesanan sudah terhubung dengan pengiriman/resi Biteship. Yang dihapus hanya data pesanan di website; pengiriman Biteship TIDAK dibatalkan.";
+        } else {
+            pesan += "\n\nStok produk akan dikembalikan otomatis.";
+        }
+        if(!confirm(pesan)) return;
+
+        // Stok hanya dikembalikan untuk pesanan yang belum masuk proses pengiriman.
+        // Pesanan yang sudah dibuatkan pengiriman tidak boleh mengembalikan stok
+        // karena barang bisa saja sudah keluar dari stok toko.
+        if(!sudahDiproses){
+            const produk = Array.isArray(order.produk) ? order.produk : [];
+            for(const item of produk){
+                if(!item || !item.id) continue;
+                try {
+                    await database.ref("produk/" + item.id).transaction(function(current){
+                        if(!current) return current;
+                        const jumlah = Math.max(0, Number(item.jumlah || 0));
+                        if(item.variantId && Array.isArray(current.variants)){
+                            const vi = current.variants.findIndex(v => String(v.id) === String(item.variantId));
+                            if(vi >= 0){
+                                current.variants[vi].stok = Number(current.variants[vi].stok || 0) + jumlah;
+                                current.stok = current.variants.reduce((sum,v)=>sum + Number(v.stok || 0),0);
+                            }
+                        }else{
+                            current.stok = Number(current.stok || 0) + jumlah;
+                        }
+                        return current;
+                    });
+                } catch(e){
+                    console.warn("Gagal mengembalikan stok produk", item.id, e);
+                }
+            }
+        }
+
+        const updates = {};
+        updates["pesanan/" + id] = null;
+        updates["pembayaran/" + id] = null;
+        if(order.invoice) updates["pelacakan/" + order.invoice] = null;
+        await database.ref().update(updates);
+
+        alert("✅ Pesanan berhasil dihapus.");
+    } catch(e){
+        console.error("Hapus pesanan:", e);
+        alert("❌ Gagal menghapus pesanan: " + e.message);
+    }
+}
+
+function tolakPembayaran(id){
+    const alasan = prompt("Alasan penolakan pembayaran (opsional):", "Pembayaran belum valid");
+    if (alasan === null) return;
+    database.ref("pesanan/" + id).once("value").then(async function(snap){
+        const order = snap.val() || {};
+        await database.ref("pesanan/" + id).update({
+            status: "Pembayaran Ditolak",
+            statusPembayaran: "Ditolak",
+            alasanPenolakan: alasan,
+            ditolakPada: new Date().toLocaleString("id-ID")
+        });
+
+        if(order.invoice){
+            const trackRef = database.ref("pelacakan/" + order.invoice);
+            const trackSnap = await trackRef.once("value");
+            const track = trackSnap.val() || {};
+            const history = Array.isArray(track.riwayatStatus) ? track.riwayatStatus : [];
+            history.push({status:"Pembayaran Ditolak", waktu:new Date().toLocaleString("id-ID")});
+            await trackRef.update({
+                status:"Pembayaran Ditolak",
+                updatedAt:new Date().toLocaleString("id-ID"),
+                riwayatStatus:history.slice(-20)
+            });
+        }
+        alert("❌ Pembayaran ditolak.");
+    }).catch(function(error){
+        alert("Gagal menolak pembayaran: " + error.message);
+    });
+}
+
+</script>
+
+<div class="box" id="produkTersimpan">
+  <h2>📦 Kelola Produk</h2>
+  <p style="margin-top:0;color:#666;">Di sini semua produk yang sudah ditambahkan akan tampil. Tekan <b>✏️ Edit Produk</b> untuk mengubahnya, atau <b>🗑️ Hapus</b> untuk menghapus produk.</p>
+  <div id="adminDaftarProduk">Memuat produk...</div>
+</div>
+
+<script>
+(function(){
+  function esc(v){
+    return String(v == null ? "" : v).replace(/[&<>"']/g, function(c){
+      return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;"}[c];
+    });
+  }
+
+  function getImageList(p){
+    if(Array.isArray(p.gambarList)) return p.gambarList.filter(Boolean);
+    if(p.gambarList && typeof p.gambarList === "object") return Object.values(p.gambarList).filter(Boolean);
+    return p.gambar ? [p.gambar] : [];
+  }
+
+  window.renderAdminDaftarProduk = function(){
+    const box=document.getElementById("adminDaftarProduk");
+    if(!box || !window.database) return;
+
+    window.database.ref("produk").on("value", function(snap){
+      const data=snap.val() || {};
+      const entries=Object.entries(data);
+
+      if(!entries.length){
+        box.innerHTML='<div style="padding:15px;border:1px dashed #ccc;border-radius:12px;color:#777;">Belum ada produk.</div>';
+        return;
+      }
+
+      box.innerHTML=entries.map(function(entry){
+        const id=entry[0], p=entry[1] || {};
+        const images=getImageList(p);
+        const img=images[0] || "";
+        const variants=Array.isArray(p.variants) ? p.variants : (p.variants && typeof p.variants==="object" ? Object.values(p.variants) : []);
+        const stok=variants.length ? variants.reduce((n,v)=>n+Number(v?.stok||0),0) : Number(p.stok||0);
+
+        return '<div style="border:1px solid #e5e0d5;padding:14px;margin:10px 0;border-radius:14px;background:#fff;box-shadow:0 4px 14px rgba(0,0,0,.05);">'
+          + '<div style="display:flex;gap:12px;align-items:center;">'
+          + (img ? '<img src="'+esc(img)+'" alt="'+esc(p.nama||"Produk")+'" style="width:82px;height:82px;object-fit:cover;border-radius:10px;border:1px solid #eee;">'
+                 : '<div style="width:82px;height:82px;border-radius:10px;background:#f1f3ef;display:flex;align-items:center;justify-content:center;">🌱</div>')
+          + '<div style="min-width:0;flex:1;">'
+          + '<b style="font-size:16px;">'+esc(p.nama||"Tanpa nama")+'</b>'
+          + '<div style="margin-top:4px;color:#17633f;font-weight:800;">Rp '+Number(p.harga||0).toLocaleString("id-ID")+'</div>'
+          + '<div style="font-size:13px;color:#66716c;margin-top:3px;">Stok: '+stok+' • Foto: '+images.length+'</div>'
+          + '</div></div>'
+          + '<div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;">'
+          + '<button type="button" onclick="editProduk(\''+esc(id)+'\')" style="flex:1;min-width:130px;">✏️ Edit Produk</button>'
+          + '<button type="button" onclick="hapusProdukAdmin(\''+esc(id)+'\')" style="flex:1;min-width:130px;background:#c62828;">🗑️ Hapus</button>'
+          + '</div></div>';
+      }).join("");
+    });
+  };
+
+  window.hapusProdukAdmin = async function(id){
+    if(!id || !confirm("Hapus produk ini? Produk akan dihapus dari katalog.")) return;
+    try{
+      await window.database.ref("produk/"+id).remove();
+      alert("✅ Produk berhasil dihapus.");
+      if(typeof editID !== "undefined" && editID === id) window.batalEditProduk();
+    }catch(e){
+      console.error(e);
+      alert("❌ Gagal menghapus produk: "+(e.message||e));
+    }
+  };
+
+  if(document.readyState==="loading"){
+    document.addEventListener("DOMContentLoaded", window.renderAdminDaftarProduk);
+  }else{
+    window.renderAdminDaftarProduk();
+  }
+})();
+</script>
+
+
+<!-- =========================
+     RINGKASAN DASHBOARD
+========================= -->
+
+
+<div class="box">
+
+
+<h2>
+
+📊 Ringkasan
+
+</h2>
+
+
+
+<p>
+
+Jumlah Pesanan:
+
+<b id="jumlahPesanan">
+
+0
+
+</b>
+
+</p>
+
+
+
+<p>
+
+Jumlah Produk:
+
+<b id="jumlahProduk">
+
+0
+
+</b>
+
+</p>
+
+
+
+<p>
+
+Jumlah Pembayaran:
+
+<b id="jumlahPembayaran">
+
+0
+
+</b>
+
+</p>
+
+
+
+</div>
+
+
+
+
+
+
+<script>
+
+
+/* =========================
+   HITUNG PESANAN
+========================= */
+
+
+database.ref("pesanan")
+
+.on(
+
+"value",
+
+function(snapshot){
+
+
+
+let data=snapshot.val();
+
+
+
+let jumlah=0;
+
+
+
+if(data){
+
+
+jumlah=
+
+Object.keys(data).length;
+
+
+}
+
+
+
+document.getElementById(
+
+"jumlahPesanan"
+
+).innerHTML=jumlah;
+
+
+
+}
+
+);
+
+
+
+
+
+
+
+/* =========================
+   HITUNG PRODUK
+========================= */
+
+
+database.ref("produk")
+
+.on(
+
+"value",
+
+function(snapshot){
+
+
+
+let data=snapshot.val();
+
+
+
+let jumlah=0;
+
+
+
+if(data){
+
+
+jumlah=
+
+Object.keys(data).length;
+
+
+}
+
+
+
+document.getElementById(
+
+"jumlahProduk"
+
+).innerHTML=jumlah;
+
+
+
+}
+
+);
+
+
+
+
+
+
+
+/* =========================
+   HITUNG PEMBAYARAN
+========================= */
+
+
+database.ref("pembayaran")
+
+.on(
+
+"value",
+
+function(snapshot){
+
+
+
+let data=snapshot.val();
+
+
+
+let jumlah=0;
+
+
+
+if(data){
+
+
+jumlah=
+
+Object.keys(data).length;
+
+
+}
+
+
+
+document.getElementById(
+
+"jumlahPembayaran"
+
+).innerHTML=jumlah;
+
+
+
+}
+
+);
+
+
+
+
+
+</script>
+
+
+
+
+
+
+
+<div class="box">
+<h2>⭐ Kelola Ulasan Pelanggan</h2>
+<p>Admin dapat menambahkan dan menghapus ulasan.</p>
+<input id="adminNamaUlasan" placeholder="Nama pelanggan">
+<select id="adminRatingUlasan">
+<option value="5">⭐⭐⭐⭐⭐ Sangat Puas</option>
+<option value="4">⭐⭐⭐⭐ Puas</option>
+<option value="3">⭐⭐⭐ Cukup</option>
+<option value="2">⭐⭐ Kurang</option>
+<option value="1">⭐ Buruk</option>
+</select>
+<select id="adminProdukUlasan" style="margin-top:8px;">
+<option value="">Pilih produk untuk ulasan</option>
+</select>
+<textarea id="adminIsiUlasan" placeholder="Isi ulasan"></textarea>
+<label style="display:block;margin:12px 0 6px;font-weight:700">📷 Foto ulasan (opsional)</label>
+<input id="adminFotoUlasan" type="file" accept="image/jpeg,image/png,image/webp" onchange="adminPreviewFotoUlasan(event)" style="display:block;width:100%;box-sizing:border-box"/>
+<div id="adminPreviewFotoUlasan" style="display:none;margin-top:10px">
+  <img id="adminPreviewFotoUlasanImg" alt="Preview foto ulasan" style="max-width:100%;max-height:220px;border-radius:12px;object-fit:cover;border:1px solid #ddd">
+  <button type="button" onclick="adminHapusFotoUlasan()" style="display:block;margin-top:8px">✕ Hapus foto</button>
+</div>
+<button onclick="adminTambahUlasan()">➕ Tambah Ulasan</button>
+<hr style="margin:25px 0">
+<div id="adminDaftarUlasan">Memuat ulasan...</div>
+</div>
+
+
+
+
+
+
+
+
+<script>
+
+
+function logout(){
+
+try { sessionStorage.removeItem("smt_admin_login_verified"); } catch(e) {}
+
+firebase.auth()
+
+.signOut()
+
+.then(()=>{
+
+
+window.location="login.html";
+
+
+});
+
+
+}
+
+
+
+let editID = null;
+let fileGambarProduk = [];
+let gambarProdukLama = "";
+let gambarProdukLamaList = [];
+
+/* =========================================================
+   PILIH + PREVIEW GAMBAR PRODUK
+========================================================= */
+let previewObjectUrls = [];
+
+function bukaPemilihFotoProduk(){
+    const input = document.getElementById("fileGambarProduk");
+    if(!input) {
+        alert("❌ Pemilih foto belum siap. Silakan refresh halaman.");
+        return false;
+    }
+    if(Array.isArray(fileGambarProduk) && fileGambarProduk.length >= 6){
+        alert("❌ Maksimal 6 foto produk.");
+        return false;
+    }
+    input.click();
+    return false;
+}
+
+function hapusFotoProduk(index){
+    if(!Array.isArray(fileGambarProduk)) return;
+    fileGambarProduk.splice(index,1);
+    previewObjectUrls.forEach(u=>{ try{ URL.revokeObjectURL(u); }catch(e){} });
+    previewObjectUrls=[];
+    const urls=fileGambarProduk.map(file=>{
+        const u=URL.createObjectURL(file);
+        previewObjectUrls.push(u);
+        return u;
+    });
+    renderPreviewProduk(urls);
+    const status=document.getElementById("uploadStatusProduk");
+    if(status){
+        status.style.display=fileGambarProduk.length ? "block" : "none";
+        status.textContent=fileGambarProduk.length ? "✅ " + fileGambarProduk.length + " foto dipilih. " + (6-fileGambarProduk.length) + " slot tersisa." : "";
+    }
+    const addBtn=document.getElementById("btnTambahFotoProduk");
+    if(addBtn) addBtn.disabled=fileGambarProduk.length>=6;
+}
+
+function renderPreviewProduk(images){
+    const wrap = document.getElementById("previewProdukGaleri");
+    const thumbs = document.getElementById("previewProdukThumbs");
+    const legacy = document.getElementById("previewProduk");
+    if(!wrap || !thumbs) return;
+
+    const list = Array.isArray(images) ? images.filter(Boolean) : [];
+    if(!list.length){
+        wrap.style.display = "none";
+        thumbs.innerHTML = "";
+        if(legacy){ legacy.src=""; legacy.style.display="none"; }
+        return;
+    }
+
+    wrap.style.display = "block";
+    thumbs.innerHTML = "";
+    list.forEach((src,i)=>{
+        const card=document.createElement("div");
+        card.style.cssText="position:relative;width:105px;padding:4px;border:1px solid #ddd;border-radius:12px;background:#fff;box-sizing:border-box;";
+        const img=document.createElement("img");
+        img.src=src; img.alt="Preview foto "+(i+1);
+        img.style.cssText="width:96px;height:96px;object-fit:cover;border-radius:9px;display:block;";
+        const badge=document.createElement("span");
+        badge.textContent=i===0?"Foto utama":"Foto "+(i+1);
+        badge.style.cssText="position:absolute;left:7px;bottom:7px;background:rgba(0,0,0,.72);color:#fff;border-radius:6px;padding:3px 5px;font-size:10px;font-weight:700;";
+        const del=document.createElement("button");
+        del.type="button"; del.textContent="×"; del.title="Hapus foto";
+        del.onclick=()=>hapusFotoProduk(i);
+        del.style.cssText="position:absolute;right:5px;top:5px;width:25px;height:25px;padding:0;border:0;border-radius:50%;background:#c62828;color:#fff;font-size:18px;line-height:25px;z-index:2;";
+        card.append(img,badge,del); thumbs.appendChild(card);
+    });
+    if(legacy){ legacy.src=list[0]; legacy.style.display="none"; }
+}
+
+function pilihGambarProduk(event){
+    const input = event && event.target ? event.target : document.getElementById("fileGambarProduk");
+    const picked = Array.from((input && input.files) || []);
+    const status = document.getElementById("uploadStatusProduk");
+    if(!picked.length) return;
+
+    // Berarti event change benar-benar terpanggil dari galeri HP.
+    if(status){
+        status.style.display="block";
+        status.style.background="#e8f5e9";
+        status.style.color="#1b5e20";
+        status.textContent="📷 " + picked.length + " foto dipilih, membuat preview...";
+    }
+
+    const existing = Array.isArray(fileGambarProduk) ? fileGambarProduk.slice() : [];
+    const merged = existing.concat(picked);
+    const unique=[]; const seen=new Set();
+    for(const file of merged){
+        const key=[file.name,file.size,file.lastModified,file.type].join("|");
+        if(!seen.has(key)){seen.add(key);unique.push(file);}
+    }
+    if(unique.length>6){
+        alert("❌ Maksimal 6 foto produk. Pilih maksimal " + (6-existing.length) + " foto lagi.");
+        if(input) input.value="";
+        const tambahInput = document.getElementById("fileGambarProdukTambah");
+        if(tambahInput) tambahInput.value="";
+        return;
+    }
+    for(const file of unique){
+        if(!file.type || !file.type.startsWith("image/")){ alert("❌ File harus berupa gambar: "+file.name); if(input) input.value=""; return; }
+        if(file.size>5*1024*1024){ alert("❌ Ukuran setiap gambar maksimal 5 MB: "+file.name); if(input) input.value=""; return; }
+    }
+    fileGambarProduk=unique;
+
+    // Reset kedua input supaya foto yang sama bisa dipilih lagi jika diperlukan.
+    const inputUtama = document.getElementById("fileGambarProduk");
+    const inputTambah = document.getElementById("fileGambarProdukTambah");
+    if(inputUtama) inputUtama.value="";
+    if(inputTambah) inputTambah.value="";
+
+    // Bersihkan object URL preview lama, lalu buat URL baru.
+    previewObjectUrls.forEach(u=>{ try{ URL.revokeObjectURL(u); }catch(e){} });
+    previewObjectUrls=[];
+    const urls=fileGambarProduk.map(file=>{
+        const u=URL.createObjectURL(file);
+        previewObjectUrls.push(u);
+        return u;
+    });
+    renderPreviewProduk(urls);
+    if(status){
+        status.style.display="block"; status.style.background="#f1f8e9"; status.style.color="#1b5e20";
+        status.textContent="✅ "+fileGambarProduk.length+" foto dipilih. "+(6-fileGambarProduk.length)+" slot tersisa.";
+    }
+    const addBtn=document.getElementById("btnTambahFotoProduk");
+    if(addBtn){addBtn.disabled=fileGambarProduk.length>=6;addBtn.style.opacity=addBtn.disabled?".5":"1";addBtn.style.cursor=addBtn.disabled?"not-allowed":"pointer";}
+}
+
+/* =========================================================
+   UPLOAD / KOMPRESI BEBERAPA FOTO PRODUK
+   Foto disimpan di Firebase Storage, bukan sebagai base64 di
+   Realtime Database. Ini membuat galeri multi-foto lebih stabil.
+========================================================= */
+function kompresGambarProduk(file){
+    return new Promise((resolve, reject) => {
+        if(!file){ reject(new Error("File gambar tidak ditemukan.")); return; }
+
+        const reader = new FileReader();
+        reader.onerror = () => reject(new Error("Gagal membaca gambar dari HP: " + file.name));
+        reader.onload = function(e){
+            const img = new Image();
+            img.onerror = () => reject(new Error("Format gambar tidak dapat diproses: " + file.name));
+            img.onload = function(){
+                try{
+                    const MAX_SIDE = 1600;
+                    let w = img.naturalWidth || img.width;
+                    let h = img.naturalHeight || img.height;
+
+                    if(!w || !h) throw new Error("Ukuran gambar tidak valid: " + file.name);
+
+                    if(w > MAX_SIDE || h > MAX_SIDE){
+                        const skala = Math.min(MAX_SIDE / w, MAX_SIDE / h);
+                        w = Math.max(1, Math.round(w * skala));
+                        h = Math.max(1, Math.round(h * skala));
+                    }
+
+                    const canvas = document.createElement("canvas");
+                    canvas.width = w;
+                    canvas.height = h;
+
+                    const ctx = canvas.getContext("2d", {alpha:false});
+                    if(!ctx) throw new Error("Browser HP tidak mendukung pemrosesan gambar.");
+
+                    ctx.fillStyle = "#ffffff";
+                    ctx.fillRect(0,0,w,h);
+                    ctx.drawImage(img,0,0,w,h);
+
+                    const dataUrl = canvas.toDataURL("image/jpeg",0.82);
+                    if(!dataUrl || dataUrl.length < 100){
+                        throw new Error("Gambar gagal diproses: " + file.name);
+                    }
+
+                    resolve(dataUrl);
+                }catch(error){
+                    reject(error);
+                }
+            };
+            img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    });
+}
+
+async function uploadSatuGambarProduk(file, productId, index, total){
+    const status = document.getElementById("uploadStatusProduk");
+
+    if(status){
+        status.style.display="block";
+        status.style.background="#fff8e1";
+        status.style.color="#8a6d00";
+        status.textContent="⏳ Menyiapkan foto " + (index + 1) + " dari " + total + "...";
+    }
+
+    const dataUrl = await kompresGambarProduk(file);
+
+    const firebaseStorage = window.storage || (window.FirebaseApp && window.FirebaseApp.storage);
+    const safeName = String(file.name || "foto")
+        .replace(/[^a-zA-Z0-9._-]/g,"_")
+        .replace(/\.[^.]+$/,"") || "foto";
+    const storagePath =
+        "produk/" + productId + "/" +
+        Date.now() + "_" + index + "_" + safeName + ".jpg";
+
+    /*
+     * Dibuat sama dengan alur foto postingan beranda:
+     * 1. coba Firebase Storage
+     * 2. jika Storage gagal/timeout, gunakan data URL sebagai cadangan
+     * Dengan begitu pemilihan dan penyimpanan foto tidak berhenti hanya
+     * karena Storage Rules belum diperbarui.
+     */
+    if(firebaseStorage){
+        try{
+            if(status) status.textContent="⏳ Upload foto " + (index + 1) + " dari " + total + "...";
+            const blob = await (await fetch(dataUrl)).blob();
+            const uploadTask = firebaseStorage.ref(storagePath).put(blob, {
+                contentType:"image/jpeg",
+                cacheControl:"public,max-age=31536000"
+            });
+            const timeout = new Promise((_, reject) =>
+                setTimeout(() => reject(new Error("Upload gambar ke Firebase Storage timeout")), 15000)
+            );
+            const snap = await Promise.race([uploadTask, timeout]);
+            return await snap.ref.getDownloadURL();
+        }catch(storageError){
+            console.warn("Upload Storage produk gagal, menggunakan cadangan data URL:", storageError);
+        }
+    }
+
+    if(status) status.textContent="⏳ Menyiapkan cadangan foto " + (index + 1) + "...";
+    return dataUrl;
+}
+
+async function uploadSemuaGambarProduk(files, productId){
+    const hasil = [];
+
+    if(!Array.isArray(files) || !files.length){
+        return hasil;
+    }
+
+    for(let i=0;i<files.length;i++){
+        hasil.push(await uploadSatuGambarProduk(files[i], productId, i, files.length));
+    }
+
+    return hasil;
+}
+/* =========================================================
+   TAMBAH / EDIT PRODUK
+========================================================= */
+async function tambahProduk(){
+
+    const btn = document.getElementById("btnProduk");
+    const status = document.getElementById("uploadStatusProduk");
+
+    try{
+        const nama = document.getElementById("namaProduk").value.trim();
+
+        if(!nama){
+            alert("❌ Nama produk wajib diisi.");
+            return;
+        }
+
+        if(btn){
+            btn.disabled = true;
+            btn.innerHTML = "⏳ Menyiapkan...";
+        }
+
+        const hargaInput = document.getElementById("hargaProduk").value || "";
+        const diskonInput = document.getElementById("diskonProduk").value || "";
+        const stokInput = document.getElementById("stokProduk").value || "";
+        const beratInput = document.getElementById("beratProduk").value || "";
+        const deskripsi = document.getElementById("deskripsiProduk")?.value.trim() || "";
+
+        const hargaNormal = parseInt(hargaInput.replace(/\D/g, ""), 10) || 0;
+        const diskon = Math.min(100, Math.max(0, parseInt(diskonInput, 10) || 0));
+
+        if(hargaNormal <= 0){
+            alert("❌ Harga produk harus lebih dari 0.");
+            return;
+        }
+
+        const daftarVarian = bacaVarianProduk();
+        const stokDasar = parseInt(stokInput, 10) || 0;
+        const beratDasar = parseInt(beratInput, 10) || 0;
+        const stokFinal = daftarVarian.length
+            ? daftarVarian.reduce((total, v) => total + Number(v.stok || 0), 0)
+            : stokDasar;
+
+        /*
+         * Buat ID terlebih dahulu agar semua foto mempunyai folder
+         * Storage yang sama. Untuk produk baru belum ada data yang
+         * ditulis ke RTDB sampai semua foto berhasil di-upload.
+         */
+        const productId = editID || database.ref("produk").push().key;
+        if(!productId){
+            throw new Error("Gagal membuat ID produk.");
+        }
+
+        let gambarList = Array.isArray(gambarProdukLamaList)
+            ? [...gambarProdukLamaList]
+            : [];
+
+        let gambar = gambarProdukLama ||
+            document.getElementById("gambarProduk").value.trim();
+
+        if(Array.isArray(fileGambarProduk) && fileGambarProduk.length){
+            if(fileGambarProduk.length > 6){
+                throw new Error("Maksimal 6 foto produk.");
+            }
+
+            if(btn) btn.innerHTML = "⏳ Upload 1/" + fileGambarProduk.length + "...";
+
+            /*
+             * Foto baru disimpan ke Firebase Storage.
+             * Yang masuk ke Realtime Database hanya URL-nya.
+             */
+            gambarList = await uploadSemuaGambarProduk(fileGambarProduk, productId);
+        }else if(!gambarList.length && gambar){
+            gambarList = [gambar];
+        }
+
+        gambar = gambarList[0] || gambar;
+
+        if(!gambar){
+            alert("❌ Silakan pilih minimal 1 foto produk terlebih dahulu.");
+            return;
+        }
+
+        const produk = {
+            nama: nama,
+            harga: hargaNormal,
+            diskon: diskon,
+            stok: stokFinal,
+            berat: beratDasar,
+            deskripsi: deskripsi,
+            gambar: gambar,
+            gambarList: gambarList,
+            variants: daftarVarian
+        };
+
+        if(btn) btn.innerHTML = "⏳ Menyimpan produk...";
+
+        await database.ref("produk/" + productId).set(produk);
+
+        alert(editID
+            ? "✅ Produk berhasil diperbarui dengan " + gambarList.length + " foto."
+            : "✅ Produk berhasil ditambahkan dengan " + gambarList.length + " foto.");
+
+        editID = null;
+        fileGambarProduk = [];
+        gambarProdukLama = "";
+        gambarProdukLamaList = [];
+
+        kosongkanForm();
+
+        if(status){
+            status.style.display = "block";
+            status.style.background = "#e8f5e9";
+            status.style.color = "#1b5e20";
+            status.textContent = "✅ Produk berhasil disimpan dengan " + gambarList.length + " foto.";
+        }
+
+    }catch(err){
+        console.error("Gagal menyimpan produk:", err);
+
+        if(status){
+            status.style.display = "block";
+            status.style.background = "#ffebee";
+            status.style.color = "#c62828";
+            status.textContent = "❌ " + (err.message || err);
+        }
+
+        alert("❌ Gagal menyimpan produk:\n\n" + (err.message || err));
+    }finally{
+        if(btn){
+            btn.disabled = false;
+            btn.innerHTML = editID ? "💾 Simpan Perubahan" : "➕ Tambah Produk";
+        }
+    }
+}
+
+
+function previewGambar(){
+    const url = document.getElementById("gambarProduk").value.trim();
+    const preview = document.getElementById("previewProduk");
+
+    if(url && !fileGambarProduk){
+        preview.src = url;
+        preview.style.display = "block";
+    }
+}
+
+function kosongkanForm(){
+
+    document.getElementById("namaProduk").value = "";
+    document.getElementById("hargaProduk").value = "";
+    document.getElementById("diskonProduk").value = "";
+    document.getElementById("stokProduk").value = "";
+    document.getElementById("beratProduk").value = "";
+    const deskripsiEl = document.getElementById("deskripsiProduk");
+    if(deskripsiEl) deskripsiEl.value = "";
+    document.getElementById("gambarProduk").value = "";
+    const daftarVarian = document.getElementById("daftarVarianProduk");
+    if(daftarVarian) daftarVarian.innerHTML = "";
+
+    const fileInput = document.getElementById("fileGambarProduk");
+    if(fileInput) fileInput.value = "";
+
+    fileGambarProduk = [];
+    previewObjectUrls.forEach(u=>{ try{ URL.revokeObjectURL(u); }catch(e){} });
+    previewObjectUrls = [];
+    gambarProdukLama = "";
+    gambarProdukLamaList = [];
+    renderPreviewProduk([]);
+
+}
+
+
+/* =========================================================
+   VARIAN PRODUK
+   Setiap varian menyimpan harga, berat, stok, dan ID sendiri.
+========================================================= */
+let adminVariants = [];
+
+function adminEscVar(v){
+    return String(v == null ? "" : v).replace(/[&<>"']/g, function(c){
+        return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;"}[c];
+    });
+}
+
+function tambahBarisVarian(data){
+    data = data || {};
+    const id = data.id || ("v" + Date.now() + Math.random().toString(36).slice(2,7));
+    const box = document.getElementById("daftarVarianProduk");
+    if(!box) return;
+
+    const row = document.createElement("div");
+    row.className = "smt-varian-row";
+    row.dataset.id = id;
+    row.style.cssText = "display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr auto;gap:8px;margin-bottom:9px;align-items:center;";
+    row.innerHTML = `
+      <input class="varianNama" placeholder="Nama pilihan" value="${adminEscVar(data.nama || "")}">
+      <input class="varianHarga" type="number" min="0" placeholder="Harga" value="${Number(data.harga || 0) || ""}">
+      <input class="varianBerat" type="number" min="0" placeholder="Berat (g)" value="${Number(data.berat || 0) || ""}">
+      <input class="varianStok" type="number" min="0" placeholder="Stok" value="${Number(data.stok || 0) || ""}">
+      <button type="button" onclick="this.closest('.smt-varian-row').remove()" style="padding:8px 10px;">🗑</button>
+    `;
+    box.appendChild(row);
+}
+
+function renderVarianProduk(list){
+    const box = document.getElementById("daftarVarianProduk");
+    if(!box) return;
+    box.innerHTML = "";
+    (Array.isArray(list) ? list : []).forEach(v => tambahBarisVarian(v));
+}
+
+function bacaVarianProduk(){
+    const rows = Array.from(document.querySelectorAll("#daftarVarianProduk .smt-varian-row"));
+    const variants = [];
+    rows.forEach((row, i) => {
+        const nama = (row.querySelector(".varianNama")?.value || "").trim();
+        const harga = Number(row.querySelector(".varianHarga")?.value || 0);
+        const berat = Number(row.querySelector(".varianBerat")?.value || 0);
+        const stok = Number(row.querySelector(".varianStok")?.value || 0);
+        if(!nama) return;
+        if(harga <= 0){
+            throw new Error("Harga varian \"" + nama + "\" harus lebih dari 0.");
+        }
+        variants.push({
+            id: row.dataset.id || ("v" + Date.now() + "_" + i),
+            nama: nama,
+            harga: Math.round(harga),
+            berat: Math.max(0, Math.round(berat)),
+            stok: Math.max(0, Math.round(stok))
+        });
+    });
+    return variants;
+}
+
+/* Mulai dengan dua contoh baris hanya ketika belum ada varian. */
+window.addEventListener("load", function(){
+    const box = document.getElementById("daftarVarianProduk");
+    if(box && !box.children.length) {
+        // Tidak wajib memakai varian; admin dapat menambahkannya sendiri.
+    }
+});
+
+
+/* =========================================================
+   EDIT PRODUK — memuat data lengkap ke formulir yang sama
+========================================================= */
+window.editProduk = async function(id){
+    if(!id || !window.database) return;
+
+    try{
+        const snap = await window.database.ref("produk/" + id).once("value");
+        const p = snap.val();
+
+        if(!p){
+            alert("❌ Produk tidak ditemukan. Mungkin sudah dihapus.");
+            return;
+        }
+
+        editID = id;
+
+        const el = id => document.getElementById(id);
+        const gambarList = Array.isArray(p.gambarList)
+            ? p.gambarList.filter(Boolean)
+            : (p.gambarList && typeof p.gambarList === "object"
+                ? Object.values(p.gambarList).filter(Boolean)
+                : (p.gambar ? [p.gambar] : []));
+
+        const variants = Array.isArray(p.variants)
+            ? p.variants
+            : (p.variants && typeof p.variants === "object"
+                ? Object.values(p.variants)
+                : []);
+
+        el("namaProduk").value = p.nama || "";
+        el("hargaProduk").value = Number(p.harga || 0);
+        el("diskonProduk").value = Number(p.diskon || 0);
+        el("stokProduk").value = Number(p.stok || 0);
+        el("beratProduk").value = Number(p.berat || 0);
+        if(el("deskripsiProduk")) el("deskripsiProduk").value = p.deskripsi || "";
+
+        gambarProdukLamaList = gambarList.slice();
+        gambarProdukLama = gambarList[0] || p.gambar || "";
+        el("gambarProduk").value = gambarProdukLama;
+
+        fileGambarProduk = [];
+        const fileInput = el("fileGambarProduk");
+        if(fileInput) fileInput.value = "";
+
+        renderVarianProduk(variants);
+
+        const status = el("uploadStatusProduk");
+        if(status){
+            status.style.display = gambarList.length ? "block" : "none";
+            status.style.background = "#f1f8e9";
+            status.style.color = "#33691e";
+            status.textContent = gambarList.length
+                ? "🖼️ " + gambarList.length + " foto lama digunakan. Pilih foto baru jika ingin menggantinya."
+                : "";
+        }
+        renderPreviewProduk(gambarList);
+
+        const title = el("judulFormProduk");
+        if(title) title.textContent = "✏️ Edit Produk";
+        const mode = el("modeEditProduk");
+        if(mode) mode.style.display = "block";
+        const btn = el("btnProduk");
+        if(btn){
+            btn.disabled = false;
+            btn.innerHTML = "💾 Simpan Perubahan";
+        }
+        const cancel = el("btnBatalEditProduk");
+        if(cancel) cancel.style.display = "block";
+
+        // Buka tab Produk tanpa bergantung pada fungsi showSection yang berada di scope lain.
+        const tab = document.querySelector('.admin-tab[data-section="produk"]');
+        if(tab) tab.click();
+
+        setTimeout(function(){
+            el("kelolaProduk")?.scrollIntoView({behavior:"smooth", block:"start"});
+        }, 80);
+
+    }catch(e){
+        console.error("Gagal memuat produk untuk diedit:", e);
+        alert("❌ Gagal memuat produk: " + (e.message || e));
+    }
+};
+
+window.batalEditProduk = function(){
+    editID = null;
+    fileGambarProduk = [];
+    gambarProdukLama = "";
+    gambarProdukLamaList = [];
+
+    if(typeof kosongkanForm === "function") kosongkanForm();
+
+    const title = document.getElementById("judulFormProduk");
+    if(title) title.textContent = "🌱 Tambahkan Produk";
+    const mode = document.getElementById("modeEditProduk");
+    if(mode) mode.style.display = "none";
+    const btn = document.getElementById("btnProduk");
+    if(btn){
+        btn.disabled = false;
+        btn.innerHTML = "🌱 Simpan Produk";
+    }
+    const cancel = document.getElementById("btnBatalEditProduk");
+    if(cancel) cancel.style.display = "none";
+};
+
+let smtStatusFilter = "";
+
+function filterPesanan(){
+    const input = (document.getElementById("cariPesanan")?.value || "").toLowerCase().trim();
+    const cards = document.querySelectorAll("#pesanan .order-card");
+    cards.forEach(card => {
+        const teks = card.innerText.toLowerCase();
+        const statusBadge = card.querySelector(".status-badge")?.innerText?.trim() || "";
+        const statusOk = !smtStatusFilter || statusBadge === smtStatusFilter;
+        const searchOk = !input || teks.includes(input);
+        card.style.display = (statusOk && searchOk) ? "block" : "none";
+    });
+}
+
+function bukaPesananDenganFilter(status){
+    smtStatusFilter = String(status || "");
+    if(typeof showAdminProSection === "function") showAdminProSection("pesanan");
+    setTimeout(()=>{
+        filterPesanan();
+        const info=document.getElementById("statusOrderInfo");
+        if(info) info.textContent = smtStatusFilter ? "Filter aktif: " + smtStatusFilter + "." : "Menampilkan semua status pesanan.";
+    },80);
+}
+
+function resetFilterStatusPesanan(){
+    smtStatusFilter = "";
+    const input=document.getElementById("cariPesanan");
+    if(input) input.value="";
+    if(typeof showAdminProSection === "function") showAdminProSection("pesanan");
+    setTimeout(filterPesanan,80);
+    const info=document.getElementById("statusOrderInfo");
+    if(info) info.textContent="Filter dihapus. Semua pesanan ditampilkan.";
+}
+
+window.bukaPesananDenganFilter=bukaPesananDenganFilter;
+window.resetFilterStatusPesanan=resetFilterStatusPesanan;
+
+</script>
+<!-- =========================
+     FOOTER ADMIN
+========================= -->
+
+
+<div class="box">
+
+
+<p style="text-align:center;">
+
+🌱 SUBUR MUJUR TANI
+
+<br>
+
+Dashboard Administrator
+
+<br>
+
+© 2026
+
+</p>
+
+
+</div>
+
+
+
+
+
+</div>
+
+
+
+<script>
+// ======================================
+// KELOLA ULASAN PELANGGAN
+// Ulasan dari index.html dan admin.html
+// menggunakan node Firebase yang sama: "ulasan"
+// ======================================
+function adminEsc(v){
+    return String(v == null ? "" : v).replace(/[&<>"']/g, c => ({
+        "&":"&amp;", "<":"&lt;", ">":"&gt;", "\"":"&quot;", "'":"&#039;"
+    }[c]));
+}
+
+function adminMuatPilihanProdukUlasan(){
+    const sel=document.getElementById("adminProdukUlasan");
+    if(!sel) return;
+    database.ref("produk").once("value").then(snap=>{
+        const data=snap.val()||{};
+        const opts=Object.entries(data).map(([id,p])=>`<option value="${adminEsc(id)}">${adminEsc(p?.nama||id)}</option>`).join("");
+        sel.innerHTML='<option value="">Pilih produk untuk ulasan</option>'+opts;
+    }).catch(()=>{});
+}
+
+function adminRenderUlasan(data){
+    const box = document.getElementById("adminDaftarUlasan");
+    if (!box) return;
+
+    if (!data || typeof data !== "object") {
+        box.innerHTML = "<p>Belum ada ulasan.</p>";
+        return;
+    }
+
+    const ids = Object.keys(data).sort((a,b) =>
+        Number(data[b]?.waktu || 0) - Number(data[a]?.waktu || 0)
+    );
+
+    if (!ids.length) {
+        box.innerHTML = "<p>Belum ada ulasan.</p>";
+        return;
+    }
+
+    box.innerHTML = ids.map(id => {
+        const u = data[id] || {};
+        const rating = Math.max(1, Math.min(5, Number(u.rating) || 5));
+        const sumber = u.dibuatOlehAdmin ? "Admin" : "Pelanggan";
+
+        return `<div class="card" style="margin-bottom:15px">
+            <b>👤 ${adminEsc(u.nama || "Pelanggan")}</b>
+            <span style="font-size:12px;opacity:.7;margin-left:8px">(${sumber})</span>
+            ${u.productId ? `<div style="margin-top:5px;color:#0b4d3b;font-weight:800;font-size:12px">🌱 Produk: ${adminEsc(u.productName||u.productId)}</div>` : `<div style="margin-top:5px;color:#9a6b00;font-size:12px">Ulasan lama tanpa produk tertentu</div>`}
+            <div style="color:#ff9800;margin:6px 0">${"⭐".repeat(rating)}</div>
+            <small>${adminEsc(u.tanggal || "")}</small>
+            <p style="white-space:pre-wrap">${adminEsc(u.isi || "")}</p>
+            ${u.foto ? `<img src="${adminEsc(u.foto)}" alt="Foto ulasan" loading="lazy" style="display:block;width:100%;max-width:420px;max-height:320px;object-fit:cover;border-radius:12px;margin:10px 0;border:1px solid #ddd">` : ""}
+            <button type="button" style="background:#c62828" onclick="adminHapusUlasan('${adminEsc(id)}')">🗑️ Hapus</button>
+        </div>`;
+    }).join("");
+}
+
+// Dengarkan ulasan secara realtime.
+// Ulasan yang dikirim dari index.html otomatis muncul di sini.
+database.ref("ulasan").on("value", snapshot => {
+    adminRenderUlasan(snapshot.val());
+}, error => {
+    const box = document.getElementById("adminDaftarUlasan");
+    if (box) box.innerHTML = `<p style="color:#c62828">❌ Tidak dapat memuat ulasan: ${adminEsc(error.message)}</p>`;
+});
+
+function adminPreviewFotoUlasan(event){
+    const file=event?.target?.files?.[0];
+    const wrap=document.getElementById("adminPreviewFotoUlasan");
+    const img=document.getElementById("adminPreviewFotoUlasanImg");
+    if(!file){ adminHapusFotoUlasan(); return; }
+    if(!file.type || !file.type.startsWith("image/")){
+        alert("❌ File harus berupa gambar.");
+        event.target.value="";
+        adminHapusFotoUlasan();
+        return;
+    }
+    const r=new FileReader();
+    r.onload=e=>{img.src=e.target.result;wrap.style.display="block";};
+    r.readAsDataURL(file);
+}
+function adminHapusFotoUlasan(){
+    const input=document.getElementById("adminFotoUlasan");
+    const wrap=document.getElementById("adminPreviewFotoUlasan");
+    const img=document.getElementById("adminPreviewFotoUlasanImg");
+    if(input) input.value="";
+    if(img) img.removeAttribute("src");
+    if(wrap) wrap.style.display="none";
+}
+function adminKompresFotoUlasan(file){
+    return new Promise((resolve,reject)=>{
+        const r=new FileReader();
+        r.onerror=()=>reject(new Error("Foto tidak dapat dibaca."));
+        r.onload=e=>{
+            const img=new Image();
+            img.onerror=()=>reject(new Error("Foto tidak valid."));
+            img.onload=()=>{
+                const max=1000, scale=Math.min(1,max/Math.max(img.width,img.height));
+                const c=document.createElement("canvas");
+                c.width=Math.max(1,Math.round(img.width*scale)); c.height=Math.max(1,Math.round(img.height*scale));
+                c.getContext("2d").drawImage(img,0,0,c.width,c.height);
+                let q=.72, data=c.toDataURL("image/jpeg",q);
+                while(data.length>650000 && q>.45){q-=.06;data=c.toDataURL("image/jpeg",q);}
+                if(data.length>700000) reject(new Error("Foto terlalu besar setelah dikompres.")); else resolve(data);
+            };
+            img.src=e.target.result;
+        };
+        r.readAsDataURL(file);
+    });
+}
+
+async function adminTambahUlasan(){
+    const nama = document.getElementById("adminNamaUlasan")?.value.trim();
+    const productId = document.getElementById("adminProdukUlasan")?.value || "";
+    const productName = document.getElementById("adminProdukUlasan")?.selectedOptions?.[0]?.textContent?.trim() || "";
+    const rating = Number(document.getElementById("adminRatingUlasan")?.value || 5);
+    const isi = document.getElementById("adminIsiUlasan")?.value.trim();
+    const file = document.getElementById("adminFotoUlasan")?.files?.[0] || null;
+
+    if (!nama || !isi || !productId) {
+        alert("Pilih produk, isi nama, dan isi ulasan terlebih dahulu.");
+        return;
+    }
+
+    try {
+        const foto = file ? await adminKompresFotoUlasan(file) : "";
+        await database.ref("ulasan").push({
+            nama, productId, productName, rating, isi, foto,
+            waktu: Date.now(),
+            tanggal: new Date().toLocaleString("id-ID"),
+            dibuatOlehAdmin: true
+        });
+
+        document.getElementById("adminNamaUlasan").value = "";
+        document.getElementById("adminIsiUlasan").value = "";
+        document.getElementById("adminRatingUlasan").value = "5";
+        const ps=document.getElementById("adminProdukUlasan"); if(ps) ps.value="";
+        adminHapusFotoUlasan();
+        alert("✅ Ulasan berhasil ditambahkan.");
+    } catch(e) {
+        alert("❌ Gagal menambahkan ulasan: " + e.message);
+    }
+}
+
+adminMuatPilihanProdukUlasan();
+
+async function adminHapusUlasan(id){
+    if (!id) return;
+    if (!confirm("Yakin ingin menghapus ulasan ini?")) return;
+
+    try {
+        await database.ref("ulasan/" + id).remove();
+        alert("✅ Ulasan berhasil dihapus.");
+    } catch(e) {
+        alert("❌ Gagal menghapus ulasan: " + e.message);
+    }
+}
+</script>
+
+
+
+<!-- =========================
+     POSTINGAN BERANDA
+========================= -->
+<div class="box" id="kelolaPostingan">
+  <h2>📣 Postingan Beranda</h2>
+  <p style="margin-top:0;color:#666;">Buat postingan yang akan tampil di Beranda. Bisa berupa tulisan, foto, atau tautan ke produk.</p>
+
+  <div class="social-post-admin">
+    <div class="composer-head">
+      <div class="composer-avatar">🌱</div>
+      <div>
+        <b>SUBUR MUJUR TANI</b>
+        <div style="font-size:12px;color:#777;">Posting ke Beranda</div>
+      </div>
+    </div>
+
+    <textarea id="postText" placeholder="Tulis kabar, promo, tips tanaman, atau informasi untuk pelanggan..."></textarea>
+
+    <label class="post-file">
+      📷 Pilih foto postingan
+      <input id="postImageFile" type="file" accept="image/jpeg,image/png,image/webp" onchange="previewBerandaPost(event)">
+    </label>
+    <img id="postImagePreview" class="post-preview" alt="Preview postingan">
+
+    <label style="display:block;margin-top:12px;font-weight:700;">🛒 Tautkan produk (opsional)</label>
+    <select id="postProductSelect">
+      <option value="">Memuat produk...</option>
+    </select>
+
+    <div id="postLivePreview" class="post-live-preview" style="display:none;">
+      <div class="post-live-label">Preview Beranda</div>
+      <div id="postLiveCard" class="home-social-card" style="background:#fff;border-radius:14px;padding:12px;">
+        <div id="postLiveText" style="white-space:pre-wrap;line-height:1.5;"></div>
+        <img id="postLiveImage" style="display:none;width:100%;max-height:300px;object-fit:cover;border-radius:12px;margin-top:10px;" alt="Preview">
+      </div>
+    </div>
+
+    <div class="post-actions">
+      <button type="button" onclick="publikasikanBerandaPost()">📤 Publikasikan</button>
+      <button type="button" onclick="resetBerandaPost()" style="background:#777;">↺ Bersihkan</button>
+    </div>
+    <div id="postUploadStatus" class="post-status"></div>
+  </div>
+
+  <h3>Postingan yang sudah dipublikasikan</h3>
+  <div id="adminBerandaPosts">Memuat postingan...</div>
+</div>
+
+
+<!-- =========================
+     TAMBAHKAN PRODUK
+========================= -->
+<div class="box" id="kelolaProduk">
+  <h2 id="judulFormProduk">🌱 Tambahkan Produk</h2>
+  <div id="modeEditProduk" style="display:none;margin:0 0 14px;padding:12px 14px;border-radius:12px;background:#fff8e8;border:1px solid #e3c46f;color:#5f4a18;">
+    ✏️ <b>Mode Edit Produk</b><br>
+    <span style="font-size:13px;">Perubahan akan memperbarui produk yang dipilih, bukan membuat produk baru.</span>
+  </div>
+  <p style="margin-top:0;color:#666;">Tambahkan bibit/produk baru ke katalog. Foto dapat dipilih langsung dari HP.</p>
+
+  <input id="namaProduk" type="text" placeholder="Nama produk, contoh: Bibit Durian Musang King">
+  <input id="hargaProduk" type="number" min="0" inputmode="numeric" placeholder="Harga (Rp)">
+  <input id="diskonProduk" type="number" min="0" max="100" inputmode="numeric" placeholder="Diskon (%) — isi 0 jika tidak ada">
+  <input id="stokProduk" type="number" min="0" inputmode="numeric" placeholder="Stok">
+  <input id="beratProduk" type="number" min="0" inputmode="numeric" placeholder="Berat per produk (gram)">
+  <textarea id="deskripsiProduk" rows="4" placeholder="Deskripsi / keterangan produk (contoh: jenis tanaman, keunggulan, cara perawatan, isi paket, dll.)" style="width:100%;margin-top:8px;padding:12px;border:1px solid #ddd;border-radius:10px;box-sizing:border-box;resize:vertical;font-family:inherit;"></textarea>
+
+  <div style="margin-top:14px;padding:14px;border:1px dashed #c7a15a;border-radius:12px;background:#fffdf8;">
+    <b>📷 Foto Produk</b>
+    <p style="font-size:13px;color:#666;margin:6px 0 10px;">Maksimal 6 foto, masing-masing maksimal 5 MB.</p>
+    <div id="pemilihFotoProdukWrap" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+      <label for="fileGambarProduk" style="display:inline-block;background:#0b3d2e;color:#fff;padding:12px 16px;border-radius:10px;font-weight:700;cursor:pointer;text-align:center;">
+        📷 Pilih Foto
+      </label>
+      <input id="fileGambarProduk" type="file" accept="image/*" multiple onchange="pilihGambarProduk(event)" style="display:none;">
+      <button id="btnTambahFotoProduk" type="button" onclick="bukaPemilihFotoProduk()">➕ Tambah Foto</button>
+    </div>
+    <div id="uploadStatusProduk" style="display:none;margin-top:10px;padding:9px;border-radius:9px;"></div>
+    <div id="previewProdukGaleri" style="display:none;margin-top:12px;">
+      <div id="previewProdukThumbs" style="display:flex;gap:8px;flex-wrap:wrap;"></div>
+    </div>
+    <input id="gambarProduk" type="hidden" value="">
+    <img id="previewProduk" style="display:none;max-width:100%;margin-top:10px;border-radius:10px;" alt="Preview produk">
+    <input id="fileGambarProdukTambah" type="file" accept="image/*" multiple onchange="pilihGambarProduk(event)" style="display:none;">
+  </div>
+
+  <div style="margin-top:16px;padding:14px;border:1px solid #e5e0d5;border-radius:12px;background:#fafcf9;">
+    <b>🔖 Varian Produk (opsional)</b>
+    <p style="font-size:13px;color:#666;margin:6px 0 10px;">Jika produk memiliki ukuran/varian berbeda, tambahkan di sini.</p>
+    <div id="daftarVarianProduk"></div>
+    <button type="button" onclick="tambahBarisVarian()">➕ Tambah Varian</button>
+  </div>
+
+  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:16px;">
+    <button id="btnProduk" type="button" onclick="tambahProduk()" style="flex:1;min-width:180px;font-size:16px;">🌱 Simpan Produk</button>
+    <button id="btnBatalEditProduk" type="button" onclick="batalEditProduk()" style="display:none;flex:1;min-width:150px;background:#777;font-size:16px;">↺ Batal Edit</button>
+  </div>
+  <div id="statusSimpanProduk" style="margin-top:10px;"></div>
+</div>
+
+
+<!-- =========================
+     BITESHIP CENTER
+========================= -->
+<div class="box" id="biteshipCenter">
+  <h2>🚚 Biteship Center</h2>
+  <p style="margin-top:0;color:#666;">Pusat pengiriman, status, tracking, sinkronisasi, dan ringkasan COD. Status utama datang dari webhook Biteship; tombol sinkronisasi memakai Order API sebagai cadangan. Biteship memang menyediakan event <b>order.status</b>, <b>order.waybill_id</b>, dan <b>order.price</b> untuk sinkronisasi.</p>
+
+  <div class="biteship-toolbar">
+    <button type="button" onclick="muatBiteshipCenter()">🔄 Refresh</button>
+    <button type="button" onclick="sinkronkanSemuaBiteship(false)">🔄 Sinkronkan Semua Biteship</button>
+    <button type="button" onclick="muatBiteshipCenter(true)">📦 Hanya Pengiriman Aktif</button>
+    <a href="https://hboard.biteship.com/" target="_blank" rel="noopener" style="display:inline-block;padding:12px 16px;border-radius:8px;background:#5b21b6;color:#fff;text-decoration:none;font-weight:700;">↗️ Dashboard Biteship</a>
+  </div>
+
+  <div class="biteship-center-summary">
+    <div class="biteship-center-stat"><small>📦 Total Pengiriman</small><b id="bsTotalOrder">0</b></div>
+    <div class="biteship-center-stat"><small>🚚 Aktif Dikirim</small><b id="bsAktifOrder">0</b></div>
+    <div class="biteship-center-stat"><small>✅ Selesai</small><b id="bsSelesaiOrder">0</b></div>
+    <div class="biteship-center-stat"><small>⚠️ Perlu Perhatian</small><b id="bsPerluPerhatian">0</b></div>
+  </div>
+
+  <div class="biteship-ok">✅ <b>Sinkronisasi aktif.</b> Webhook memperbarui status secara real-time. Auto-sync GET Order juga berjalan sebagai cadangan di admin. Status resmi Biteship seperti <code>confirmed</code>, <code>picking_up</code>, <code>picked</code>, <code>in_transit</code>, <code>dropping_off</code>, <code>delivered</code>, <code>returned</code>, dan <code>cancelled</code> dipetakan ke status toko.</div>
+
+  <h3 style="color:#1b5e20;margin-bottom:8px;">💵 Ringkasan Saldo COD — Estimasi Sistem Toko</h3>
+  <div class="biteship-balance-grid">
+    <div class="biteship-balance-card"><small>🟢 Tersedia*</small><b id="bsSaldoTersedia">Rp 0</b></div>
+    <div class="biteship-balance-card"><small>🟡 Tertahan*</small><b id="bsSaldoTertahan">Rp 0</b></div>
+    <div class="biteship-balance-card"><small>🔵 Proses Penarikan*</small><b id="bsSaldoProses">Rp 0</b></div>
+    <div class="biteship-balance-card"><small>💰 Total COD</small><b id="bsSaldoTotalCOD">Rp 0</b></div>
+  </div>
+  <div class="biteship-warning">⚠️ <b>*Penting:</b> angka saldo di atas adalah <b>estimasi berdasarkan data pesanan Firebase</b>, bukan saldo wallet Biteship aktual. Dokumentasi resmi Biteship saat ini menjelaskan Available/Held/Withdrawal in Process pada dashboard, tetapi tidak menyediakan endpoint saldo wallet publik yang bisa kita gunakan di Admin. Jadi saya tidak akan mengarang angka saldo aktual.</div>
+
+  <div style="display:flex;gap:8px;flex-wrap:wrap;margin:10px 0;">
+    <select id="filterBiteshipStatus" onchange="muatBiteshipCenter()" style="max-width:220px;margin:0;">
+      <option value="semua">Semua Status</option>
+      <option value="aktif">Pengiriman Aktif</option>
+      <option value="delivered">Selesai</option>
+      <option value="return">Retur / Gagal</option>
+      <option value="cod">COD</option>
+      <option value="noncod">Non-COD</option>
+    </select>
+    <input id="cariBiteshipCenter" oninput="muatBiteshipCenter()" placeholder="Cari resi, invoice, pelanggan..." style="max-width:280px;margin:0;">
+  </div>
+  <div id="daftarBiteshipCenter">Memuat pengiriman...</div>
+</div>
+
+<script>
+(function(){
+  const esc = v => String(v == null ? "" : v).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;"}[c]));
+  const rupiah = v => "Rp " + Number(v || 0).toLocaleString("id-ID");
+  const rawStatus = o => String(o?.statusPengiriman || "").toLowerCase();
+  const isCOD = o => String(o?.metodePembayaran || "").toUpperCase() === "COD";
+  const active = o => Boolean(o?.biteshipOrderId) && !["delivered","returned","cancelled","rejected","disposed"].includes(rawStatus(o));
+  const delivered = o => ["delivered","success","completed","complete"].includes(rawStatus(o));
+  const returnish = o => ["returned","return_in_transit","cancelled","rejected","disposed","courier_not_found"].includes(rawStatus(o));
+  function tanggal(v){ const n=Number(v||0); return n ? new Date(n).toLocaleString("id-ID") : (v || "-"); }
+  function saldoEstimate(arr){
+    let available=0, held=0, process=0, total=0;
+    const now=Date.now();
+    arr.forEach(o=>{
+      if(!isCOD(o)) return;
+      const n=Number(o.total||0); total+=n;
+      const st=rawStatus(o);
+      if(String(o.codWithdrawalStatus||"").toLowerCase()==="processing"){ process+=n; return; }
+      if(st === "delivered" || o.status === "COD Lunas"){
+        const rawDate=o.codDeliveredAtMs || o.codDeliveredAt || o.danaSelesaiAt || 0;
+        const deliveredAt=typeof rawDate === "number" ? rawDate : Date.parse(String(rawDate));
+        const days=Number(String(o.biteshipCODType||"7_days").match(/(3|5|7)/)?.[1] || 7);
+        if(deliveredAt && now-deliveredAt >= days*86400000) available+=n; else held+=n;
+      } else held+=n;
+    });
+    return {available,held,process,total};
+  }
+  window.lihatTrackingBiteship = async function(id){
+    try{
+      const token=await getAdminIdToken();
+      const res=await fetch("/.netlify/functions/biteship-track",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({orderId:id,idToken:token})});
+      const data=await res.json();
+      if(!res.ok||data.success===false) throw new Error(data.message||"Tracking gagal.");
+      const t=data.data||{}; const hist=Array.isArray(t.history)?t.history:(Array.isArray(t.tracking_history)?t.tracking_history:[]);
+      const lines=hist.slice(0,15).map(x=>`• ${esc(x.status||x.description||x.note||"Update")} — ${esc(x.updated_at||x.datetime||x.created_at||"")}`).join("\\n");
+      alert("📍 Tracking Biteship\\n\\nStatus: "+(t.status||t.order_status||"-")+"\\nResi: "+(t.waybill_id||t.courier?.waybill_id||"-")+"\\nKurir: "+(t.courier?.company||t.courier?.name||"-")+"\\n\\nRiwayat:\\n"+(lines||"Belum ada riwayat detail."));
+    }catch(e){alert("❌ Gagal mengambil tracking: "+(e.message||e));}
+  };
+  window.batalkanPengirimanBiteship = async function(id){
+    if(!confirm("Batalkan pengiriman Biteship ini? Tindakan ini hanya bisa dilakukan pada status yang masih dapat dibatalkan.")) return;
+    try{
+      const token=await getAdminIdToken();
+      const res=await fetch("/.netlify/functions/biteship-cancel-order",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({orderId:id,idToken:token})});
+      const data=await res.json();
+      if(!res.ok||data.success===false) throw new Error(data.message||"Pembatalan gagal.");
+      alert("✅ Pengiriman Biteship dibatalkan.");
+      muatBiteshipCenter();
+    }catch(e){alert("❌ Gagal membatalkan pengiriman: "+(e.message||e));}
+  };
+
+  window.muatBiteshipCenter = function(onlyActive=false){
+    const box=document.getElementById("daftarBiteshipCenter"); if(!box || !window.database) return;
+    const filter=document.getElementById("filterBiteshipStatus")?.value || "semua";
+    const q=(document.getElementById("cariBiteshipCenter")?.value||"").trim().toLowerCase();
+    box.innerHTML="⏳ Memuat pengiriman...";
+    window.database.ref("pesanan").once("value").then(snap=>{
+      let arr=Object.entries(snap.val()||{}).map(([id,o])=>({id,o:o||{}})).filter(x=>x.o.biteshipOrderId);
+      const all=arr.map(x=>x.o);
+      document.getElementById("bsTotalOrder").textContent=String(arr.length);
+      document.getElementById("bsAktifOrder").textContent=String(all.filter(active).length);
+      document.getElementById("bsSelesaiOrder").textContent=String(all.filter(delivered).length);
+      document.getElementById("bsPerluPerhatian").textContent=String(all.filter(o=>["on_hold","courier_not_found","return_in_transit","returned","cancelled","rejected","disposed"].includes(rawStatus(o))).length);
+      const bal=saldoEstimate(all); document.getElementById("bsSaldoTersedia").textContent=rupiah(bal.available); document.getElementById("bsSaldoTertahan").textContent=rupiah(bal.held); document.getElementById("bsSaldoProses").textContent=rupiah(bal.process); document.getElementById("bsSaldoTotalCOD").textContent=rupiah(bal.total);
+      arr=arr.filter(({o})=>{
+        if(onlyActive || filter==="aktif") if(!active(o)) return false;
+        if(filter==="delivered" && !delivered(o)) return false;
+        if(filter==="return" && !returnish(o)) return false;
+        if(filter==="cod" && !isCOD(o)) return false;
+        if(filter==="noncod" && isCOD(o)) return false;
+        if(q){ const hay=[o.invoice,o.nama,o.resi,o.biteshipOrderId,o.biteshipCourier,o.biteshipCourierType,o.statusPengiriman].join(" ").toLowerCase(); if(!hay.includes(q)) return false; }
+        return true;
+      }).sort((a,b)=>Number(b.o.biteshipCreatedAtMs||b.o.waktu||0)-Number(a.o.biteshipCreatedAtMs||a.o.waktu||0));
+      if(!arr.length){ box.innerHTML='<div style="padding:16px;border:1px dashed #ccc;border-radius:12px;color:#777;text-align:center;">Tidak ada pengiriman sesuai filter.</div>'; return; }
+      box.innerHTML='<div class="biteship-table-wrap"><table class="biteship-table"><thead><tr><th>Pelanggan</th><th>Invoice</th><th>Kurir / Layanan</th><th>Resi</th><th>Status Biteship</th><th>Status Admin</th><th>Ongkir</th><th>Total</th><th>Update</th><th>Aksi</th></tr></thead><tbody>'+arr.map(({id,o})=>{
+        const rs=rawStatus(o)||"-"; const adminSt=o.status||"-"; const link=o.biteshipTrackingUrl||"";
+        return `<tr><td><b>${esc(o.nama||"Pelanggan")}</b><br><small>${esc(o.whatsapp||"")}</small></td><td><b>${esc(o.invoice||id)}</b><br><small>${esc(o.biteshipOrderId||"")}</small></td><td>${esc(o.biteshipCourier||o.kurirNama||"-")}<br><small>${esc(o.biteshipCourierType||o.layananNama||"-")}</small></td><td><b>${esc(o.resi||"Menunggu")}</b></td><td><span class="biteship-raw">${esc(rs)}</span></td><td><span class="status-badge">${esc(adminSt)}</span></td><td>${rupiah(o.biteshipShippingPrice||o.ongkir)}</td><td>${rupiah(o.total)}</td><td>${esc(o.biteshipLastWebhookAt||o.biteshipLastSyncAt||"-")}</td><td style="white-space:nowrap;">${link?`<a href="${esc(link)}" target="_blank" rel="noopener" style="display:inline-block;margin-bottom:5px;">🔗 Tracking</a><br>`:""}<button type="button" onclick="lihatTrackingBiteship('${esc(id)}')">📍 Detail</button> <button type="button" onclick="sinkronkanStatusBiteship('${esc(id)}',false)">🔄 Sync</button> <button type="button" onclick="cetakLabelPengiriman('${esc(id)}')">🖨️ Label</button>${["confirmed","scheduled","allocated","picking_up"].includes(rs)?`<br><button type="button" onclick="batalkanPengirimanBiteship('${esc(id)}')" style="background:#c62828;margin-top:5px;">❌ Batalkan</button>`:""}</td></tr>`;
+      }).join('')+'</tbody></table></div>';
+    }).catch(e=>{box.innerHTML='<div style="padding:14px;color:#c62828;">❌ Gagal memuat Biteship Center: '+esc(e.message)+'</div>';});
+  };
+  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",()=>window.muatBiteshipCenter()); else window.muatBiteshipCenter();
+})();
+</script>
+
+<!-- =========================
+     KEUANGAN
+========================= -->
+<div class="box" id="kelolaKeuangan">
+  <h2>💰 Keuangan</h2>
+  <p style="margin-top:0;color:#666;">Ringkasan dana transaksi yang sudah selesai secara pembayaran. Non-COD dihitung saat pembayaran transfer dikonfirmasi <b>Lunas</b>; COD dihitung saat admin menekan <b>COD Lunas</b>.</p>
+
+  <div class="keuangan-toolbar">
+    <button type="button" onclick="muatKeuanganAdmin()">🔄 Muat Ulang</button>
+    <select id="filterKeuanganJenis" onchange="muatKeuanganAdmin()">
+      <option value="selesai">Dana Selesai</option>
+      <option value="semua">Semua Transaksi</option>
+      <option value="noncod">Non-COD</option>
+      <option value="cod">COD</option>
+    </select>
+    <input id="filterKeuanganDari" type="date" onchange="muatKeuanganAdmin()" aria-label="Tanggal mulai">
+    <input id="filterKeuanganSampai" type="date" onchange="muatKeuanganAdmin()" aria-label="Tanggal sampai">
+  </div>
+
+  <div class="keuangan-summary">
+    <div class="keuangan-stat"><small>💰 Total Dana</small><b id="keuTotalDana">Rp 0</b></div>
+    <div class="keuangan-stat"><small>🏦 Non-COD / BRI</small><b id="keuTotalNonCOD">Rp 0</b></div>
+    <div class="keuangan-stat"><small>📦 COD Lunas</small><b id="keuTotalCOD">Rp 0</b></div>
+    <div class="keuangan-stat"><small>🧾 Transaksi</small><b id="keuJumlah">0</b></div>
+  </div>
+
+  <div class="keuangan-note">
+    ℹ️ <b>Catatan:</b> angka ini adalah pencatatan dari status pesanan di sistem toko. Untuk Non-COD, “Lunas” berarti admin sudah mengonfirmasi pembayaran transfer. Untuk COD, “COD Lunas” berarti admin sudah mengonfirmasi uang COD diterima. Saldo/biaya pencairan Biteship yang sebenarnya tetap mengikuti akun Biteship.
+  </div>
+
+  <div class="withdrawal-panel" style="margin-top:16px;padding:16px;border:1px solid #dfe9e2;border-radius:16px;background:#f8fbf8;">
+    <h3 style="margin:0 0 8px;color:#0b3d2e;">🏦 Penarikan Dana ke Rekening</h3>
+    <p style="margin:0 0 12px;color:#66716c;font-size:13px;">Ajukan pencairan saldo toko ke rekening bank. Untuk versi ini pencairan <b>belum otomatis</b>; setelah admin menekan ajukan, transfer dilakukan manual melalui bank lalu statusnya ditandai berhasil.</p>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;">
+      <input id="wdBank" value="BRI" placeholder="Bank">
+      <input id="wdNama" value="Muhamad Rizal Hakim" placeholder="Nama pemilik rekening">
+      <input id="wdRekening" inputmode="numeric" placeholder="Nomor rekening">
+      <input id="wdJumlah" inputmode="numeric" placeholder="Jumlah penarikan (Rp)">
+    </div>
+    <button id="wdAjukanBtn" type="button" onclick="ajukanPenarikanDana()" style="margin-top:10px;">💸 Ajukan Penarikan</button>
+    <div id="wdNotice" style="display:none;margin-top:12px;padding:12px 14px;border-radius:12px;font-weight:700;"></div>
+    <div id="wdSaldoInfo" style="margin-top:10px;font-weight:700;color:#0b3d2e;"></div>
+    <div id="wdRiwayat" style="margin-top:14px;">Memuat riwayat penarikan...</div>
+  </div>
+
+  <div id="daftarKeuanganAdmin" style="margin-top:14px;">Memuat keuangan...</div>
+</div>
+
+
+<script>
+(function(){
+  function keuEsc(v){
+    return String(v == null ? "" : v).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;"}[c]));
+  }
+  function rupiah(v){ return "Rp " + Number(v||0).toLocaleString("id-ID"); }
+  function tanggalKeu(order){
+    const at=Number(order.danaSelesaiAt || order.codDibayarAt || order.dikonfirmasiAt || order.waktu || 0);
+    if(!at) return "-";
+    return new Date(at).toLocaleString("id-ID");
+  }
+  function isCOD(order){ return String(order?.metodePembayaran||"").toUpperCase()==="COD"; }
+  function danaSelesai(order){
+    const st=String(order?.statusPembayaran||"").toLowerCase();
+    if(isCOD(order)) return order.status === "COD Lunas" || st.includes("lunas (cod)") || st === "lunas";
+    return st.includes("lunas");
+  }
+  function tanggalAt(order){ return Number(order.danaSelesaiAt || order.codDibayarAt || order.dikonfirmasiAt || order.waktu || 0); }
+
+  window.muatKeuanganAdmin = function(){
+    const box=document.getElementById("daftarKeuanganAdmin");
+    if(!box || !window.database) return;
+    const jenis=document.getElementById("filterKeuanganJenis")?.value || "selesai";
+    const dari=document.getElementById("filterKeuanganDari")?.value || "";
+    const sampai=document.getElementById("filterKeuanganSampai")?.value || "";
+    const minAt=dari ? new Date(dari+"T00:00:00").getTime() : 0;
+    const maxAt=sampai ? new Date(sampai+"T23:59:59.999").getTime() : Infinity;
+    box.innerHTML="⏳ Memuat data keuangan...";
+
+    window.database.ref("pesanan").once("value").then(snap=>{
+      const data=snap.val()||{};
+      let arr=Object.entries(data).map(([id,o])=>({id,order:o||{}}));
+      arr=arr.filter(x=>{
+        const o=x.order, cod=isCOD(o), selesai=danaSelesai(o), at=tanggalAt(o);
+        if(jenis==="selesai" && !selesai) return false;
+        if(jenis==="noncod" && cod) return false;
+        if(jenis==="cod" && !cod) return false;
+        return at>=minAt && at<=maxAt;
+      }).sort((a,b)=>tanggalAt(b.order)-tanggalAt(a.order));
+
+      let total=0, noncod=0, codTotal=0;
+      arr.forEach(x=>{
+        const n=Number(x.order.total||0); total+=n; if(isCOD(x.order)) codTotal+=n; else noncod+=n;
+      });
+      const set=(id,val)=>{const e=document.getElementById(id);if(e)e.textContent=val;};
+      set("keuTotalDana",rupiah(total)); set("keuTotalNonCOD",rupiah(noncod)); set("keuTotalCOD",rupiah(codTotal)); set("keuJumlah",String(arr.length));
+
+      if(!arr.length){
+        box.innerHTML='<div style="padding:16px;border:1px dashed #ccc;border-radius:12px;color:#777;text-align:center;">Belum ada transaksi sesuai filter.</div>';
+        return;
+      }
+
+      box.innerHTML=`<div class="keuangan-table-wrap"><table class="keuangan-table"><thead><tr>
+        <th>Tanggal Dana</th><th>Invoice</th><th>Pelanggan</th><th>Metode</th><th>Produk</th><th>Ongkir</th><th>Total Dana</th><th>Status</th>
+      </tr></thead><tbody>${arr.map(({id,order:o})=>{
+        const cod=isCOD(o), produk=Number(o.totalProduk||0), ongkir=Number(o.ongkir||0), total=Number(o.total||0);
+        const status=cod ? "COD Lunas" : "Lunas";
+        return `<tr>
+          <td>${keuEsc(tanggalKeu(o))}</td>
+          <td><b>${keuEsc(o.invoice||id)}</b></td>
+          <td>${keuEsc(o.nama||"Pelanggan")}<br><small>${keuEsc(o.whatsapp||"")}</small></td>
+          <td>${cod ? "🤝 COD" : "🏦 BRI / Transfer"}</td>
+          <td>${rupiah(produk)}</td>
+          <td>${rupiah(ongkir)}</td>
+          <td><b>${rupiah(total)}</b></td>
+          <td><span class="keuangan-badge">${status}</span></td>
+        </tr>`;
+      }).join("")}</tbody></table></div>`;
+    }).catch(e=>{box.innerHTML='<div style="padding:14px;color:#c62828;">❌ Gagal memuat keuangan: '+keuEsc(e.message)+'</div>';});
+  };
+
+  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",()=>window.muatKeuanganAdmin());
+  else window.muatKeuanganAdmin();
+})();
+</script>
+
+<script>
+(function(){
+  function wdEsc(v){ return String(v == null ? "" : v).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;"}[c])); }
+  function wdRp(v){ return "Rp " + Number(v||0).toLocaleString("id-ID"); }
+  function wdIsCOD(o){ return String(o?.metodePembayaran||"").toUpperCase()==="COD"; }
+  function wdDanaSelesai(o){ const st=String(o?.statusPembayaran||"").toLowerCase(); return wdIsCOD(o) ? (o.status==="COD Lunas" || st.includes("lunas (cod)") || st==="lunas") : st.includes("lunas"); }
+  function wdCompletedTotal(data){ let n=0; Object.values(data||{}).forEach(o=>{ if(wdDanaSelesai(o)) n += Math.max(0,Number(o.total||0)); }); return n; }
+  async function wdGet(){
+    const [ps,ws]=await Promise.all([window.database.ref("pesanan").once("value"),window.database.ref("penarikan").once("value")]);
+    return {orders:ps.val()||{}, withdrawals:ws.val()||{}};
+  }
+  function wdReserved(ws){ let n=0; Object.values(ws||{}).forEach(w=>{ if(["Menunggu","Diproses","Berhasil"].includes(String(w.status||""))) n+=Math.max(0,Number(w.jumlah||0)); }); return n; }
+  async function muatPenarikanDana(){
+    if(!window.database) return;
+    const info=document.getElementById("wdSaldoInfo"), box=document.getElementById("wdRiwayat"); if(!info||!box) return;
+    try{
+      const {orders,withdrawals}=await wdGet();
+      const total=wdCompletedTotal(orders), reserved=wdReserved(withdrawals), available=Math.max(0,total-reserved);
+      info.innerHTML=`Saldo transaksi selesai: <b>${wdRp(total)}</b> &nbsp;|&nbsp; Dicadangkan/ditarik: <b>${wdRp(reserved)}</b> &nbsp;|&nbsp; Saldo dapat ditarik: <b>${wdRp(available)}</b>`;
+      const arr=Object.entries(withdrawals).map(([id,w])=>({id,w:w||{}})).sort((a,b)=>Number(b.w.diajukanAt||0)-Number(a.w.diajukanAt||0));
+      if(!arr.length){ box.innerHTML='<div style="padding:12px;border:1px dashed #ccd8d0;border-radius:12px;color:#777;text-align:center;">Belum ada pengajuan penarikan.</div>'; return; }
+      box.innerHTML=`<div class="keuangan-table-wrap"><table class="keuangan-table"><thead><tr><th>Tanggal</th><th>Bank/Rekening</th><th>Jumlah</th><th>Status</th><th>Aksi</th></tr></thead><tbody>${arr.map(({id,w})=>{
+        const status=String(w.status||"Menunggu"); const canProcess=status==="Menunggu"; const canSuccess=status==="Diproses";
+        const aksi=(canProcess?`<button type="button" onclick="prosesPenarikanDana('${wdEsc(id)}')">🔄 Proses</button>`:"")+(canSuccess?`<button type="button" onclick="berhasilPenarikanDana('${wdEsc(id)}')">✅ Tandai Berhasil</button>`:"")+(status==="Menunggu"||status==="Diproses"?` <button type="button" onclick="tolakPenarikanDana('${wdEsc(id)}')">❌ Tolak</button>`:"");
+        const rek=String(w.nomorRekening||""); const masked=rek.length>4?"••••"+rek.slice(-4):rek;
+        return `<tr><td>${wdEsc(w.diajukanPada||"-")}</td><td><b>${wdEsc(w.bank||"BRI")}</b><br>${wdEsc(w.namaPemilik||"-")}<br><small>${wdEsc(masked)}</small></td><td><b>${wdRp(w.jumlah)}</b></td><td><span class="keuangan-badge">${wdEsc(status)}</span></td><td>${aksi||"-"}</td></tr>`;
+      }).join("")}</tbody></table></div>`;
+    }catch(e){ box.innerHTML='<div style="padding:12px;color:#c62828;">❌ Gagal memuat penarikan: '+wdEsc(e.message)+'</div>'; }
+  }
+  window.muatPenarikanDana=muatPenarikanDana;
+  window.ajukanPenarikanDana=async function(){
+    const btn=document.getElementById("wdAjukanBtn");
+    const notice=document.getElementById("wdNotice");
+    const showNotice=(ok,msg)=>{ if(!notice)return; notice.style.display="block"; notice.style.background=ok?"#e8f5e9":"#ffebee"; notice.style.color=ok?"#1b5e20":"#b71c1c"; notice.textContent=msg; };
+    try{
+      if(btn?.disabled) return;
+      const bank=(document.getElementById("wdBank")?.value||"BRI").trim();
+      const nama=(document.getElementById("wdNama")?.value||"").trim();
+      const rekening=(document.getElementById("wdRekening")?.value||"").replace(/\D/g,"");
+      const jumlah=Math.round(Number((document.getElementById("wdJumlah")?.value||"").replace(/[^0-9]/g,"")));
+      if(!nama||!rekening||rekening.length<6){ showNotice(false,"❌ Nama pemilik dan nomor rekening belum benar."); return alert("❌ Isi nama pemilik dan nomor rekening dengan benar."); }
+      if(!jumlah||jumlah<10000){ showNotice(false,"❌ Minimal penarikan adalah Rp 10.000."); return alert("❌ Minimal penarikan Rp 10.000."); }
+      const {orders,withdrawals}=await wdGet();
+      const available=Math.max(0,wdCompletedTotal(orders)-wdReserved(withdrawals));
+      if(jumlah>available){ showNotice(false,"❌ Saldo tidak mencukupi. Tersedia: "+wdRp(available)); return alert("❌ Saldo yang dapat ditarik tidak mencukupi.\n\nTersedia: "+wdRp(available)); }
+
+      const masked=rekening.length>4?"••••"+rekening.slice(-4):rekening;
+      const yakin=confirm("Konfirmasi Penarikan Dana\n\nBank: "+bank+"\nNama: "+nama+"\nRekening: "+masked+"\nJumlah: "+wdRp(jumlah)+"\n\nApakah data sudah benar dan pengajuan ingin dibuat?");
+      if(!yakin) return;
+
+      if(btn){btn.disabled=true; btn.textContent="⏳ Menyimpan...";}
+      const ref=window.database.ref("penarikan").push(); const now=Date.now();
+      await ref.set({bank,namaPemilik:nama,nomorRekening:rekening,jumlah,status:"Menunggu",diajukanAt:now,diajukanPada:new Date(now).toLocaleString("id-ID"),catatan:"Pencairan manual"});
+      document.getElementById("wdRekening").value=""; document.getElementById("wdJumlah").value="";
+      showNotice(true,"✅ Pengajuan penarikan berhasil! "+wdRp(jumlah)+" sedang menunggu proses transfer.");
+      alert("✅ Pengajuan penarikan berhasil!\n\nNominal: "+wdRp(jumlah)+"\nStatus: Menunggu\n\nSilakan lakukan transfer manual, kemudian ubah status menjadi Diproses dan Berhasil.");
+      await muatPenarikanDana();
+    }catch(e){
+      console.error(e);
+      showNotice(false,"❌ Pengajuan gagal disimpan. Silakan coba lagi.");
+      alert("❌ Gagal membuat pengajuan: "+e.message);
+    }finally{
+      if(btn){btn.disabled=false; btn.textContent="💸 Ajukan Penarikan";}
+    }
+  };
+  window.prosesPenarikanDana=async function(id){ if(!confirm("Ubah penarikan ini menjadi Diproses?")) return; await window.database.ref("penarikan/"+id).update({status:"Diproses",diprosesAt:Date.now(),diprosesPada:new Date().toLocaleString("id-ID")}); await muatPenarikanDana(); };
+  window.berhasilPenarikanDana=async function(id){ if(!confirm("Pastikan transfer bank sudah benar-benar dilakukan. Tandai penarikan sebagai BERHASIL?")) return; await window.database.ref("penarikan/"+id).update({status:"Berhasil",berhasilAt:Date.now(),berhasilPada:new Date().toLocaleString("id-ID")}); await muatPenarikanDana(); };
+  window.tolakPenarikanDana=async function(id){ if(!confirm("Tolak pengajuan penarikan ini? Saldo akan kembali tersedia.")) return; await window.database.ref("penarikan/"+id).update({status:"Ditolak",ditolakAt:Date.now(),ditolakPada:new Date().toLocaleString("id-ID")}); await muatPenarikanDana(); };
+  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",muatPenarikanDana); else muatPenarikanDana();
+})();
+</script>
+
+<!-- =========================
+     PEMBAYARAN MASUK
+========================= -->
+<div class="box" id="kelolaPembayaran">
+  <h2>💳 Pembayaran Masuk</h2>
+  <p style="margin-top:0;color:#666;">Daftar pembayaran pelanggan dari Firebase. Pesanan COD juga muncul di sini untuk dipantau.</p>
+
+  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
+    <button type="button" onclick="muatPembayaranAdmin()">🔄 Muat Ulang</button>
+    <select id="filterPembayaranAdmin" onchange="muatPembayaranAdmin()" style="max-width:260px;">
+      <option value="semua">Semua Pembayaran</option>
+      <option value="menunggu">Menunggu</option>
+      <option value="lunas">Lunas</option>
+      <option value="ditolak">Ditolak</option>
+    </select>
+  </div>
+
+  <div id="daftarPembayaranAdmin">Memuat pembayaran...</div>
+</div>
+
+<script>
+(function(){
+  function esc(v){
+    return String(v == null ? "" : v).replace(/[&<>"']/g, c => ({
+      "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;"
+    }[c]));
+  }
+
+  window.muatPembayaranAdmin = function(){
+    const box = document.getElementById("daftarPembayaranAdmin");
+    const filter = document.getElementById("filterPembayaranAdmin")?.value || "semua";
+    if(!box || !window.database) return;
+
+    box.innerHTML = "⏳ Memuat pembayaran...";
+
+    window.database.ref("pembayaran").once("value").then(async snap => {
+      const pembayaran = snap.val() || {};
+      const ordersSnap = await window.database.ref("pesanan").once("value");
+      const orders = ordersSnap.val() || {};
+
+      let arr = Object.entries(pembayaran).map(([id,p]) => ({id,p:p||{},order:orders[id]||{}}));
+      arr.sort((a,b) => Number(b.p.waktu||b.order.waktu||0) - Number(a.p.waktu||a.order.waktu||0));
+
+      if(filter === "menunggu"){
+        arr = arr.filter(x => !/lunas|ditolak/i.test(String(x.p.status||"")));
+      } else if(filter === "lunas"){
+        arr = arr.filter(x => /lunas/i.test(String(x.p.status||"")));
+      } else if(filter === "ditolak"){
+        arr = arr.filter(x => /ditolak/i.test(String(x.p.status||"")));
+      }
+
+      if(!arr.length){
+        box.innerHTML = '<div style="padding:14px;border:1px dashed #ccc;border-radius:10px;color:#777;">Belum ada pembayaran sesuai filter.</div>';
+        return;
+      }
+
+      box.innerHTML = arr.map(({id,p,order}) => {
+        const metode = p.metodePembayaran || order.metodePembayaran || "-";
+        const status = p.status || order.statusPembayaran || order.status || "Menunggu";
+        const total = Number(p.total || order.total || 0);
+        const isCOD = String(metode).toUpperCase() === "COD";
+        const sudahLunas = /lunas/i.test(String(status));
+        const ditolak = /ditolak/i.test(String(status));
+
+        return `<div class="card" style="margin-bottom:12px;">
+          <div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;">
+            <b>👤 ${esc(p.nama || order.nama || "Pelanggan")}</b>
+            <span class="status-badge">${esc(status)}</span>
+          </div>
+          <div style="font-size:13px;color:#66716c;margin-top:7px;">
+            📱 ${esc(p.whatsapp || order.whatsapp || "-")}<br>
+            💳 ${esc(metode)}${isCOD ? " 🤝" : ""}<br>
+            💰 <b>Rp ${total.toLocaleString("id-ID")}</b><br>
+            🧾 ${esc(order.invoice || id)}
+          </div>
+          <div style="display:flex;gap:7px;flex-wrap:wrap;margin-top:10px;">
+            ${(!sudahLunas && !ditolak && !isCOD) ? `<button type="button" onclick="verifikasiBayar('${esc(id)}')">✅ Lunas</button>` : ""}
+            ${(!sudahLunas && !ditolak) ? `<button type="button" onclick="tolakPembayaran('${esc(id)}')">❌ Tolak</button>` : ""}
+            ${isCOD && !sudahLunas ? `<button type="button" onclick="window.konfirmasiCOD('${esc(id)}')">🤝 Konfirmasi COD</button>` : ""}
+            ${String(order.status||"") === "Dikemas" ? `<button type="button" onclick="buatPengiriman('${esc(id)}')">🚚 Buat Pengiriman</button>` : ""}
+            ${isCOD && String(order.status||"") === "Dikirim" ? `<button type="button" onclick="tandaiCODLunas('${esc(id)}')">💰 COD Lunas</button>` : ""}
+          </div>
+        </div>`;
+      }).join("");
+    }).catch(e => {
+      box.innerHTML = '<div style="padding:14px;color:#c62828;">❌ Gagal memuat pembayaran: '+esc(e.message)+'</div>';
+    });
+  };
+
+  if(document.readyState === "loading"){
+    document.addEventListener("DOMContentLoaded", () => window.muatPembayaranAdmin());
+  } else {
+    window.muatPembayaranAdmin();
+  }
+
+function renderProdukAdmin(){
+  if(typeof window.renderAdminDaftarProduk === "function") window.renderAdminDaftarProduk();
+}
+})();
+</script>
+
+<!-- =========================
+     VOUCHER DISKON
+========================= -->
+<div class="box">
+<h2>🏷️ Kelola Voucher Diskon</h2>
+<p>Buat voucher persen atau nominal tetap. Minimum pembelian dapat diatur per voucher.</p>
+
+<input id="voucherAdminCode" placeholder="Kode voucher, contoh: HEMAT10" style="text-transform:uppercase">
+
+<select id="voucherAdminType">
+  <option value="percent">Persentase (%)</option>
+  <option value="fixed">Potongan Nominal (Rp)</option>
+</select>
+
+<input id="voucherAdminValue" type="number" min="1" placeholder="Nilai diskon">
+<input id="voucherAdminMin" type="number" min="0" placeholder="Minimum pembelian (Rp)">
+<input id="voucherAdminMax" type="number" min="0" placeholder="Maksimal potongan (Rp, opsional)">
+<label style="display:block;margin:8px 0">Berlaku sampai (opsional)</label>
+<input id="voucherAdminExpiry" type="datetime-local">
+<label style="display:block;margin:8px 0">
+  <input id="voucherAdminActive" type="checkbox" checked style="width:auto"> Voucher aktif
+</label>
+<button type="button" onclick="adminSimpanVoucher()">💾 Simpan Voucher</button>
+
+<hr style="margin:20px 0">
+<h3>Daftar Voucher</h3>
+<div id="daftarVoucherAdmin">Memuat voucher...</div>
+</div>
+
+<script>
+/* =========================================================
+   ADMIN — POSTINGAN BERANDA + PREVIEW + NAVIGASI BAGIAN
+========================================================= */
+(function(){
+  "use strict";
+  const escAdmin = v => String(v ?? "").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;"}[m]));
+  const dbAdmin = () => window.database || (typeof database !== "undefined" ? database : null);
+  const storageAdmin = () => window.storage || (typeof storage !== "undefined" ? storage : null);
+  let previewUrl = "";
+
+  function setPostStatus(msg, ok=false){
+    const el=document.getElementById("postUploadStatus"); if(!el) return;
+    el.textContent=msg||""; el.style.color=ok?"#1b5e20":"#b3261e"; el.style.background=ok?"#edf8ee":"#fff0ee";
+  }
+  function getSelectedPostProduct(){
+    const sel=document.getElementById("postProductSelect");
+    if(!sel || !sel.value) return null;
+    const opt=sel.options[sel.selectedIndex];
+    return {id:sel.value,nama:opt?.dataset?.nama || opt?.textContent?.replace(/^🛒\\s*/,"") || ""};
+  }
+
+  function updateLivePreview(){
+    const text=(document.getElementById("postText")?.value||"").trim();
+    const img=document.getElementById("postImagePreview");
+    const live=document.getElementById("postLivePreview");
+    const lt=document.getElementById("postLiveText");
+    const li=document.getElementById("postLiveImage");
+    const product=getSelectedPostProduct();
+
+    if(lt) lt.textContent=text;
+    if(li){
+      if(img?.src && img.style.display!=="none"){ li.src=img.src; li.style.display="block"; }
+      else { li.removeAttribute("src"); li.style.display="none"; }
+    }
+
+    const oldBtn=document.getElementById("postLiveProductLink");
+    if(oldBtn) oldBtn.remove();
+
+    if(product && live){
+      const card=document.getElementById("postLiveCard");
+      if(card){
+        const a=document.createElement("a");
+        a.id="postLiveProductLink";
+        a.href="produk.html?produk="+encodeURIComponent(product.id);
+        a.textContent="🛒 Beli "+product.nama;
+        a.target="_blank";
+        a.rel="noopener";
+        a.style.cssText="display:inline-block;margin:12px 0 0;padding:10px 14px;border-radius:10px;background:#c7a15a;color:#173d2f;text-decoration:none;font-weight:800;";
+        card.appendChild(a);
+      }
+    }
+
+    if(live) live.style.display=(text || (img?.src && img.style.display!=="none") || product) ? "block" : "none";
+  }
+
+  window.previewBerandaPost=function(ev){
+    const file=ev?.target?.files?.[0];
+    const img=document.getElementById("postImagePreview");
+    if(!file){ if(img){img.removeAttribute("src");img.style.display="none";} updateLivePreview(); return; }
+    if(!/^image\/(jpeg|png|webp)$/.test(file.type)){ alert("❌ Foto harus JPG, PNG, atau WEBP."); ev.target.value=""; return; }
+    if(file.size>5*1024*1024){ alert("❌ Ukuran foto maksimal 5 MB."); ev.target.value=""; return; }
+    const r=new FileReader();
+    r.onload=e=>{ if(img){img.src=e.target.result;img.style.display="block";} updateLivePreview(); };
+    r.readAsDataURL(file);
+  };
+  window.resetBerandaPost=function(){
+    const t=document.getElementById("postText"), f=document.getElementById("postImageFile"), img=document.getElementById("postImagePreview"), sel=document.getElementById("postProductSelect");
+    if(t)t.value=""; if(f)f.value=""; if(sel)sel.value="";
+    if(img){img.removeAttribute("src");img.style.display="none";}
+    setPostStatus(""); updateLivePreview();
+  };
+    async function compressImage(file){
+    return new Promise((resolve,reject)=>{
+      const r=new FileReader(); r.onerror=reject; r.onload=()=>{
+        const im=new Image(); im.onload=()=>{
+          const max=1400, scale=Math.min(1,max/Math.max(im.width,im.height));
+          const c=document.createElement("canvas"); c.width=Math.max(1,Math.round(im.width*scale)); c.height=Math.max(1,Math.round(im.height*scale));
+          c.getContext("2d").drawImage(im,0,0,c.width,c.height);
+          c.toBlob(b=>b?resolve(b):reject(new Error("Gagal memproses gambar.")),"image/jpeg",.82);
+        }; im.onerror=reject; im.src=r.result;
+      }; r.readAsDataURL(file);
+    });
+  }
+  async function fileToDataUrl(blob){
+    return new Promise((resolve,reject)=>{
+      const r=new FileReader();
+      r.onload=()=>resolve(r.result);
+      r.onerror=()=>reject(new Error("Gagal membaca gambar."));
+      r.readAsDataURL(blob);
+    });
+  }
+
+  async function uploadPostImage(blob,fileName,st){
+    // Utamakan Firebase Storage, tetapi jangan biarkan proses publikasi macet
+    // jika Storage sedang bermasalah/aturan Storage menolak upload.
+    if(st){
+      try{
+        const path="berandaPosts/"+Date.now()+"_"+fileName.replace(/[^a-zA-Z0-9._-]/g,"_");
+        const uploadTask=st.ref(path).put(blob,{contentType:"image/jpeg"});
+        const timeout=new Promise((_,reject)=>setTimeout(()=>reject(new Error("Upload gambar ke Storage timeout")),12000));
+        const snap=await Promise.race([uploadTask,timeout]);
+        return await snap.ref.getDownloadURL();
+      }catch(storageError){
+        console.warn("Upload Storage gagal, menggunakan penyimpanan cadangan:",storageError);
+      }
+    }
+    // Cadangan: gambar terkompresi disimpan langsung pada node postingan.
+    // Ukuran gambar sudah diperkecil oleh compressImage agar aman untuk RTDB.
+    return await fileToDataUrl(blob);
+  }
+
+  window.publikasikanBerandaPost=async function(){
+    const db=dbAdmin(), st=storageAdmin();
+    if(!db){alert("❌ Firebase belum siap. Tunggu sebentar lalu coba lagi.");return;}
+    const text=(document.getElementById("postText")?.value||"").trim();
+    const file=document.getElementById("postImageFile")?.files?.[0]||null;
+    const product=getSelectedPostProduct();
+    if(!text && !file && !product){alert("Tulis kata-kata, pilih foto, atau pilih produk terlebih dahulu.");return;}
+    if(file && file.size>5*1024*1024){alert("Ukuran foto maksimal 5 MB.");return;}
+
+    const btn=document.querySelector('#kelolaPostingan .post-actions button:first-child');
+    if(btn){btn.disabled=true;btn.textContent="⏳ Mempublikasikan...";}
+    setPostStatus(file ? "📷 Menyiapkan gambar..." : "💾 Menyimpan postingan...");
+
+    try{
+      let image="";
+      if(file){
+        const blob=await compressImage(file);
+        setPostStatus("💾 Menyimpan postingan...");
+        image=await uploadPostImage(blob,file.name,st);
+      }
+
+      const postData={
+        text,
+        image,
+        productId: product ? String(product.id) : "",
+        productName: product ? product.nama : "",
+        createdAt:Date.now(),
+        tanggal:new Date().toLocaleString("id-ID"),
+        dibuatOleh:"Admin"
+      };
+
+      await db.ref("berandaPosts").push(postData);
+      setPostStatus("✅ Postingan berhasil dipublikasikan dan sudah tersimpan di Beranda.",true);
+      window.resetBerandaPost();
+      setPostStatus("✅ Postingan berhasil dipublikasikan dan sudah tersimpan di Beranda.",true);
+      muatPostinganAdmin(); renderProdukAdmin();
+    }catch(e){
+      console.error("Gagal mempublikasikan postingan:",e);
+      const msg=e?.message||String(e);
+      setPostStatus("❌ Gagal mempublikasikan: "+msg,false);
+      alert("❌ Gagal mempublikasikan postingan:\n\n"+msg);
+    }finally{
+      if(btn){btn.disabled=false;btn.textContent="📤 Publikasikan";}
+    }
+  };
+  window.hapusBerandaPost=async function(id){
+    const db=dbAdmin(); if(!db||!id)return;
+    if(!confirm("Hapus postingan ini dari Beranda?"))return;
+    try{await db.ref("berandaPosts/"+id).remove();muatPostinganAdmin(); renderProdukAdmin();}
+    catch(e){alert("❌ Gagal menghapus postingan: "+e.message);}
+  };
+  function muatPostinganAdmin(){
+    const db=dbAdmin(), box=document.getElementById("adminBerandaPosts"); if(!db||!box)return;
+    db.ref("berandaPosts").once("value").then(s=>{
+      const data=s.val()||{}; const arr=Object.entries(data).sort((a,b)=>(b[1]?.createdAt||0)-(a[1]?.createdAt||0));
+      if(!arr.length){box.innerHTML='<div style="padding:14px;color:#777">Belum ada postingan.</div>';return;}
+      box.innerHTML=arr.map(([id,p])=>`<div style="border:1px solid #e5e0d5;border-radius:14px;padding:12px;margin:10px 0;background:#fff">${p.text?`<div style="white-space:pre-wrap;line-height:1.5">${escAdmin(p.text)}</div>`:""}${p.image?`<img src="${escAdmin(p.image)}" style="width:100%;max-height:260px;object-fit:cover;border-radius:10px;margin-top:10px" loading="lazy">`:""}${p.productId?`<a href="produk.html?produk=${encodeURIComponent(p.productId)}" target="_blank" rel="noopener" style="display:inline-block;margin-top:10px;padding:9px 12px;border-radius:9px;background:#c7a15a;color:#173d2f;text-decoration:none;font-weight:800">🛒 ${escAdmin(p.productName||"Beli Produk")}</a>`:""}<small style="display:block;color:#777;margin-top:8px">${escAdmin(p.tanggal||"")}</small><button type="button" onclick="hapusBerandaPost('${id}')" style="margin-top:8px;background:#b3261e">🗑️ Hapus</button></div>`).join("");
+    }).catch(e=>{box.textContent="Gagal memuat postingan: "+e.message;});
+  }
+  function classifyBoxes(){
+    document.querySelectorAll(".box").forEach(box=>{
+      const h=(box.querySelector("h2")?.textContent||"").toLowerCase();
+      let sec="other";
+      if(h.includes("pesanan masuk"))sec="pesanan";
+      else if(h.includes("status pesanan"))sec="status";
+      else if(h.includes("postingan beranda"))sec="postingan";
+      else if(h.includes("tambah produk")||h.includes("tambahkan produk")||h.includes("daftar produk"))sec="produk";
+      else if(h.includes("pembayaran masuk"))sec="pembayaran";
+      else if(h.includes("keuangan"))sec="keuangan";
+      else if(h.includes("biteship center"))sec="biteship";
+      else if(h.includes("voucher diskon"))sec="voucher";
+      else if(h.includes("ulasan"))sec="ulasan";
+      else if(box.id === "adminLogoutBox" || (!h && box.textContent.toLowerCase().includes("keluar admin")))sec="logout";
+      else if(!h && box.textContent.toLowerCase().includes("© 2026"))sec="persistent";
+      else if(h.includes("ringkasan"))sec="pesanan";
+      box.dataset.adminSection=sec;
+    });
+  }
+  function showSection(sec){
+    if(sec==="pengembalian" && typeof window.muatPengembalianAdmin==="function") setTimeout(()=>window.muatPengembalianAdmin(),50);
+    document.querySelectorAll(".box").forEach(b=>{
+      const keep=b.dataset.adminSection==="logout";
+      b.style.display=(keep || b.dataset.adminSection===sec)?"block":"none";
+    });
+    document.querySelectorAll(".admin-tab").forEach(b=>b.classList.toggle("active",b.dataset.section===sec));
+    window.scrollTo({top:0,behavior:"smooth"});
+  }
+  function init(){
+    classifyBoxes();
+    const explicit = {
+      kelolaPostingan:"postingan",
+      kelolaProduk:"produk",
+      produkTersimpan:"produk",
+      kelolaPembayaran:"pembayaran",
+      kelolaKeuangan:"keuangan",
+      biteshipCenter:"biteship",
+      statusPanduanAdmin:"status",
+      pengembalian:"pengembalian",
+      adminProDashboard:"dashboard",
+      adminProNotifications:"notifikasi"
+    };
+    Object.entries(explicit).forEach(([id,sec])=>{
+      const el=document.getElementById(id);
+      if(el) el.dataset.adminSection=sec;
+    });
+    document.querySelectorAll(".admin-tab").forEach(b=>b.addEventListener("click",()=>showSection(b.dataset.section)));
+    document.getElementById("postText")?.addEventListener("input",updateLivePreview);
+    document.getElementById("postProductSelect")?.addEventListener("change",updateLivePreview);
+
+    function muatProdukUntukPosting(){
+      const sel=document.getElementById("postProductSelect");
+      const db=dbAdmin();
+      if(!sel || !db) return;
+      const current=sel.value;
+      db.ref("produk").on("value",snap=>{
+        const data=snap.val()||{};
+        const items=Object.entries(data).sort((a,b)=>String(a[1]?.nama||"").localeCompare(String(b[1]?.nama||""),"id"));
+        sel.innerHTML='<option value="">Tidak ada link produk</option>'+items.map(([id,p])=>
+          `<option value="${escAdmin(id)}" data-nama="${escAdmin(p?.nama||"Produk")}">🛒 ${escAdmin(p?.nama||"Produk")}</option>`
+        ).join("");
+        if(items.some(([id])=>id===current)) sel.value=current;
+        updateLivePreview();
+      });
+    }
+
+    muatProdukUntukPosting();
+    muatPostinganAdmin(); renderProdukAdmin();
+    showSection("dashboard");
+    setTimeout(function(){
+      if(typeof muatProDashboard === "function") muatProDashboard();
+      if(typeof muatNotifikasiTokoAdmin === "function") muatNotifikasiTokoAdmin();
+    }, 0);
+  }
+  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init);else init();
+
+function renderProdukAdmin(){
+  if(typeof window.renderAdminDaftarProduk === "function") window.renderAdminDaftarProduk();
+}
+})();
+</script>
+
+<script id="admin-pro-functions">
+function showAdminProSection(sec){const tab=document.querySelector('.admin-tab[data-section="'+sec+'"]');if(tab)tab.click();}window.showAdminProSection=showAdminProSection;
+function proRp(n){return "Rp "+Number(n||0).toLocaleString("id-ID");}
+async function muatProDashboard(){if(typeof database==="undefined")return;try{const [ps,prod,pay,ret]=await Promise.all([database.ref("pesanan").once("value"),database.ref("produk").once("value"),database.ref("pembayaran").once("value"),database.ref("pengembalian").once("value")]);const orders=Object.values(ps.val()||{}),products=Object.values(prod.val()||{}),payments=Object.values(pay.val()||{}),returns=Object.values(ret.val()||{});const status=o=>String(o?.status||"").toLowerCase();const newOrders=orders.filter(o=>/menunggu|baru/i.test(status(o))).length;const low=products.filter(p=>{const v=Array.isArray(p.variants)?p.variants.reduce((n,x)=>n+Number(x?.stok||0),0):Number(p.stok||0);return v>0&&v<=10;}).length;const paid=payments.filter(p=>/lunas|berhasil|paid|success/i.test(String(p.status||""))).length;const revenue=orders.filter(o=>/lunas|selesai|cod/i.test(status(o))||o.pembayaranStatus==="lunas").reduce((n,o)=>n+Number(o.totalBayar||o.total||o.grandTotal||0),0);const refundDone=returns.filter(r=>/selesai|dana dikembalikan/i.test(String(r.refundStatus||r.status||""))).length;const shipping=orders.filter(o=>/dikirim|buat pengiriman|diproses|dikemas/i.test(status(o))).length;const set=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};set("proDashOrders",orders.length);set("proDashNew",newOrders+" pesanan baru");set("proDashProducts",products.length);set("proDashLowStock",low+" stok rendah");set("proDashPayments",payments.length);set("proDashPaid",paid+" lunas");set("proDashRevenue",proRp(revenue));set("proDashReturns",returns.length);set("proDashRefund",refundDone+" refund selesai");set("proDashShipping",shipping);set("proDashUpdated","Diperbarui: "+new Date().toLocaleString("id-ID"));}catch(e){const el=document.getElementById("proDashUpdated");if(el)el.textContent="Gagal memuat ringkasan: "+e.message;}}
+window.muatProDashboard=muatProDashboard;
+function escProNotif(v){return String(v==null?"":v).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;"}[c]));}
+function renderNotifikasiTokoAdmin(data){const box=document.getElementById("proNotifList");if(!box)return;const rows=Object.entries(data||{}).map(([id,v])=>({id,v:v||{}})).sort((a,b)=>Number(b.v.createdAt||0)-Number(a.v.createdAt||0));if(!rows.length){box.innerHTML='<div style="padding:14px;border:1px dashed #ccc;border-radius:12px;color:#777;text-align:center">Belum ada notifikasi toko.</div>';return;}box.innerHTML=rows.map(x=>'<div class="pro-notif-item"><div class="row"><b>'+escProNotif(x.v.title||"Informasi Toko")+'</b><span class="pro-notif-badge">'+escProNotif(x.v.type||"Info")+' · '+(x.v.active===false?"Disembunyikan":"Aktif")+'</span></div><p>'+escProNotif(x.v.message||"")+'</p><small>'+(x.v.createdAt?new Date(Number(x.v.createdAt)).toLocaleString("id-ID"):"")+'</small><br><button type="button" onclick="hapusNotifikasiToko(\''+escProNotif(x.id)+'\')">🗑️ Hapus</button></div>').join("");}
+async function muatNotifikasiTokoAdmin(){if(typeof database==="undefined")return;database.ref("notifikasiToko").on("value",s=>renderNotifikasiTokoAdmin(s.val()||{}));}
+async function simpanNotifikasiToko(){const title=document.getElementById("proNotifTitle")?.value.trim(),message=document.getElementById("proNotifMessage")?.value.trim(),type=document.getElementById("proNotifType")?.value||"Info",active=document.getElementById("proNotifActive")?.checked!==false;if(!title||!message)return alert("Judul dan isi informasi wajib diisi.");try{await database.ref("notifikasiToko").push({title,message,type,active,createdAt:Date.now(),createdBy:window.userLogin?.email||"admin"});document.getElementById("proNotifTitle").value="";document.getElementById("proNotifMessage").value="";alert("✅ Informasi toko dipublikasikan.");}catch(e){alert("❌ Gagal menyimpan informasi: "+e.message);}}
+async function hapusNotifikasiToko(id){if(!confirm("Hapus informasi ini?"))return;try{await database.ref("notifikasiToko/"+id).remove();}catch(e){alert("❌ Gagal menghapus: "+e.message);}}
+window.simpanNotifikasiToko=simpanNotifikasiToko;window.hapusNotifikasiToko=hapusNotifikasiToko;window.muatNotifikasiTokoAdmin=muatNotifikasiTokoAdmin;
+</script>
+<script src="fitur-toko.js"></script>
+<script src="navigasi.js">
+/* =========================
+   PENGEMBALIAN / REFUND
+========================= */
+function formatRupiahAdmin(n){ return "Rp "+Number(n||0).toLocaleString("id-ID"); }
+async function muatPengembalianAdmin(){
+  const box=document.getElementById("daftarPengembalian"); if(!box) return;
+  try{
+    const snap=await database.ref("pengembalian").once("value"), data=snap.val()||{};
+    const rows=Object.entries(data).sort((a,b)=>String(b[1]?.updatedAt||"").localeCompare(String(a[1]?.updatedAt||"")));
+    if(!rows.length){box.innerHTML="<p>Belum ada pengajuan pengembalian.</p>";return;}
+    box.innerHTML=rows.map(([id,o])=>{
+      const st=String(o.status||"Diajukan");
+      const refund=String(o.refundStatus||"Belum Diproses");
+      const safe=escapeAdmin(id);
+      return `<div class="card order-card" style="margin-bottom:10px;">
+        <div class="order-head"><h3>${escapeAdmin(o.invoice||id)}</h3><span class="status-badge">${escapeAdmin(st)}</span></div>
+        <div class="order-meta">
+          <span>👤 ${escapeAdmin(o.nama||"-")}</span><span>📱 ${escapeAdmin(o.whatsapp||"-")}</span>
+          <span>💰 Total: ${formatRupiahAdmin(o.total)}</span><span>🔄 ${escapeAdmin(o.refundType||"-")}</span>
+        </div>
+        <div style="margin:8px 0;"><b>Alasan:</b> ${escapeAdmin(o.reason||"-")}<br><b>Keterangan:</b> ${escapeAdmin(o.note||"-")}</div>
+        <div class="status-tools">
+          <select id="ret-status-${safe}">
+            ${["Diajukan","Disetujui","Ditolak","Menunggu Pengembalian","Pengembalian Diterima","Dana Dikembalikan"].map(x=>`<option value="${x}" ${st===x?"selected":""}>${x}</option>`).join("")}
+          </select>
+          <select id="ret-refund-${safe}">
+            ${["Belum Diproses","Disiapkan","Diproses","Selesai"].map(x=>`<option value="${x}" ${refund===x?"selected":""}>Refund: ${x}</option>`).join("")}
+          </select>
+          <button type="button" onclick="simpanStatusPengembalian('${safe}')">💾 Simpan</button>
+        </div>
+        <div style="font-size:12px;color:#66716c;margin-top:7px;">Diajukan: ${escapeAdmin(o.diajukanPada||"-")} · Diperbarui: ${escapeAdmin(o.updatedAt||"-")}</div>
+      </div>`;
+    }).join("");
+  }catch(e){ box.innerHTML='<p style="color:#c62828">❌ Gagal memuat pengembalian: '+escapeAdmin(e.message)+'</p>'; }
+}
+async function simpanStatusPengembalian(id){
+  try{
+    const ref=database.ref("pengembalian/"+id), snap=await ref.once("value"), req=snap.val();
+    if(!req) return alert("Pengajuan tidak ditemukan.");
+    const status=document.getElementById("ret-status-"+id)?.value||req.status||"Diajukan";
+    const refundStatus=document.getElementById("ret-refund-"+id)?.value||req.refundStatus||"Belum Diproses";
+    const now=new Date().toLocaleString("id-ID");
+    await ref.update({status,refundStatus,updatedAt:now,adminDiperbaruiPada:now});
+    if(req.orderId){
+      const orderRef=database.ref("pesanan/"+req.orderId);
+      const orderSnap=await orderRef.once("value"), order=orderSnap.val()||{};
+      const updates={statusPengembalian:status,refundStatus};
+      if(status==="Dana Dikembalikan" || refundStatus==="Selesai"){
+        updates.pengembalianSelesaiPada=now;
+        updates.danaDikembalikan=true;
+      }
+      await orderRef.update(updates);
+      if(order.invoice) await database.ref("pelacakan/"+order.invoice).update({statusPengembalian:status,refundStatus,updatedAt:now});
+    }
+    alert("✅ Status pengembalian diperbarui.");
+    muatPengembalianAdmin();
+  }catch(e){ alert("❌ Gagal menyimpan: "+e.message); }
+}
+window.muatPengembalianAdmin=muatPengembalianAdmin;
+window.simpanStatusPengembalian=simpanStatusPengembalian;
+
+</script>
+
+<script id="admin-refund-live-fix">
+function formatRupiahAdmin(n){return "Rp "+Number(n||0).toLocaleString("id-ID");}
+function refundEsc(v){return String(v==null?"":v).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;"}[c];});}
+async function muatPengembalianAdmin(){
+ const box=document.getElementById("daftarPengembalian"); if(!box||typeof database==="undefined")return;
+ try{
+  const snap=await database.ref("pengembalian").once("value"), data=snap.val()||{};
+  const rows=Object.entries(data).sort(function(a,b){return Number(b[1]?.updatedAtMs||0)-Number(a[1]?.updatedAtMs||0);});
+  if(!rows.length){box.innerHTML="<p>Belum ada pengajuan pengembalian.</p>";return;}
+  const statuses=["Diajukan","Disetujui","Ditolak","Menunggu Pengembalian","Pengembalian Diterima","Dana Dikembalikan"];
+  const refunds=["Belum Diproses","Disiapkan","Diproses","Selesai"];
+  box.innerHTML=rows.map(function(pair){
+   const id=pair[0],o=pair[1]||{},st=String(o.status||"Diajukan"),refund=String(o.refundStatus||"Belum Diproses"),safe=String(id).replace(/[^a-zA-Z0-9_-]/g,"");
+   const stOpts=statuses.map(function(x){return '<option value="'+refundEsc(x)+'" '+(st===x?"selected":"")+'>'+refundEsc(x)+'</option>';}).join("");
+   const rfOpts=refunds.map(function(x){return '<option value="'+refundEsc(x)+'" '+(refund===x?"selected":"")+'>Refund: '+refundEsc(x)+'</option>';}).join("");
+   return '<div class="card order-card" style="margin-bottom:10px"><div class="order-head"><h3>'+refundEsc(o.invoice||id)+'</h3><span class="status-badge">'+refundEsc(st)+'</span></div><div class="order-meta"><span>👤 '+refundEsc(o.nama||"-")+'</span><span>📱 '+refundEsc(o.whatsapp||"-")+'</span><span>💰 Total: '+formatRupiahAdmin(o.total)+'</span><span>🔄 '+refundEsc(o.refundType||"-")+'</span></div><div style="margin:8px 0"><b>Alasan:</b> '+refundEsc(o.reason||"-")+'<br><b>Keterangan:</b> '+refundEsc(o.note||"-")+'</div><div class="status-tools"><select id="ret-status-'+safe+'">'+stOpts+'</select><select id="ret-refund-'+safe+'">'+rfOpts+'</select><button type="button" onclick="simpanStatusPengembalian(\''+safe+'\')">💾 Simpan</button></div></div>';
+  }).join("");
+ }catch(e){box.innerHTML='<p style="color:#c62828">❌ Gagal memuat pengembalian: '+refundEsc(e.message)+'</p>';}
+}
+async function simpanStatusPengembalian(id){
+ try{
+  const ref=database.ref("pengembalian/"+id),snap=await ref.once("value"),req=snap.val();if(!req)return alert("Pengajuan tidak ditemukan.");
+  const status=document.getElementById("ret-status-"+id)?.value||req.status||"Diajukan",refundStatus=document.getElementById("ret-refund-"+id)?.value||req.refundStatus||"Belum Diproses",now=Date.now();
+  await ref.update({status:status,refundStatus:refundStatus,updatedAtMs:now,updatedAt:new Date(now).toLocaleString("id-ID")});
+  if(req.orderId){await database.ref("pesanan/"+req.orderId).update({statusPengembalian:status,refundStatus:refundStatus,danaDikembalikan:status==="Dana Dikembalikan"||refundStatus==="Selesai",pengembalianSelesaiPada:(status==="Dana Dikembalikan"||refundStatus==="Selesai")?now:null});}
+  alert("✅ Status pengembalian diperbarui.");muatPengembalianAdmin();
+ }catch(e){alert("❌ Gagal menyimpan: "+e.message);}
+}
+window.muatPengembalianAdmin=muatPengembalianAdmin;window.simpanStatusPengembalian=simpanStatusPengembalian;
+</script>
+
+<script id="status-order-dashboard-fix">
+(function(){
+  function esc(v){return String(v==null?"":v).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;"}[c]));}
+  const defs=[
+    ["Belum Bayar","💳","Menunggu pembayaran"],
+    ["Menunggu Konfirmasi COD","🤝","Menunggu konfirmasi COD"],
+    ["Dikemas","📦","Pesanan diproses"],
+    ["Buat Pengiriman","🚚","Order kurir dibuat"],
+    ["Dikirim","🚚","Paket sedang dikirim"],
+    ["COD Lunas","💰","COD sudah diterima"],
+    ["Beri Penilaian","⭐","Pesanan selesai / menunggu ulasan"],
+    ["Selesai","✅","Pesanan selesai"]
+  ];
+  function render(snap){
+    const box=document.getElementById("statusOrderSummary"); if(!box)return;
+    const data=snap.val()||{}, counts={};
+    Object.values(data).forEach(o=>{
+      let st=String(o?.status||"Menunggu Pembayaran");
+      if(st==="Menunggu Pembayaran") st="Belum Bayar";
+      if(st==="Lunas") st="Dikemas";
+      counts[st]=(counts[st]||0)+1;
+    });
+    box.innerHTML=defs.map(([st,icon,desc])=>{
+      const n=counts[st]||0;
+      return `<button type="button" onclick="bukaPesananDenganFilter(${JSON.stringify(st)})" style="text-align:left;padding:14px;border:1px solid #dfe8e2;border-radius:12px;background:${smtStatusFilter===st?"#e7f4ec":"#fff"};color:#173f30;cursor:pointer;box-shadow:0 2px 7px rgba(0,0,0,.04)"><div style="font-size:22px">${icon}</div><div style="font-weight:800;font-size:17px;margin-top:4px">${n}</div><div style="font-weight:800">${esc(st)}</div><small style="color:#6b7771">${esc(desc)}</small></button>`;
+    }).join("");
+  }
+  function start(){
+    if(typeof database==="undefined") return;
+    database.ref("pesanan").on("value",render);
+  }
+  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",start); else start();
+})();
+</script>
+
+</body>
+
+</html>

@@ -1,0 +1,31 @@
+SUBUR MUJUR TANI - WEBHOOK BITESHIP + AUTO SYNC
+
+PENTING:
+Admin sekarang memiliki 2 jalur sinkronisasi:
+1. Webhook Biteship -> update real-time.
+2. GET Order Biteship otomatis setiap 20 detik dari admin -> fallback jika webhook terlambat/tidak terkirim.
+
+WEBHOOK URL (sesuaikan dengan domain Netlify tempat project ini benar-benar dideploy):
+https://subur-mujurr-tanii.netlify.app/api/biteship-webhook
+
+Event yang disarankan:
+- order.status
+- order.waybill_id
+- order.price
+
+Headers Signature Key/Secret:
+- Jika tidak menggunakan signature, boleh dikosongkan.
+- Jika menggunakan signature, isi juga BITESHIP_WEBHOOK_SIGNATURE_KEY dan BITESHIP_WEBHOOK_SIGNATURE_SECRET di Netlify.
+
+SETELAH DEPLOY:
+1. Buka URL webhook di browser. Harus tampil: ok
+2. Di Biteship -> Integrasi -> Untuk Developer -> Webhook -> Tambah Webhook.
+3. Masukkan URL webhook di atas.
+4. Pilih event order.status, order.waybill_id, order.price.
+5. Simpan.
+6. Cek Events Log Biteship. Status respons webhook harus 200.
+
+KENAPA INI DIPERLUKAN:
+Jika status di Biteship sudah "Dalam Pengantaran" tetapi admin masih "Buat Pengiriman", biasanya webhook belum diarahkan ke domain Netlify yang sedang dipakai. Auto-sync 20 detik tetap akan mengambil GET /v1/orders/{order_id} agar admin menyusul tanpa harus membuka Biteship.
+
+JANGAN gunakan domain Netlify lama jika sudah berganti. Gunakan domain site yang benar-benar sedang menjalankan admin.html.

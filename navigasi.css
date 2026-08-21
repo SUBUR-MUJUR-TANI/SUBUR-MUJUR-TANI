@@ -1,0 +1,80 @@
+
+/* =========================================================
+   SUBUR MUJUR TANI — NAVIGASI BAWAH GLOBAL
+   Satu-satunya navigasi utama website.
+========================================================= */
+.smt-bottom-nav{
+  position:fixed;
+  left:0;
+  right:0;
+  bottom:0;
+  z-index:999999;
+  display:flex;
+  align-items:center;
+  justify-content:space-around;
+  gap:2px;
+  height:68px;
+  padding:5px 4px max(5px, env(safe-area-inset-bottom, 0px));
+  background:rgba(255,255,255,.98);
+  border-top:1px solid #dfe8e2;
+  box-shadow:0 -5px 20px rgba(0,0,0,.10);
+  backdrop-filter:blur(12px);
+  -webkit-backdrop-filter:blur(12px);
+}
+.smt-bottom-nav a{
+  flex:1 1 0;
+  min-width:0;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:1px;
+  height:56px;
+  padding:3px 2px;
+  border-radius:11px;
+  color:#315d47;
+  text-decoration:none;
+  font-size:11px;
+  font-weight:700;
+  line-height:1.1;
+  text-align:center;
+  -webkit-tap-highlight-color:transparent;
+}
+.smt-bottom-nav a b{
+  display:block;
+  font-size:21px;
+  line-height:23px;
+  font-weight:700;
+}
+.smt-bottom-nav a.active{
+  color:#0b3d2e;
+  background:#f1f5ef;
+}
+.smt-bottom-nav a:active{
+  transform:scale(.96);
+}
+body{
+  padding-bottom:calc(76px + env(safe-area-inset-bottom, 0px)) !important;
+}
+@media(min-width:769px){
+  .smt-bottom-nav{
+    height:72px;
+    padding-left:18px;
+    padding-right:18px;
+  }
+  .smt-bottom-nav a{
+    max-width:150px;
+    font-size:12px;
+  }
+}
+
+/* ===== SATU-SATUNYA NAVIGASI WEBSITE =====
+   Hapus/hilangkan navigasi lama yang mungkin masih terbawa dari versi sebelumnya.
+   Navigasi utama website hanya .smt-bottom-nav. */
+body > nav:not(.smt-bottom-nav),
+body > .pm-mobile-nav,
+body > .mobile-bottom-nav,
+body > .bottom-nav,
+body > .nav-bottom {
+  display:none !important;
+}

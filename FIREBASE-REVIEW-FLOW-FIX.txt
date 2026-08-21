@@ -1,0 +1,9 @@
+ALUR ULASAN TERVERIFIKASI PER PRODUK
+
+- Saat pesanan dibuat, sistem membuat reviewToken unik dan produkIds.
+- Data tersebut disimpan di /pesanan/<orderId>.
+- Pelanggan hanya melihat tombol Nilai Produk setelah status pesanan Selesai.
+- Produk yang dibuka untuk ulasan harus benar-benar ada di pesanan tersebut.
+- Firebase Rules memeriksa orderId + reviewToken + status Selesai + produkIds.
+- Ulasan disimpan di /ulasan/<orderId>__<productId>, sehingga tampil hanya pada produk yang diulas.
+- Foto ulasan opsional dan dikompres di browser.

@@ -1,0 +1,33 @@
+[build]
+  publish = "."
+  functions = "netlify/functions"
+
+[functions]
+  node_bundler = "esbuild"
+
+# Biteship public webhook.
+# This exact route must be deployed together with the function above.
+[[redirects]]
+  from = "/api/biteship-webhook"
+  to = "/.netlify/functions/biteship-webhook"
+  status = 200
+  force = true
+
+# Existing API routes.
+[[redirects]]
+  from = "/api/ongkir"
+  to = "/.netlify/functions/ongkir"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/api/biteship-rates"
+  to = "/.netlify/functions/biteship-rates"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/:splat"
+  status = 200
+  force = true
