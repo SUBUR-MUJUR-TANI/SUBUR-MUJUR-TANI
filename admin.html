@@ -552,29 +552,37 @@ window.adminDbGet = async function(path) {
   await window.adminAuthReady;
   const cleanPath = String(path || "").replace(/^\/+|\/+$/g, "");
   if (!cleanPath) throw new Error("Path data admin kosong.");
-  if (!window.database) throw new Error("Firebase Database belum siap.");
 
   const now = Date.now();
   const cached = __adminReadCache.get(cleanPath);
-  if (cached && cached.expiresAt > now) return cached.snapshot;
+  if (cached && cached.expiresAt > now && cached.snapshot) return cached.snapshot;
   if (cached && cached.promise) return cached.promise;
 
-  // Batasi root collection besar agar halaman admin tidak menarik terlalu banyak
-  // node sekaligus. 500 data terbaru cukup untuk operasional dan dapat dimuat ulang.
-  const root = cleanPath.split('/')[0];
-  const ref = window.database.ref(cleanPath);
-  const query = (cleanPath === root && (root === "pesanan" || root === "pembayaran"))
-    ? ref.orderByKey().limitToLast(500)
-    : ref;
-
-  const promise = query.once("value").then(function(snapshot){
-    const wrapped = { val: () => snapshot.val(), exists: () => snapshot.exists() };
-    __adminReadCache.set(cleanPath, {snapshot: wrapped, expiresAt: Date.now() + 2500});
-    return wrapped;
-  }).catch(function(err){
+  // Semua data sensitif Admin dibaca lewat Netlify + Firebase Admin SDK.
+  // Jangan membaca /pesanan, /pembayaran, /penarikan, dll. langsung dari
+  // Firebase Client SDK karena Security Rules memang membatasi akses client.
+  // Ini juga menghilangkan sumber permission_denied pada halaman Admin.
+  const promise = (async function(){
+    const token = await window.getAdminIdToken();
+    const res = await fetch('/.netlify/functions/admin-data', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      cache: 'no-store',
+      body: JSON.stringify({path: cleanPath, op: 'get', idToken: token})
+    });
+    const result = await res.json().catch(() => ({}));
+    if (!res.ok || result.success === false) {
+      throw new Error(result.message || `Gagal membaca ${cleanPath}.`);
+    }
+    const value = result.data == null ? null : result.data;
+    const snapshot = { val: () => value, exists: () => value !== null && value !== undefined };
+    __adminReadCache.set(cleanPath, {snapshot, expiresAt: Date.now() + 2500});
+    return snapshot;
+  })().catch(function(err){
     __adminReadCache.delete(cleanPath);
-    throw new Error(err?.message || `Gagal membaca ${cleanPath}.`);
+    throw err;
   });
+
   __adminReadCache.set(cleanPath, {promise});
   return promise;
 };
