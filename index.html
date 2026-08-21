@@ -616,6 +616,7 @@ body{background:#f5f6f2}
 ========================================================= */
 body.page-home #produk,
 body.page-home #galeri,
+body.page-home #ulasan,
 body.page-home #keranjang,
 body.page-home #checkout,
 body.page-home #pengiriman,
@@ -987,8 +988,22 @@ ulasan pelanggan
 <p>Belum ada ulasan.</p>
 </div>
 <hr style="margin:25px 0;"/>
-<h3>⭐ Ulasan hanya dari pelanggan yang sudah menyelesaikan pesanan</h3>
-<p style="color:#66716c;line-height:1.6">Untuk menjaga ulasan tetap terpercaya, pelanggan tidak dapat membuat ulasan hanya dengan membuka link. Setelah pesanan berstatus <b>Selesai</b>, tombol <b>⭐ Nilai Produk</b> akan muncul di Pesanan Saya dan ulasan akan ditempatkan pada produk yang dibeli.</p>
+<h3>Tulis Ulasan</h3>
+<input id="namaUlasan" placeholder="Nama Anda"/>
+<select id="rating">
+<option value="5">⭐⭐⭐⭐⭐ Sangat Puas</option>
+<option value="4">⭐⭐⭐⭐ Puas</option>
+<option value="3">⭐⭐⭐ Cukup</option>
+<option value="2">⭐⭐ Kurang</option>
+<option value="1">⭐ Buruk</option>
+</select>
+<textarea id="isiUlasan" placeholder="Bagaimana pengalaman Anda?">
+</textarea>
+<button onclick="kirimUlasan()">
+
+⭐ Kirim Ulasan
+
+</button>
 </div>
 </section>
 <!-- =========================
@@ -2269,8 +2284,7 @@ function pmShowOrderStatus(group,btn){
   box.classList.add('show');
   if(!list.length){ box.innerHTML='<div class="pm-order-empty">Belum ada pesanan pada bagian ini.</div>'; return; }
   box.innerHTML=list.map(o=>{
-    const reviewBtn=(group==='Selesai') ? `<button type="button" class="pm-order-action" onclick="pmBukaUlasanPesanan('${pmOrderSafe(o.orderId||'')}')">⭐ Nilai Produk</button>` : '';
-    const action=group==='Dibatalkan' ? `<span class="pm-order-action" style="background:#eee!important;color:#777!important">❌ Pesanan Dibatalkan</span>` : (group==='Pengembalian' ? `<span class="pm-order-action" style="background:#fff8e1!important;color:#8a5a00!important">🔄 Pengembalian: ${pmOrderSafe(o.statusPengembalian||o.status||'Diajukan')}</span>` : (group==='Beri Penilaian' ? `<span class="pm-order-action" style="background:#fff8e1!important;color:#8a5a00!important">⏳ Tunggu status Selesai</span>` : (group==='Selesai' ? `<span>${reviewBtn} <button type="button" class="pm-order-action" onclick="pmAjukanPengembalianByInvoice('${pmOrderSafe(o.invoice||'')}')">🔄 Ajukan Pengembalian</button></span>` : (group==='Dikirim' ? `<a class="pm-order-action" href="checkout.html#lacak">📦 Lacak Pesanan</a>` : `<a class="pm-order-action" href="checkout.html#riwayatSection">🔎 Detail</a>`))));
+    const action=group==='Dibatalkan' ? `<span class="pm-order-action" style="background:#eee!important;color:#777!important">❌ Pesanan Dibatalkan</span>` : (group==='Pengembalian' ? `<span class="pm-order-action" style="background:#fff8e1!important;color:#8a5a00!important">🔄 Pengembalian: ${pmOrderSafe(o.statusPengembalian||o.status||'Diajukan')}</span>` : (group==='Beri Penilaian' ? `<a class="pm-order-action" href="galeri.html#ulasan">⭐ Beri Penilaian</a>` : (group==='Selesai' ? `<span><a class="pm-order-action" href="galeri.html#ulasan">⭐ Beri Penilaian</a> <button type="button" class="pm-order-action" onclick="pmAjukanPengembalianByInvoice('${pmOrderSafe(o.invoice||'')}')">🔄 Ajukan Pengembalian</button></span>` : (group==='Dikirim' ? `<a class="pm-order-action" href="checkout.html#lacak">📦 Lacak Pesanan</a>` : `<a class="pm-order-action" href="checkout.html#riwayatSection">🔎 Detail</a>`))));
     return `<div class="pm-order-item"><div class="left"><b>${pmOrderSafe(o.invoice||'Pesanan')}</b><small>${pmOrderSafe(o.tanggal||'')} · Rp ${Number(o.total||0).toLocaleString('id-ID')}</small></div><div style="text-align:right"><div class="pm-order-status">${pmOrderSafe(o.status||'Menunggu Pembayaran')}</div>${action}</div></div>`;
   }).join('');
 }
@@ -2281,13 +2295,8 @@ async function pmSyncOrderStatuses(){
     const db=(window.FirebaseApp&&window.FirebaseApp.database)||window.database;
     if(db){
       const updated=await Promise.all(list.map(async o=>{
-        try{
-          if(o.orderId){
-            const os=await db.ref('pesanan/'+o.orderId).once('value');
-            if(os.exists()){ const d=os.val()||{}; return {...o,status:d.status||o.status,invoice:d.invoice||o.invoice,reviewToken:d.reviewToken||o.reviewToken,produk:d.produk||o.produk||[],nama:d.nama||o.nama,total:d.total||o.total,tanggal:d.tanggal||o.tanggal}; }
-          }
-          if(o.invoice){ const snap=await db.ref('pelacakan/'+o.invoice).once('value'); if(snap.exists()){ const d=snap.val()||{}; return {...o,status:d.status||o.status,resi:d.resi||o.resi||'',updatedAt:d.updatedAt||o.updatedAt,statusPengembalian:d.statusPengembalian||o.statusPengembalian||''}; } }
-        }catch(e){}
+        if(!o.invoice) return o;
+        try{ const snap=await db.ref('pelacakan/'+o.invoice).once('value'); if(snap.exists()){ const d=snap.val()||{}; return {...o,status:d.status||o.status,resi:d.resi||o.resi||'',updatedAt:d.updatedAt||o.updatedAt,statusPengembalian:d.statusPengembalian||o.statusPengembalian||''}; } }catch(e){}
         return o;
       }));
       list=updated; pmSaveOrderHistory(list);
@@ -2302,27 +2311,6 @@ async function pmAjukanPengembalianByInvoice(invoice){
   alert("Fitur pengembalian belum siap. Silakan refresh halaman.");
 }
 window.pmAjukanPengembalianByInvoice=pmAjukanPengembalianByInvoice;
-
-async function pmBukaUlasanPesanan(orderId){
-  if(!orderId){ alert('Pesanan lama ini belum memiliki akses ulasan terverifikasi.'); return; }
-  const list=pmReadOrderHistory(); const o=list.find(x=>x.orderId===orderId);
-  if(!o || !o.reviewToken){ alert('Akses ulasan pesanan tidak ditemukan di perangkat ini.'); return; }
-  const products=Array.isArray(o.produk)?o.produk:[];
-  if(!products.length){ alert('Produk pada pesanan tidak ditemukan.'); return; }
-  try{
-    const db=(window.FirebaseApp&&window.FirebaseApp.database)||window.database;
-    const snap=await db.ref('ulasan').once('value'); const reviews=snap.val()||{};
-    const first=products.find(x=>x.id && !reviews[orderId+'__'+String(x.id)]) || products.find(x=>x.id) || products[0];
-    const remaining=products.filter(x=>x.id && !reviews[orderId+'__'+String(x.id)]).length;
-    if(!remaining){ alert('✅ Semua produk dalam pesanan ini sudah kamu ulas.'); return; }
-    const url='produk.html?produk='+encodeURIComponent(first.id||'')+'&reviewOrder='+encodeURIComponent(orderId);
-    window.location.href=url;
-  }catch(e){
-    const first=products.find(x=>x.id)||products[0];
-    window.location.href='produk.html?produk='+encodeURIComponent(first.id||'')+'&reviewOrder='+encodeURIComponent(orderId);
-  }
-}
-window.pmBukaUlasanPesanan=pmBukaUlasanPesanan;
 window.addEventListener('load',()=>setTimeout(pmSyncOrderStatuses,350));
 </script>
 <script>
@@ -2616,24 +2604,6 @@ async function finalSyncCartStock() {
 
 /* Simpan pesanan + kurangi stok secara atomik per produk.
    Jika ada produk yang gagal, stok yang sudah dipotong dikembalikan. */
-function smtCreateReviewToken(){
-    try{
-        if(window.crypto && crypto.randomUUID) return crypto.randomUUID().replace(/-/g,"");
-        if(window.crypto && crypto.getRandomValues){
-            const a=new Uint32Array(8); crypto.getRandomValues(a); return Array.from(a).map(x=>x.toString(36)).join("");
-        }
-    }catch(e){}
-    return String(Date.now())+Math.random().toString(36).slice(2)+Math.random().toString(36).slice(2);
-}
-function smtSaveLocalOrder(orderId, orderData, reviewToken){
-    try{
-        const list=JSON.parse(localStorage.getItem('smt_order_history')||'[]');
-        const item={orderId,invoice:orderData.invoice,nama:orderData.nama,whatsapp:orderData.whatsapp,total:orderData.total,tanggal:orderData.tanggal,status:orderData.status,reviewToken,produk:orderData.produk||[]};
-        const idx=list.findIndex(x=>x.orderId===orderId || (x.invoice && x.invoice===orderData.invoice));
-        if(idx>=0) list[idx]={...list[idx],...item}; else list.unshift(item);
-        localStorage.setItem('smt_order_history',JSON.stringify(list.slice(0,20)));
-    }catch(e){console.warn('Riwayat lokal:',e);}
-}
 async function simpanPesanan() {
     pastikanKeranjangArray();
     if (finalOrderProcessing) return;
@@ -2698,13 +2668,8 @@ async function simpanPesanan() {
             changed.push({id:item.id, variantId:item.variantId || "", jumlah:Number(item.jumlah || 0)});
         }
 
-        const reviewToken = smtCreateReviewToken();
-        const produkIds = {};
-        keranjang.forEach(item => { produkIds[String(item.id)] = true; });
         const orderData = {
             invoice: "SMT-" + Date.now(),
-            reviewToken,
-            produkIds,
             nama, alamat, rt, rw, kodePos, whatsapp,
             provinsi: document.getElementById("provinsi")?.selectedOptions?.[0]?.textContent?.trim() || "",
             kabupaten: document.getElementById("kabupaten")?.selectedOptions?.[0]?.textContent?.trim() || "",
@@ -2745,9 +2710,7 @@ async function simpanPesanan() {
                 const selected = daftarLayanan[Number(document.getElementById("layananOngkir")?.value)];
                 return selected?.duration || "";
             })(),
-            status: metode === "COD" ? "Menunggu Konfirmasi COD" : "Dikemas",
-            statusPembayaran: metode === "COD" ? "COD - Belum Dibayar" : "Lunas",
-            tipePembayaran: metode === "COD" ? "COD" : "NON_COD",
+            status: "Menunggu Pembayaran",
             tanggal: new Date().toLocaleString("id-ID"),
             waktu: Date.now()
         };
@@ -2758,14 +2721,12 @@ async function simpanPesanan() {
             whatsapp: orderData.whatsapp,
             total: orderData.total,
             metodePembayaran: orderData.metodePembayaran,
-            status: metode === "COD" ? "Menunggu Pembayaran COD" : "Lunas",
-            tipe: metode === "COD" ? "COD" : "NON_COD",
+            status: "Menunggu",
             waktu: orderData.waktu
         });
 
         finalLastOrderId = orderKey;
         localStorage.setItem("smt_last_order_id", orderKey);
-        smtSaveLocalOrder(orderKey, orderData, reviewToken);
 
         keranjang = [];
         simpanKeranjang();
@@ -2976,83 +2937,21 @@ function cetakInvoice(data) {
     }, 60000);
 }
 
-let fotoUlasanData = "";
-
-function previewFotoUlasan(event){
-    const file = event?.target?.files?.[0];
-    const wrap = document.getElementById("previewFotoUlasan");
-    const img = document.getElementById("previewFotoUlasanImg");
-    if(!file){ hapusFotoUlasan(); return; }
-    if(!file.type || !file.type.startsWith("image/")){
-        alert("❌ File harus berupa gambar.");
-        event.target.value="";
-        hapusFotoUlasan();
-        return;
-    }
-    const reader = new FileReader();
-    reader.onload = e => {
-        img.src = e.target.result;
-        wrap.style.display = "block";
-        fotoUlasanData = e.target.result;
-    };
-    reader.readAsDataURL(file);
-}
-
-function hapusFotoUlasan(){
-    fotoUlasanData = "";
-    const input=document.getElementById("fotoUlasan");
-    const wrap=document.getElementById("previewFotoUlasan");
-    const img=document.getElementById("previewFotoUlasanImg");
-    if(input) input.value="";
-    if(img) img.removeAttribute("src");
-    if(wrap) wrap.style.display="none";
-}
-
-function kompresFotoUlasan(file){
-    return new Promise((resolve,reject)=>{
-        const reader=new FileReader();
-        reader.onerror=()=>reject(new Error("Foto tidak dapat dibaca."));
-        reader.onload=e=>{
-            const img=new Image();
-            img.onerror=()=>reject(new Error("Foto tidak valid."));
-            img.onload=()=>{
-                const max=1000, scale=Math.min(1,max/Math.max(img.width,img.height));
-                const canvas=document.createElement("canvas");
-                canvas.width=Math.max(1,Math.round(img.width*scale));
-                canvas.height=Math.max(1,Math.round(img.height*scale));
-                canvas.getContext("2d").drawImage(img,0,0,canvas.width,canvas.height);
-                let q=.72, data=canvas.toDataURL("image/jpeg",q);
-                while(data.length>650000 && q>.45){ q-=.06; data=canvas.toDataURL("image/jpeg",q); }
-                if(data.length>700000) reject(new Error("Foto terlalu besar setelah dikompres. Silakan pilih foto lain."));
-                else resolve(data);
-            };
-            img.src=e.target.result;
-        };
-        reader.readAsDataURL(file);
-    });
-}
-
 async function kirimUlasan() {
     const nama = document.getElementById("namaUlasan")?.value.trim();
     const isi = document.getElementById("isiUlasan")?.value.trim();
     const rating = Number(document.getElementById("rating")?.value || 5);
-    const file = document.getElementById("fotoUlasan")?.files?.[0] || null;
 
     if (!nama || !isi) { alert("Nama dan isi ulasan wajib diisi."); return; }
 
     try {
-        let foto = "";
-        if(file){
-            foto = await kompresFotoUlasan(file);
-        }
         await database.ref("ulasan").push({
-            nama, isi, rating, foto, waktu:Date.now(),
+            nama, isi, rating, waktu:Date.now(),
             tanggal:new Date().toLocaleString("id-ID")
         });
         document.getElementById("namaUlasan").value="";
         document.getElementById("isiUlasan").value="";
         document.getElementById("rating").value="5";
-        hapusFotoUlasan();
         alert("✅ Ulasan berhasil dikirim.");
     } catch(e) {
         console.error(e); alert("❌ Ulasan gagal dikirim: " + e.message);
@@ -3080,7 +2979,6 @@ function muatUlasan() {
                 <div style="color:#ff9800">${"⭐".repeat(Math.max(1,Math.min(5,Number(u.rating)||5)))}</div>
                 <small>${finalEscape(u.tanggal||"")}</small>
                 <p style="white-space:pre-wrap">${finalEscape(u.isi||"")}</p>
-                ${u.foto ? `<img src="${finalEscape(u.foto)}" alt="Foto ulasan" loading="lazy" style="display:block;width:100%;max-width:420px;max-height:320px;object-fit:cover;border-radius:12px;margin-top:10px;border:1px solid #ddd">` : ""}
             </div>`;
         }).join("");
     });

@@ -827,8 +827,22 @@ ulasan pelanggan
 <p>Belum ada ulasan.</p>
 </div>
 <hr style="margin:25px 0;"/>
-<h3>⭐ Ulasan hanya dari pelanggan yang sudah menyelesaikan pesanan</h3>
-<p style="color:#66716c;line-height:1.6">Ulasan tidak dapat dibuat dari halaman umum. Setelah pesanan berstatus <b>Selesai</b>, buka <b>Pesanan Saya → ⭐ Nilai Produk</b> untuk memberi ulasan pada produk yang benar-benar dibeli.</p>
+<h3>Tulis Ulasan</h3>
+<input id="namaUlasan" placeholder="Nama Anda"/>
+<select id="rating">
+<option value="5">⭐⭐⭐⭐⭐ Sangat Puas</option>
+<option value="4">⭐⭐⭐⭐ Puas</option>
+<option value="3">⭐⭐⭐ Cukup</option>
+<option value="2">⭐⭐ Kurang</option>
+<option value="1">⭐ Buruk</option>
+</select>
+<textarea id="isiUlasan" placeholder="Bagaimana pengalaman Anda?">
+</textarea>
+<button onclick="kirimUlasan()">
+
+⭐ Kirim Ulasan
+
+</button>
 </div>
 </section>
 <!-- =========================

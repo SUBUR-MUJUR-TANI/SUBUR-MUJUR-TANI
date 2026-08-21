@@ -2,58 +2,69 @@
   "rules": {
     ".read": false,
     ".write": false,
+
     "produk": {
       ".read": true,
       "$id": {
-        ".write": "auth != null || (data.exists() && newData.exists() && data.child('stok').isNumber() && newData.child('stok').isNumber() && newData.child('stok').val() >= 0 && newData.child('stok').val() <= data.child('stok').val())"
+        ".write": "auth != null || (data.exists() && newData.exists() && newData.child('stok').isNumber() && data.child('stok').isNumber() && newData.child('stok').val() <= data.child('stok').val() && newData.child('nama').val() == data.child('nama').val() && newData.child('harga').val() == data.child('harga').val() && newData.child('gambar').val() == data.child('gambar').val())"
       }
     },
+
     "ulasan": {
       ".read": true,
       "$id": {
-        ".write": "auth != null || (!data.exists() && newData.exists() && newData.child('orderId').isString() && newData.child('productId').isString() && newData.child('reviewToken').isString() && root.child('pesanan').child(newData.child('orderId').val()).exists() && root.child('pesanan').child(newData.child('orderId').val()).child('status').val() == 'Selesai' && root.child('pesanan').child(newData.child('orderId').val()).child('reviewToken').val() == newData.child('reviewToken').val() && root.child('pesanan').child(newData.child('orderId').val()).child('produkIds').child(newData.child('productId').val()).val() == true && newData.child('nama').val() == root.child('pesanan').child(newData.child('orderId').val()).child('nama').val() && newData.child('rating').isNumber() && newData.child('rating').val() >= 1 && newData.child('rating').val() <= 5 && newData.child('isi').isString() && newData.child('waktu').isNumber())"
+        ".write": "auth != null || (!data.exists() && newData.exists())"
       }
     },
+
     "berandaPosts": {
       ".read": true,
       ".write": "auth != null"
     },
+
     "notifikasiToko": {
       ".read": true,
       ".write": "auth != null"
     },
+
     "voucher": {
       ".read": true,
       "$code": {
         ".write": "auth != null"
       }
     },
+
     "pesanan": {
       "$id": {
         ".read": "auth != null || data.exists()",
         ".write": "auth != null || (!data.exists() && newData.exists()) || (data.exists() && newData.exists() && newData.child('invoice').val() == data.child('invoice').val() && newData.child('nama').val() == data.child('nama').val() && newData.child('whatsapp').val() == data.child('whatsapp').val() && newData.child('total').val() == data.child('total').val() && newData.child('waktu').val() == data.child('waktu').val() && newData.child('status').val() == data.child('status').val())"
       }
     },
+
     "pembayaran": {
       "$id": {
         ".read": "auth != null",
         ".write": "auth != null || (!data.exists() && newData.exists())"
       }
     },
+
     "pelacakan": {
       "$invoice": {
         ".read": true,
         ".write": "auth != null || (!data.exists() && newData.exists() && newData.child('invoice').val() == $invoice && (newData.child('status').val() == 'Menunggu Pembayaran' || newData.child('status').val() == 'Menunggu Konfirmasi COD'))"
       }
     },
+
     "pengembalian": {
       ".read": "auth != null",
       ".write": "auth != null"
     },
+
     "penarikan": {
       ".read": "auth != null",
       ".write": "auth != null"
     },
+
     "biteshipWebhookEvents": {
       ".read": "auth != null",
       ".write": "auth != null"
