@@ -1,4 +1,4 @@
-const CACHE = 'subur-mujur-tani-pwa-v5';
+const CACHE = 'subur-mujur-tani-pwa-v7-auth-token-fix';
 const SHELL = [
   '/index.html',
   '/login.html',

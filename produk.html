@@ -875,22 +875,8 @@ ulasan pelanggan
 <p>Belum ada ulasan.</p>
 </div>
 <hr style="margin:25px 0;"/>
-<h3>Tulis Ulasan</h3>
-<input id="namaUlasan" placeholder="Nama Anda"/>
-<select id="rating">
-<option value="5">⭐⭐⭐⭐⭐ Sangat Puas</option>
-<option value="4">⭐⭐⭐⭐ Puas</option>
-<option value="3">⭐⭐⭐ Cukup</option>
-<option value="2">⭐⭐ Kurang</option>
-<option value="1">⭐ Buruk</option>
-</select>
-<textarea id="isiUlasan" placeholder="Bagaimana pengalaman Anda?">
-</textarea>
-<button onclick="kirimUlasan()">
-
-⭐ Kirim Ulasan
-
-</button>
+<h3>⭐ Ulasan terpercaya per produk</h3>
+<p style="color:#66716c;line-height:1.6">Ulasan pelanggan hanya dapat dibuat dari pesanan yang sudah berstatus <b>Selesai</b>. Buka produk yang dibeli untuk melihat ulasannya.</p>
 </div>
 </section>
 <!-- =========================
@@ -2262,6 +2248,7 @@ function pmRenderGallery(){
           </button>`;
     }
 
+    if(typeof smtLoadProductReviews === "function") smtLoadProductReviews(product.id);
     thumbs.innerHTML = images.map((src,i)=>`
       <button type="button" class="smt-photo-thumb ${i===st.index?'active':''}" onclick="pmGalleryGo(${i})" aria-label="Lihat foto ${i+1}">
         <img src="${pmEscape(src)}" alt="Foto ${i+1}" loading="lazy">
@@ -3166,31 +3153,12 @@ async function kirimUlasan() {
 }
 
 function muatUlasan() {
-    database.ref("ulasan").on("value", function(snap) {
-        const data=snap.val()||{};
-        const ids=Object.keys(data);
-        const box=document.getElementById("daftarUlasan");
-        if(!ids.length) {
-            box.innerHTML="<p>Belum ada ulasan.</p>";
-            document.getElementById("jumlahUlasan").textContent="0";
-            document.getElementById("rataRating").textContent="0.0";
-            return;
-        }
-        const total=ids.reduce((a,id)=>a+Number(data[id].rating||0),0);
-        document.getElementById("jumlahUlasan").textContent=ids.length;
-        document.getElementById("rataRating").textContent=(total/ids.length).toFixed(1);
-        box.innerHTML=ids.sort((a,b)=>(data[b].waktu||0)-(data[a].waktu||0)).map(id=>{
-            const u=data[id];
-            return `<div style="border:1px solid #ddd;border-radius:12px;padding:15px;margin:10px 0">
-                <b>👤 ${finalEscape(u.nama||"Pelanggan")}</b>
-                <div style="color:#ff9800">${"⭐".repeat(Math.max(1,Math.min(5,Number(u.rating)||5)))}</div>
-                <small>${finalEscape(u.tanggal||"")}</small>
-                <p style="white-space:pre-wrap">${finalEscape(u.isi||"")}</p>
-            </div>`;
-        }).join("");
-    });
+    const box=document.getElementById("daftarUlasan");
+    if(box) box.innerHTML="<p style=\"color:#66716c\">Buka salah satu produk di atas untuk melihat ulasan khusus produk tersebut.</p>";
+    const j=document.getElementById("jumlahUlasan"); if(j) j.textContent="—";
+    const r=document.getElementById("rataRating"); if(r) r.textContent="—";
 }
-document.addEventListener("DOMContentLoaded", muatUlasan);
+
 </script>
 
 <!-- =========================================================
@@ -3250,8 +3218,98 @@ document.addEventListener("DOMContentLoaded", muatUlasan);
     </div>
     <div id="smtPhotoDescription" style="margin-top:12px;padding:12px;background:#f7faf8;border-radius:12px;font-size:14px;"></div>
     <div id="smtPhotoActions" class="smt-detail-actions"></div>
+    <section id="smtProductReviews" style="margin-top:16px;padding-top:14px;border-top:1px solid #e6ebe7;">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;">
+        <h3 style="margin:0;color:#0b3d2e;font-size:18px;">⭐ Ulasan Produk</h3>
+        <span id="smtProductReviewSummary" style="font-size:13px;color:#68746e;"></span>
+      </div>
+      <div id="smtProductReviewList" style="margin-top:10px;"><small style="color:#777;">Memuat ulasan...</small></div>
+      <div id="smtReviewFormWrap" style="display:none;margin-top:14px;padding:13px;background:#fffaf0;border:1px solid #eadfbd;border-radius:14px;">
+        <div id="smtReviewFormTitle" style="font-weight:800;color:#0b3d2e;margin-bottom:8px;">⭐ Nilai produk ini</div>
+        <select id="smtReviewRating" style="width:100%;padding:11px;border:1px solid #d5ddd7;border-radius:10px;box-sizing:border-box;">
+          <option value="5">⭐⭐⭐⭐⭐ Sangat Puas</option><option value="4">⭐⭐⭐⭐ Puas</option><option value="3">⭐⭐⭐ Cukup</option><option value="2">⭐⭐ Kurang</option><option value="1">⭐ Buruk</option>
+        </select>
+        <textarea id="smtReviewText" placeholder="Bagaimana produk ini?" style="width:100%;min-height:90px;margin-top:8px;padding:11px;border:1px solid #d5ddd7;border-radius:10px;box-sizing:border-box;resize:vertical;"></textarea>
+        <label style="display:block;margin-top:9px;font-weight:700;font-size:13px;">📷 Foto produk (opsional)</label>
+        <input id="smtReviewPhoto" type="file" accept="image/jpeg,image/png,image/webp" style="display:block;width:100%;margin-top:5px;">
+        <div id="smtReviewPhotoPreview" style="display:none;margin-top:8px;"><img id="smtReviewPhotoPreviewImg" alt="Preview foto ulasan" style="max-width:100%;max-height:180px;border-radius:10px;object-fit:cover;"></div>
+        <button type="button" onclick="smtSubmitProductReview()" style="width:100%;margin-top:10px;border:0;border-radius:11px;padding:12px;background:#0b4d3b;color:#fff;font-weight:800;cursor:pointer;">⭐ Kirim Ulasan Produk</button>
+        <div id="smtReviewFormMsg" style="margin-top:7px;font-size:12px;color:#68746e;"></div>
+      </div>
+    </section>
   </div>
 </div>
+
+<script id="smt-product-review-system">
+(function(){
+  let reviewListenerRef=null;
+  let currentReviewProductId="";
+  let reviewContext=null;
+  function db(){return (window.FirebaseApp&&window.FirebaseApp.database)||window.database;}
+  function esc(v){return String(v==null?"":v).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;"}[c]));}
+  function getLocalOrders(){try{const a=JSON.parse(localStorage.getItem('smt_order_history')||'[]');return Array.isArray(a)?a:[]}catch(e){return []}}
+  function getReviewContextFromUrl(){
+    const q=new URLSearchParams(location.search); const orderId=q.get('reviewOrder'); if(!orderId)return null;
+    const o=getLocalOrders().find(x=>x.orderId===orderId); return o&&o.reviewToken?{orderId,reviewToken:o.reviewToken,products:o.produk||[],nama:o.nama||""}:null;
+  }
+  function productInOrder(ctx,pid){return Array.isArray(ctx?.products)&&ctx.products.some(x=>String(x.id)===String(pid));}
+  async function loadContextForProduct(pid){
+    reviewContext=getReviewContextFromUrl();
+    if(!reviewContext) return null;
+    if(!productInOrder(reviewContext,pid)) return null;
+    try{
+      const snap=await db().ref('pesanan/'+reviewContext.orderId).once('value');
+      const o=snap.val()||{};
+      if(!o.reviewToken || o.reviewToken!==reviewContext.reviewToken) return null;
+      if(String(o.status||'')!=='Selesai') return null;
+      if(!(o.produkIds&&o.produkIds[String(pid)]===true)) return null;
+      reviewContext={...reviewContext,nama:o.nama||reviewContext.nama,products:o.produk||reviewContext.products};
+      return reviewContext;
+    }catch(e){return null;}
+  }
+  function renderReviews(data,pid){
+    const box=document.getElementById('smtProductReviewList'),sum=document.getElementById('smtProductReviewSummary'); if(!box)return;
+    const rows=Object.entries(data||{}).map(([id,u])=>({id,u:u||{}})).filter(x=>String(x.u.productId||'')===String(pid)).sort((a,b)=>Number(b.u.waktu||0)-Number(a.u.waktu||0));
+    if(!rows.length){box.innerHTML='<div style="padding:12px;border:1px dashed #d8dfda;border-radius:11px;color:#777;font-size:13px;">Belum ada ulasan untuk produk ini.</div>';if(sum)sum.textContent='Belum ada ulasan';return;}
+    const avg=rows.reduce((n,x)=>n+Number(x.u.rating||0),0)/rows.length;
+    if(sum)sum.textContent='⭐ '+avg.toFixed(1)+' · '+rows.length+' ulasan';
+    box.innerHTML=rows.map(x=>{const u=x.u;return `<article style="border:1px solid #e2e8e3;border-radius:12px;padding:12px;margin-top:9px;background:#fff;"><div><b>👤 ${esc(u.nama||'Pelanggan')}</b> <span style="color:#ff9800">${'⭐'.repeat(Math.max(1,Math.min(5,Number(u.rating)||5)))}</span></div><small style="color:#777">${esc(u.tanggal||'')}</small><p style="white-space:pre-wrap;margin:7px 0;">${esc(u.isi||'')}</p>${u.foto?`<img src="${esc(u.foto)}" alt="Foto ulasan" loading="lazy" style="display:block;width:100%;max-width:420px;max-height:260px;object-fit:cover;border-radius:10px;border:1px solid #ddd;">`:''}</article>`}).join('');
+  }
+  window.smtLoadProductReviews=function(pid){
+    currentReviewProductId=String(pid||'');
+    if(reviewListenerRef){try{reviewListenerRef.off();}catch(e){}reviewListenerRef=null;}
+    const d=db(); if(!d)return;
+    const ref=d.ref('ulasan'); reviewListenerRef=ref; ref.on('value',snap=>renderReviews(snap.val(),currentReviewProductId),()=>renderReviews({},currentReviewProductId));
+    const wrap=document.getElementById('smtReviewFormWrap'); if(wrap)wrap.style.display='none';
+    loadContextForProduct(currentReviewProductId).then(ctx=>{
+      if(!ctx)return;
+      const existsPath='ulasan/'+ctx.orderId+'__'+currentReviewProductId;
+      d.ref(existsPath).once('value').then(snap=>{
+        if(snap.exists()){if(wrap)wrap.style.display='block'; const msg=document.getElementById('smtReviewFormMsg'); if(msg)msg.textContent='✅ Kamu sudah memberi ulasan untuk produk ini.'; const btn=wrap?.querySelector('button[onclick="smtSubmitProductReview()"]'); if(btn)btn.disabled=true; return;}
+        if(wrap)wrap.style.display='block';
+        const msg=document.getElementById('smtReviewFormMsg'); if(msg)msg.textContent='Pesanan sudah selesai. Kamu bisa memberi ulasan untuk produk ini.';
+        const btn=wrap?.querySelector('button[onclick="smtSubmitProductReview()"]'); if(btn)btn.disabled=false;
+      });
+    });
+  };
+  window.smtSubmitProductReview=async function(){
+    const ctx=await loadContextForProduct(currentReviewProductId); if(!ctx){alert('❌ Ulasan hanya bisa dibuat dari pesanan yang sudah selesai dan produk tersebut harus ada di pesanan.');return;}
+    const text=(document.getElementById('smtReviewText')?.value||'').trim(); const rating=Number(document.getElementById('smtReviewRating')?.value||5); const file=document.getElementById('smtReviewPhoto')?.files?.[0]||null;
+    if(!text){alert('Tulis ulasan terlebih dahulu.');return;}
+    try{
+      let foto=''; if(file) foto=await compress(file);
+      const id=ctx.orderId+'__'+currentReviewProductId;
+      await db().ref('ulasan/'+id).set({orderId:ctx.orderId,reviewToken:ctx.reviewToken,productId:String(currentReviewProductId),nama:ctx.nama||'',rating,isi:text,foto,waktu:Date.now(),tanggal:new Date().toLocaleString('id-ID')});
+      const msg=document.getElementById('smtReviewFormMsg'); if(msg)msg.textContent='✅ Ulasan berhasil dikirim.';
+      const btn=document.querySelector('#smtReviewFormWrap button[onclick="smtSubmitProductReview()"]'); if(btn)btn.disabled=true;
+      const inp=document.getElementById('smtReviewText');if(inp)inp.value=''; const ph=document.getElementById('smtReviewPhoto');if(ph)ph.value='';
+    }catch(e){alert('❌ Ulasan gagal dikirim: '+(e.message||e));}
+  };
+  async function compress(file){return new Promise((resolve,reject)=>{const r=new FileReader();r.onerror=()=>reject(new Error('Foto tidak dapat dibaca.'));r.onload=e=>{const img=new Image();img.onerror=()=>reject(new Error('Foto tidak valid.'));img.onload=()=>{const max=1000,scale=Math.min(1,max/Math.max(img.width,img.height)),c=document.createElement('canvas');c.width=Math.max(1,Math.round(img.width*scale));c.height=Math.max(1,Math.round(img.height*scale));c.getContext('2d').drawImage(img,0,0,c.width,c.height);let q=.72,data=c.toDataURL('image/jpeg',q);while(data.length>650000&&q>.45){q-=.06;data=c.toDataURL('image/jpeg',q);}if(data.length>700000)reject(new Error('Foto terlalu besar setelah dikompres.'));else resolve(data)};img.src=e.target.result};r.readAsDataURL(file)});}
+  document.addEventListener('change',e=>{if(e.target&&e.target.id==='smtReviewPhoto'){const f=e.target.files?.[0],w=document.getElementById('smtReviewPhotoPreview'),i=document.getElementById('smtReviewPhotoPreviewImg');if(!f){if(w)w.style.display='none';return;}const r=new FileReader();r.onload=x=>{if(i)i.src=x.target.result;if(w)w.style.display='block'};r.readAsDataURL(f)}});
+  window.addEventListener('beforeunload',()=>{if(reviewListenerRef)try{reviewListenerRef.off()}catch(e){}});
+})();
+</script>
 
 <!-- =========================================================
      VARIAN PRODUK / PILIHAN HARGA & BERAT
@@ -3552,6 +3610,16 @@ document.addEventListener("DOMContentLoaded", muatUlasan);
   document.addEventListener("keydown",function(e){
     if(e.key==="Escape") smtCloseVariantModal();
   });
+})();
+</script>
+
+<script id="smt-review-auto-open">
+(function(){
+  function go(){
+    const q=new URLSearchParams(location.search); const pid=q.get('produk'); if(!pid)return;
+    let n=0; const t=setInterval(()=>{try{const p=pmProducts&&pmProducts.find(x=>String(x.id)===String(pid));if(p){clearInterval(t);pmOpenGallery(p);}}catch(e){} if(++n>50)clearInterval(t)},250);
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(go,700));else setTimeout(go,700);
 })();
 </script>
 

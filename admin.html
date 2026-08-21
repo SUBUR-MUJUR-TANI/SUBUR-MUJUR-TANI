@@ -380,15 +380,15 @@ Memuat data pesanan...
 
 <div class="box" id="statusPanduanAdmin">
 <h2>⚙️ Status Pesanan</h2>
-<p style="margin:0 0 10px;color:#666;">Status yang bisa dipilih admin dan akan tampil di menu <b>Pesanan Saya</b> pelanggan:</p>
-<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;">
-  <div style="padding:12px;border:1px solid #eee;border-radius:10px;">💳 <b>Belum Bayar</b><br><small>Menunggu pembayaran</small></div>
-  <div style="padding:12px;border:1px solid #eee;border-radius:10px;">📦 <b>Dikemas</b><br><small>Pesanan diproses</small></div>
-  <div style="padding:12px;border:1px solid #eee;border-radius:10px;">🚚 <b>Buat Pengiriman</b><br><small>Order kurir dibuat</small></div>
-  <div style="padding:12px;border:1px solid #eee;border-radius:10px;">🚚 <b>Dikirim</b><br><small>Pesanan dikirim</small></div>
-  <div style="padding:12px;border:1px solid #eee;border-radius:10px;">💰 <b>COD Lunas</b><br><small>COD sudah diterima</small></div>
-  <div style="padding:12px;border:1px solid #eee;border-radius:10px;">⭐ <b>Beri Penilaian</b><br><small>Pesanan selesai</small></div>
+<p style="margin:0 0 12px;color:#666;">Sekarang bagian ini <b>aktif</b>: lihat jumlah pesanan per status dan tekan status untuk langsung memfilter pesanan.</p>
+<div id="statusOrderSummary" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;">
+  <div style="padding:14px;border:1px solid #e5e8e6;border-radius:12px;background:#fafcfb;">⏳ Memuat status...</div>
 </div>
+<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;">
+  <button type="button" onclick="bukaPesananDenganFilter('')" style="background:#0b3d2e;color:#fff;">📦 Lihat Semua Pesanan</button>
+  <button type="button" onclick="resetFilterStatusPesanan()" style="background:#e8f0eb;color:#174b38;">↩️ Reset Filter</button>
+</div>
+<div id="statusOrderInfo" style="margin-top:12px;font-size:12px;color:#66716c;">Status mengikuti data pesanan Firebase dan pembaruan Biteship/webhook.</div>
 </div>
 <div class="box" id="pengembalian" style="display:none;">
 <h2>🔄 Pengembalian & Pengembalian Dana</h2>
@@ -447,37 +447,193 @@ window.FirebaseApp.storage = storage;
 
 
 /* =========================
-   CEK LOGIN ADMIN
+   AUTH ADMIN — WAJIB SELESAI SEBELUM BACA DATA
 ========================= */
 
+// Firebase Auth dipulihkan secara asynchronous. Semua pembacaan data admin
+// yang membutuhkan auth menunggu promise ini agar tidak pernah berjalan
+// sebagai anonymous dan memunculkan permission_denied.
+const adminAuth = firebase.auth();
+window.adminAuth = adminAuth;
 
-firebase.auth()
-
-.onAuthStateChanged(
-
-function(user){
-
-  let loginVerified = false;
-  try {
-    loginVerified = sessionStorage.getItem("smt_admin_login_verified") === "1";
-  } catch(e) {}
-
-  // Dashboard admin hanya boleh dibuka setelah login berhasil
-  // melalui login.html pada tab browser ini. Sesi Firebase lama
-  // tidak boleh membuat admin terbuka otomatis.
-  if(!user || !loginVerified){
-    try { sessionStorage.removeItem("smt_admin_login_verified"); } catch(e) {}
-    if (user) firebase.auth().signOut().catch(function(){});
-    window.location.replace("login.html");
+/*
+ * ADMIN AUTH ROBUST:
+ * - Pakai persistence LOCAL agar sesi admin tidak hilang ketika pindah/reload halaman.
+ * - Jangan langsung menjalankan query Firebase sebelum Auth selesai dipulihkan.
+ * - Jika belum login, tampilkan form login di halaman ini (bukan membiarkan
+ *   query berjalan sebagai anonymous lalu menghasilkan permission_denied).
+ */
+window.adminAuthReady = (async function(){
+  // Pastikan persistence disetel SEBELUM membaca Realtime Database.
+  // Ini penting karena halaman admin dan halaman toko bisa berada pada origin
+  // Netlify yang berbeda, sehingga sesi Auth harus benar-benar ada di origin admin.
+  try { await adminAuth.setPersistence(firebase.auth.Auth.Persistence.LOCAL); } catch(e) {
+    console.warn("Firebase Auth persistence:", e?.message || e);
   }
 
+  return await new Promise(function(resolve) {
+    let firstState = true;
+    let redirected = false;
+    const unsubscribe = adminAuth.onAuthStateChanged(function(user) {
+      if (user) {
+        window.userLogin = user;
+        window.adminUser = user;
+        const gate = document.getElementById("adminAuthGate");
+        if (gate) gate.style.display = "none";
+        window.__SMT_ADMIN_AUTH_OK = true;
+        unsubscribe();
+        resolve(user);
+        return;
+      }
+
+      if (firstState) {
+        firstState = false;
+        window.__SMT_ADMIN_AUTH_OK = false;
+        // Jangan biarkan admin.html melakukan query sebagai anonymous.
+        // Arahkan ke login khusus admin agar tidak ada permission_denied palsu.
+        const gate = document.getElementById("adminAuthGate");
+        if (!gate) {
+          const box = document.createElement("div");
+          box.id = "adminAuthGate";
+          box.style.cssText = "position:fixed;inset:0;z-index:999999;background:rgba(3,32,24,.94);display:flex;align-items:center;justify-content:center;padding:20px;box-sizing:border-box";
+          box.innerHTML = '<div style="width:min(430px,100%);background:#fff;border-radius:22px;padding:24px;box-shadow:0 20px 60px rgba(0,0,0,.25);font-family:Arial,sans-serif;text-align:center"><div style="font-size:42px">🔐</div><h2 style="margin:8px 0;color:#0b3d2e">Login Admin Diperlukan</h2><p style="margin:0 0 16px;color:#66716c;line-height:1.55">Sesi admin belum aktif. Login terlebih dahulu agar Pesanan, Pembayaran, COD, Keuangan, Penarikan, dan Ulasan admin dapat dibaca dari Firebase.</p><button id="adminGoLogin" type="button" style="width:100%;padding:14px;border:0;border-radius:12px;background:#0b5a43;color:#fff;font-weight:800;font-size:16px">🔑 Login Admin</button><p style="margin:12px 0 0;font-size:12px;color:#888">Jangan ubah Firebase Rules menjadi read/write true.</p></div>';
+          document.body.appendChild(box);
+          document.getElementById("adminGoLogin").onclick = function(){ window.location.replace("login.html?return=admin.html"); };
+        }
+        setTimeout(function(){
+          if (!adminAuth.currentUser && !redirected) {
+            redirected = true;
+            window.location.replace("login.html?return=admin.html");
+          }
+        }, 1200);
+      }
+    });
+  });
+})();
+
+window.adminAfterAuth = function(fn) {
+  return window.adminAuthReady.then(function(user) {
+    return typeof fn === "function" ? fn(user) : user;
+  });
+};
+
+// Single-flight token retrieval:
+// Finance, Penarikan, Pembayaran, and Biteship Center can load at the same time.
+// Do not force-refresh the token on every request; concurrent forced refreshes can
+// trigger Firebase Auth re-entry in some mobile WebViews. Firebase automatically
+// refreshes an expired token when forceRefresh=false.
+let __adminTokenPromise = null;
+window.getAdminIdToken = async function() {
+  if (__adminTokenPromise) return __adminTokenPromise;
+  __adminTokenPromise = (async function(){
+    const user = await window.adminAuthReady;
+    if (!user) throw new Error("Sesi admin tidak ditemukan. Silakan login ulang.");
+    const token = await user.getIdToken(false);
+    if (!token) throw new Error("Token login admin tidak tersedia. Silakan login ulang.");
+    return token;
+  })();
+  try {
+    return await __adminTokenPromise;
+  } finally {
+    __adminTokenPromise = null;
+  }
+};
+
+// ADMIN DATA SERVER-SIDE FIX:
+// Pembacaan data sensitif admin dilakukan melalui Netlify Function + Firebase Admin SDK.
+// Ini mencegah permission_denied ketika Firebase Realtime Database Rules di server
+// belum tersinkron dengan deployment frontend.
+// ADMIN DATA READ — gunakan Firebase Client SDK setelah Auth admin benar-benar siap.
+// Rules root untuk data admin sudah mensyaratkan auth != null. Ini menghindari
+// pengiriman seluruh /pesanan melalui Firebase Admin SDK di Netlify yang dapat
+// memicu RangeError "Maximum call stack size exceeded" ketika data membesar.
+const __adminReadCache = new Map();
+window.adminDbGet = async function(path) {
+  await window.adminAuthReady;
+  const cleanPath = String(path || "").replace(/^\/+|\/+$/g, "");
+  if (!cleanPath) throw new Error("Path data admin kosong.");
+  if (!window.database) throw new Error("Firebase Database belum siap.");
+
+  const now = Date.now();
+  const cached = __adminReadCache.get(cleanPath);
+  if (cached && cached.expiresAt > now) return cached.snapshot;
+  if (cached && cached.promise) return cached.promise;
+
+  // Batasi root collection besar agar halaman admin tidak menarik terlalu banyak
+  // node sekaligus. 500 data terbaru cukup untuk operasional dan dapat dimuat ulang.
+  const root = cleanPath.split('/')[0];
+  const ref = window.database.ref(cleanPath);
+  const query = (cleanPath === root && (root === "pesanan" || root === "pembayaran"))
+    ? ref.orderByKey().limitToLast(500)
+    : ref;
+
+  const promise = query.once("value").then(function(snapshot){
+    const wrapped = { val: () => snapshot.val(), exists: () => snapshot.exists() };
+    __adminReadCache.set(cleanPath, {snapshot: wrapped, expiresAt: Date.now() + 2500});
+    return wrapped;
+  }).catch(function(err){
+    __adminReadCache.delete(cleanPath);
+    throw new Error(err?.message || `Gagal membaca ${cleanPath}.`);
+  });
+  __adminReadCache.set(cleanPath, {promise});
+  return promise;
+};
+
+window.invalidateAdminDataCache = function(path){
+  if(path) __adminReadCache.delete(String(path).replace(/^\/+|\/+$/g, ""));
+  else __adminReadCache.clear();
+};
+
+// ADMIN DATABASE PROXY (EXPLICIT, NO MONKEY-PATCH):
+// Do NOT overwrite database.ref(). Firebase's database object is used by the
+// client SDK internally, and replacing its ref method can cause recursive
+// calls / "Maximum call stack size exceeded". Sensitive Admin data uses
+// adminRef() explicitly; public/product data keeps using the normal client SDK.
+const __adminSensitiveRoots = new Set(['pesanan','pembayaran','penarikan','pengembalian','pelacakan','notifikasiToko']);
+function __adminSnapshot(value){ return { val: () => value, exists: () => value !== null && value !== undefined }; }
+function __adminPath(path){ return String(path || '').replace(/^\/+|\/+$/g,''); }
+async function __adminDbRequest(path, op, data) {
+  const token = await window.getAdminIdToken();
+  const res = await fetch('/.netlify/functions/admin-data', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({path: __adminPath(path), op, data, idToken: token})
+  });
+  const result = await res.json().catch(()=>({}));
+  if (!res.ok || result.success === false) throw new Error(result.message || `Gagal ${op} ${path}.`);
+  return result;
 }
-
-);
-
-
-
-
+function __adminRefProxy(path){
+  const clean=__adminPath(path);
+  return {
+    once: async function(){ const r=await __adminDbRequest(clean,'get'); return __adminSnapshot(r.data); },
+    set: async function(value){ const r=await __adminDbRequest(clean,'set',value); window.invalidateAdminDataCache(clean.split('/')[0]); return __adminSnapshot(r.data); },
+    update: async function(value){ const r=await __adminDbRequest(clean,'update',value); window.invalidateAdminDataCache(clean.split('/')[0]); return __adminSnapshot(r.data); },
+    remove: async function(){ await __adminDbRequest(clean,'remove'); window.invalidateAdminDataCache(clean.split('/')[0]); return __adminSnapshot(null); },
+    push: function(value){
+      if(!window.database) throw new Error('Firebase Database belum siap.');
+      const key = window.database.ref(clean).push().key;
+      if(!key) throw new Error('Gagal membuat ID data baru.');
+      const child={key};
+      child.set=async function(v){ const r=await __adminDbRequest(clean+'/'+key,'set',v); window.invalidateAdminDataCache(clean.split('/')[0]); return __adminSnapshot(r.data); };
+      child.update=async function(v){ const r=await __adminDbRequest(clean+'/'+key,'update',v); window.invalidateAdminDataCache(clean.split('/')[0]); return __adminSnapshot(r.data); };
+      const promise = value === undefined ? Promise.resolve(__adminSnapshot(null)) : child.set(value);
+      child.then=(resolve,reject)=>promise.then(resolve,reject);
+      child.catch=(reject)=>promise.catch(reject);
+      return child;
+    },
+    on: function(eventType, callback){
+      if(eventType !== 'value') throw new Error('Proxy admin hanya mendukung event value.');
+      let stopped=false;
+      const run=async()=>{ try { const snap=await window.adminDbGet(clean); if(!stopped && typeof callback==='function') callback(snap); } catch(e){ console.error('Admin database listener:', e); } };
+      run();
+      const timer=setInterval(run,15000);
+      return function(){ stopped=true; clearInterval(timer); };
+    },
+    off: function(){ return undefined; }
+  };
+}
+window.adminRef=__adminRefProxy;
 
 /* =========================
    TAMPIL PESANAN
@@ -485,7 +641,8 @@ function(user){
 
 
 
-database.ref("pesanan").on("value", function(snapshot) {
+window.adminAuthReady.then(function(){
+window.adminDbGet("pesanan").then(function(snapshot) {
     const data = snapshot.val();
     let hasil = "";
 
@@ -508,7 +665,7 @@ database.ref("pesanan").on("value", function(snapshot) {
             const shippingPrice = Number(order.ongkir || order.biteshipShippingPrice || 0);
 
             let shippingBox = "";
-            if (["Dikemas", "Buat Pengiriman", "Resi", "Dikirim", "COD Lunas", "Beri Penilaian"].includes(orderStatus)) {
+            if (["Dikemas", "Buat Pengiriman", "Resi", "Dikirim", "COD Lunas", "Beri Penilaian", "Selesai"].includes(orderStatus)) {
                 const hasCreated = Boolean(order.biteshipOrderId || order.resi);
 
                 shippingBox = `
@@ -620,6 +777,7 @@ database.ref("pesanan").on("value", function(snapshot) {
     mulaiAutoSinkronBiteship();
 });
 
+});
 function escapeAdmin(v) {
     return String(v == null ? "" : v).replace(/[&<>"']/g, function(m) {
         return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m];
@@ -639,7 +797,7 @@ function escapeAdminAttr(v) {
 
 async function ubahStatus(id, selectedStatus){
     try {
-        const ref = database.ref("pesanan/" + id);
+        const ref = adminRef("pesanan/" + id);
         const snap = await ref.once("value");
         const order = snap.val();
         if(!order) return alert("Pesanan tidak ditemukan.");
@@ -652,16 +810,18 @@ async function ubahStatus(id, selectedStatus){
             "Buat Pengiriman":"Resi",
             "Resi":"Dikirim",
             "Dikirim":"COD Lunas",
-            "COD Lunas":"Beri Penilaian",
-            "Beri Penilaian":"Beri Penilaian"
+            "COD Lunas":"Selesai",
+            "Beri Penilaian":"Selesai",
+            "Selesai":"Selesai"
         } : {
             "Belum Bayar":"Dikemas",
             "Menunggu Pembayaran":"Dikemas",
             "Dikemas":"Buat Pengiriman",
             "Buat Pengiriman":"Resi",
             "Resi":"Dikirim",
-            "Dikirim":"Beri Penilaian",
-            "Beri Penilaian":"Beri Penilaian"
+            "Dikirim":"Selesai",
+            "Beri Penilaian":"Selesai",
+            "Selesai":"Selesai"
         };
         const next = nextMap[current];
         const allowedSpecial = ["Dibatalkan","Dikembalikan","Ditahan"];
@@ -676,7 +836,7 @@ async function ubahStatus(id, selectedStatus){
         const waktu = new Date().toLocaleString("id-ID");
         await ref.update({status:selectedStatus,statusKategori:selectedStatus,statusTerakhirDiperbarui:waktu});
         if(order.invoice){
-            const trackRef = database.ref("pelacakan/" + order.invoice);
+            const trackRef = adminRef("pelacakan/" + order.invoice);
             const trackSnap = await trackRef.once("value");
             const track = trackSnap.val() || {};
             const history = Array.isArray(track.riwayatStatus) ? track.riwayatStatus : [];
@@ -724,7 +884,8 @@ async function sinkronkanStatusBiteship(id, silent = true) {
 
 async function sinkronkanSemuaBiteship(silent = true) {
     try {
-        const snap = await database.ref("pesanan").once("value");
+        await window.adminAuthReady;
+        const snap = await window.adminDbGet("pesanan");
         const data = snap.val() || {};
         const aktif = Object.entries(data).filter(([_,o]) => {
             if (!o?.biteshipOrderId) return false;
@@ -745,9 +906,7 @@ function mulaiAutoSinkronBiteship() {
 }
 
 async function getAdminIdToken() {
-    const user = firebase.auth().currentUser;
-    if (!user) throw new Error("Sesi admin sudah habis. Silakan login ulang.");
-    return await user.getIdToken(true);
+    return await window.getAdminIdToken();
 }
 
 async function hitungTarifPengiriman(id) {
@@ -780,7 +939,7 @@ async function hitungTarifPengiriman(id) {
             return;
         }
 
-        const current = await database.ref("pesanan/" + id).once("value");
+        const current = await adminRef("pesanan/" + id).once("value");
         const order = current.val() || {};
         const selectedIndex = rates.findIndex(r =>
             String(r.courier_code) === String(order.kurirKode || "") &&
@@ -818,7 +977,7 @@ async function pilihTarifPengiriman(id, index, silent) {
     if (!rate) return;
 
     try {
-        const ref = database.ref("pesanan/" + id);
+        const ref = adminRef("pesanan/" + id);
         const snap = await ref.once("value");
         const order = snap.val();
         if (!order) throw new Error("Pesanan tidak ditemukan.");
@@ -849,7 +1008,7 @@ async function pilihTarifPengiriman(id, index, silent) {
         });
 
         if (order.invoice) {
-            await database.ref("pelacakan/" + order.invoice).update({
+            await adminRef("pelacakan/" + order.invoice).update({
                 ongkir: shipping,
                 total: totalCOD,
                 kurir: rate.courier_code,
@@ -887,7 +1046,7 @@ function togglePickupSchedule(id) {
 
 async function buatPengiriman(id) {
     try {
-        const snap = await database.ref("pesanan/" + id).once("value");
+        const snap = await adminRef("pesanan/" + id).once("value");
         const order = snap.val();
 
         if (!order) return alert("Pesanan tidak ditemukan.");
@@ -952,7 +1111,7 @@ window.buatPengirimanCOD = buatPengiriman;
 
 async function cetakLabelPengiriman(id){
     try {
-        const snap = await database.ref("pesanan/" + id).once("value");
+        const snap = await adminRef("pesanan/" + id).once("value");
         const order = snap.val();
         if(!order) return alert("Pesanan tidak ditemukan.");
 
@@ -1131,6 +1290,9 @@ body{margin:0;background:#e9e9e9;font-family:Arial,Helvetica,sans-serif;color:#1
   <button class="no-print" onclick="window.print()" style="margin-top:4mm;width:100%;padding:12px;font-size:16px;font-weight:800;border:0;background:#0b4d3b;color:#fff;border-radius:8px">🖨️ CETAK LABEL</button>
 </div>
 <script src="/pwa-register.js"><\/script>
+
+
+
 </body>
 </html>`);
         win.document.close();
@@ -1145,7 +1307,7 @@ body{margin:0;background:#e9e9e9;font-family:Arial,Helvetica,sans-serif;color:#1
 
 window.konfirmasiCOD = async function konfirmasiCOD(id){
     try {
-        const ref = database.ref("pesanan/" + id);
+        const ref = adminRef("pesanan/" + id);
         const snap = await ref.once("value");
         const order = snap.val();
         if (!order) return alert("Pesanan tidak ditemukan.");
@@ -1172,7 +1334,7 @@ window.konfirmasiCOD = async function konfirmasiCOD(id){
         });
 
         if (order.invoice) {
-            const trackRef = database.ref("pelacakan/" + order.invoice);
+            const trackRef = adminRef("pelacakan/" + order.invoice);
             const trackSnap = await trackRef.once("value");
             const track = trackSnap.val() || {};
             const history = Array.isArray(track.riwayatStatus) ? track.riwayatStatus : [];
@@ -1185,7 +1347,7 @@ window.konfirmasiCOD = async function konfirmasiCOD(id){
             });
         }
 
-        const pembayaranRef = database.ref("pembayaran/" + id);
+        const pembayaranRef = adminRef("pembayaran/" + id);
         const pembayaranSnap = await pembayaranRef.once("value");
         if (pembayaranSnap.exists()) {
             await pembayaranRef.update({
@@ -1205,12 +1367,12 @@ window.konfirmasiCOD = async function konfirmasiCOD(id){
 
 async function tandaiResiDikirim(id){
     try {
-        const ref=database.ref("pesanan/"+id); const snap=await ref.once("value"); const order=snap.val();
+        const ref=adminRef("pesanan/"+id); const snap=await ref.once("value"); const order=snap.val();
         if(!order) return alert("Pesanan tidak ditemukan.");
         if(order.status!=="Resi" || !order.resi) return alert("⛔ Pesanan harus berada di tahap Resi dan memiliki nomor resi.");
         const waktu=new Date().toLocaleString("id-ID");
         await ref.update({status:"Dikirim",statusKategori:"Dikirim",statusTerakhirDiperbarui:waktu});
-        if(order.invoice) await database.ref("pelacakan/"+order.invoice).update({status:"Dikirim",statusKategori:"Dikirim",updatedAt:waktu});
+        if(order.invoice) await adminRef("pelacakan/"+order.invoice).update({status:"Dikirim",statusKategori:"Dikirim",updatedAt:waktu});
         alert("✅ Pesanan sekarang berstatus Dikirim."); location.reload();
     } catch(e){ alert("❌ Gagal mengubah status menjadi Dikirim: " + e.message); }
 }
@@ -1218,15 +1380,15 @@ async function tandaiResiDikirim(id){
 async function tandaiCODLunas(id){
     if(!confirm("Apakah uang COD sudah diterima dari pembeli?")) return;
     try {
-        const orderRef=database.ref("pesanan/"+id); const snap=await orderRef.once("value"); const order=snap.val();
+        const orderRef=adminRef("pesanan/"+id); const snap=await orderRef.once("value"); const order=snap.val();
         if(!order) return alert("Pesanan tidak ditemukan.");
         if(order.metodePembayaran!=="COD") return alert("Pesanan ini bukan COD.");
         if(order.status!=="Dikirim") return alert("⛔ COD hanya bisa dilunasi setelah status Dikirim.");
         const waktu=new Date().toLocaleString("id-ID");
         const waktuAt=Date.now();
         await orderRef.update({status:"COD Lunas",statusKategori:"COD Lunas",statusPembayaran:"Lunas (COD)",codDibayarPada:waktu,codDibayarAt:waktuAt,danaSelesaiAt:waktuAt,statusTerakhirDiperbarui:waktu});
-        await database.ref("pembayaran/"+id).update({status:"Lunas (COD)",dikonfirmasiPada:waktu});
-        if(order.invoice) await database.ref("pelacakan/"+order.invoice).update({status:"COD Lunas",statusKategori:"COD Lunas",updatedAt:waktu});
+        await adminRef("pembayaran/"+id).update({status:"Lunas (COD)",dikonfirmasiPada:waktu});
+        if(order.invoice) await adminRef("pelacakan/"+order.invoice).update({status:"COD Lunas",statusKategori:"COD Lunas",updatedAt:waktu});
         alert("✅ Pembayaran COD diterima. Status pesanan menjadi COD Lunas."); location.reload();
     } catch(error){ console.error(error); alert("❌ Gagal memperbarui pembayaran COD: " + error.message); }
 }
@@ -1234,7 +1396,7 @@ async function tandaiCODLunas(id){
 
 async function verifikasiBayar(id){
     try {
-        const orderRef = database.ref("pesanan/" + id);
+        const orderRef = adminRef("pesanan/" + id);
         const snap = await orderRef.once("value");
         const order = snap.val();
         if (!order) { alert("Pesanan tidak ditemukan."); return; }
@@ -1251,7 +1413,7 @@ async function verifikasiBayar(id){
         });
 
         if (order.invoice) {
-            const trackRef = database.ref("pelacakan/" + order.invoice);
+            const trackRef = adminRef("pelacakan/" + order.invoice);
             const trackSnap = await trackRef.once("value");
             const track = trackSnap.val() || {};
             const history = Array.isArray(track.riwayatStatus) ? track.riwayatStatus : [];
@@ -1269,7 +1431,7 @@ async function verifikasiBayar(id){
             });
         }
 
-        const pembayaranRef = database.ref("pembayaran/" + id);
+        const pembayaranRef = adminRef("pembayaran/" + id);
         const pembayaranSnap = await pembayaranRef.once("value");
         if (pembayaranSnap.exists()) {
             await pembayaranRef.update({status:"Lunas", dikonfirmasiPada:waktuKonfirmasi});
@@ -1283,7 +1445,7 @@ async function verifikasiBayar(id){
 
 async function hapusPesanan(id){
     try {
-        const ref = database.ref("pesanan/" + id);
+        const ref = adminRef("pesanan/" + id);
         const snap = await ref.once("value");
         const order = snap.val();
         if(!order) return alert("Pesanan tidak ditemukan.");
@@ -1343,9 +1505,9 @@ async function hapusPesanan(id){
 function tolakPembayaran(id){
     const alasan = prompt("Alasan penolakan pembayaran (opsional):", "Pembayaran belum valid");
     if (alasan === null) return;
-    database.ref("pesanan/" + id).once("value").then(async function(snap){
+    adminRef("pesanan/" + id).once("value").then(async function(snap){
         const order = snap.val() || {};
-        await database.ref("pesanan/" + id).update({
+        await adminRef("pesanan/" + id).update({
             status: "Pembayaran Ditolak",
             statusPembayaran: "Ditolak",
             alasanPenolakan: alasan,
@@ -1353,7 +1515,7 @@ function tolakPembayaran(id){
         });
 
         if(order.invoice){
-            const trackRef = database.ref("pelacakan/" + order.invoice);
+            const trackRef = adminRef("pelacakan/" + order.invoice);
             const trackSnap = await trackRef.once("value");
             const track = trackSnap.val() || {};
             const history = Array.isArray(track.riwayatStatus) ? track.riwayatStatus : [];
@@ -1523,53 +1685,15 @@ Jumlah Pembayaran:
 ========================= */
 
 
-database.ref("pesanan")
-
-.on(
-
-"value",
-
-function(snapshot){
-
-
-
-let data=snapshot.val();
-
-
-
-let jumlah=0;
-
-
-
-if(data){
-
-
-jumlah=
-
-Object.keys(data).length;
-
-
-}
-
-
-
-document.getElementById(
-
-"jumlahPesanan"
-
-).innerHTML=jumlah;
-
-
-
-}
-
-);
-
-
-
-
-
-
+window.adminAuthReady.then(function(){
+  window.adminDbGet("pesanan").then(function(snapshot){
+    const data=snapshot.val()||{};
+    const el=document.getElementById("jumlahPesanan");
+    if(el) el.innerHTML=Object.keys(data).length;
+  }).catch(function(e){
+    console.error("Gagal menghitung pesanan admin:",e);
+  });
+});
 
 /* =========================
    HITUNG PRODUK
@@ -1629,13 +1753,8 @@ document.getElementById(
 ========================= */
 
 
-database.ref("pembayaran")
-
-.on(
-
-"value",
-
-function(snapshot){
+window.adminAuthReady.then(function(){
+window.adminDbGet("pembayaran").then(function(snapshot){
 
 
 
@@ -1675,6 +1794,8 @@ document.getElementById(
 
 
 
+});
+
 </script>
 
 
@@ -1694,7 +1815,16 @@ document.getElementById(
 <option value="2">⭐⭐ Kurang</option>
 <option value="1">⭐ Buruk</option>
 </select>
+<select id="adminProdukUlasan" style="margin-top:8px;">
+<option value="">Pilih produk untuk ulasan</option>
+</select>
 <textarea id="adminIsiUlasan" placeholder="Isi ulasan"></textarea>
+<label style="display:block;margin:12px 0 6px;font-weight:700">📷 Foto ulasan (opsional)</label>
+<input id="adminFotoUlasan" type="file" accept="image/jpeg,image/png,image/webp" onchange="adminPreviewFotoUlasan(event)" style="display:block;width:100%;box-sizing:border-box"/>
+<div id="adminPreviewFotoUlasan" style="display:none;margin-top:10px">
+  <img id="adminPreviewFotoUlasanImg" alt="Preview foto ulasan" style="max-width:100%;max-height:220px;border-radius:12px;object-fit:cover;border:1px solid #ddd">
+  <button type="button" onclick="adminHapusFotoUlasan()" style="display:block;margin-top:8px">✕ Hapus foto</button>
+</div>
 <button onclick="adminTambahUlasan()">➕ Tambah Ulasan</button>
 <hr style="margin:25px 0">
 <div id="adminDaftarUlasan">Memuat ulasan...</div>
@@ -2331,29 +2461,42 @@ window.batalEditProduk = function(){
     if(cancel) cancel.style.display = "none";
 };
 
+let smtStatusFilter = "";
+
 function filterPesanan(){
-
-    let input = document.getElementById("cariPesanan").value.toLowerCase();
-
-    let card = document.getElementsByClassName("card");
-
-    for(let i=0;i<card.length;i++){
-
-        let teks = card[i].innerText.toLowerCase();
-
-        if(teks.indexOf(input)>-1){
-
-            card[i].style.display="block";
-
-        }else{
-
-            card[i].style.display="none";
-
-        }
-
-    }
-
+    const input = (document.getElementById("cariPesanan")?.value || "").toLowerCase().trim();
+    const cards = document.querySelectorAll("#pesanan .order-card");
+    cards.forEach(card => {
+        const teks = card.innerText.toLowerCase();
+        const statusBadge = card.querySelector(".status-badge")?.innerText?.trim() || "";
+        const statusOk = !smtStatusFilter || statusBadge === smtStatusFilter;
+        const searchOk = !input || teks.includes(input);
+        card.style.display = (statusOk && searchOk) ? "block" : "none";
+    });
 }
+
+function bukaPesananDenganFilter(status){
+    smtStatusFilter = String(status || "");
+    if(typeof showAdminProSection === "function") showAdminProSection("pesanan");
+    setTimeout(()=>{
+        filterPesanan();
+        const info=document.getElementById("statusOrderInfo");
+        if(info) info.textContent = smtStatusFilter ? "Filter aktif: " + smtStatusFilter + "." : "Menampilkan semua status pesanan.";
+    },80);
+}
+
+function resetFilterStatusPesanan(){
+    smtStatusFilter = "";
+    const input=document.getElementById("cariPesanan");
+    if(input) input.value="";
+    if(typeof showAdminProSection === "function") showAdminProSection("pesanan");
+    setTimeout(filterPesanan,80);
+    const info=document.getElementById("statusOrderInfo");
+    if(info) info.textContent="Filter dihapus. Semua pesanan ditampilkan.";
+}
+
+window.bukaPesananDenganFilter=bukaPesananDenganFilter;
+window.resetFilterStatusPesanan=resetFilterStatusPesanan;
 
 </script>
 <!-- =========================
@@ -2401,6 +2544,16 @@ function adminEsc(v){
     }[c]));
 }
 
+function adminMuatPilihanProdukUlasan(){
+    const sel=document.getElementById("adminProdukUlasan");
+    if(!sel) return;
+    database.ref("produk").once("value").then(snap=>{
+        const data=snap.val()||{};
+        const opts=Object.entries(data).map(([id,p])=>`<option value="${adminEsc(id)}">${adminEsc(p?.nama||id)}</option>`).join("");
+        sel.innerHTML='<option value="">Pilih produk untuk ulasan</option>'+opts;
+    }).catch(()=>{});
+}
+
 function adminRenderUlasan(data){
     const box = document.getElementById("adminDaftarUlasan");
     if (!box) return;
@@ -2427,9 +2580,11 @@ function adminRenderUlasan(data){
         return `<div class="card" style="margin-bottom:15px">
             <b>👤 ${adminEsc(u.nama || "Pelanggan")}</b>
             <span style="font-size:12px;opacity:.7;margin-left:8px">(${sumber})</span>
+            ${u.productId ? `<div style="margin-top:5px;color:#0b4d3b;font-weight:800;font-size:12px">🌱 Produk: ${adminEsc(u.productName||u.productId)}</div>` : `<div style="margin-top:5px;color:#9a6b00;font-size:12px">Ulasan lama tanpa produk tertentu</div>`}
             <div style="color:#ff9800;margin:6px 0">${"⭐".repeat(rating)}</div>
             <small>${adminEsc(u.tanggal || "")}</small>
             <p style="white-space:pre-wrap">${adminEsc(u.isi || "")}</p>
+            ${u.foto ? `<img src="${adminEsc(u.foto)}" alt="Foto ulasan" loading="lazy" style="display:block;width:100%;max-width:420px;max-height:320px;object-fit:cover;border-radius:12px;margin:10px 0;border:1px solid #ddd">` : ""}
             <button type="button" style="background:#c62828" onclick="adminHapusUlasan('${adminEsc(id)}')">🗑️ Hapus</button>
         </div>`;
     }).join("");
@@ -2444,21 +2599,68 @@ database.ref("ulasan").on("value", snapshot => {
     if (box) box.innerHTML = `<p style="color:#c62828">❌ Tidak dapat memuat ulasan: ${adminEsc(error.message)}</p>`;
 });
 
+function adminPreviewFotoUlasan(event){
+    const file=event?.target?.files?.[0];
+    const wrap=document.getElementById("adminPreviewFotoUlasan");
+    const img=document.getElementById("adminPreviewFotoUlasanImg");
+    if(!file){ adminHapusFotoUlasan(); return; }
+    if(!file.type || !file.type.startsWith("image/")){
+        alert("❌ File harus berupa gambar.");
+        event.target.value="";
+        adminHapusFotoUlasan();
+        return;
+    }
+    const r=new FileReader();
+    r.onload=e=>{img.src=e.target.result;wrap.style.display="block";};
+    r.readAsDataURL(file);
+}
+function adminHapusFotoUlasan(){
+    const input=document.getElementById("adminFotoUlasan");
+    const wrap=document.getElementById("adminPreviewFotoUlasan");
+    const img=document.getElementById("adminPreviewFotoUlasanImg");
+    if(input) input.value="";
+    if(img) img.removeAttribute("src");
+    if(wrap) wrap.style.display="none";
+}
+function adminKompresFotoUlasan(file){
+    return new Promise((resolve,reject)=>{
+        const r=new FileReader();
+        r.onerror=()=>reject(new Error("Foto tidak dapat dibaca."));
+        r.onload=e=>{
+            const img=new Image();
+            img.onerror=()=>reject(new Error("Foto tidak valid."));
+            img.onload=()=>{
+                const max=1000, scale=Math.min(1,max/Math.max(img.width,img.height));
+                const c=document.createElement("canvas");
+                c.width=Math.max(1,Math.round(img.width*scale)); c.height=Math.max(1,Math.round(img.height*scale));
+                c.getContext("2d").drawImage(img,0,0,c.width,c.height);
+                let q=.72, data=c.toDataURL("image/jpeg",q);
+                while(data.length>650000 && q>.45){q-=.06;data=c.toDataURL("image/jpeg",q);}
+                if(data.length>700000) reject(new Error("Foto terlalu besar setelah dikompres.")); else resolve(data);
+            };
+            img.src=e.target.result;
+        };
+        r.readAsDataURL(file);
+    });
+}
+
 async function adminTambahUlasan(){
     const nama = document.getElementById("adminNamaUlasan")?.value.trim();
+    const productId = document.getElementById("adminProdukUlasan")?.value || "";
+    const productName = document.getElementById("adminProdukUlasan")?.selectedOptions?.[0]?.textContent?.trim() || "";
     const rating = Number(document.getElementById("adminRatingUlasan")?.value || 5);
     const isi = document.getElementById("adminIsiUlasan")?.value.trim();
+    const file = document.getElementById("adminFotoUlasan")?.files?.[0] || null;
 
-    if (!nama || !isi) {
-        alert("Nama dan isi ulasan wajib diisi.");
+    if (!nama || !isi || !productId) {
+        alert("Pilih produk, isi nama, dan isi ulasan terlebih dahulu.");
         return;
     }
 
     try {
+        const foto = file ? await adminKompresFotoUlasan(file) : "";
         await database.ref("ulasan").push({
-            nama,
-            rating,
-            isi,
+            nama, productId, productName, rating, isi, foto,
             waktu: Date.now(),
             tanggal: new Date().toLocaleString("id-ID"),
             dibuatOlehAdmin: true
@@ -2467,11 +2669,15 @@ async function adminTambahUlasan(){
         document.getElementById("adminNamaUlasan").value = "";
         document.getElementById("adminIsiUlasan").value = "";
         document.getElementById("adminRatingUlasan").value = "5";
+        const ps=document.getElementById("adminProdukUlasan"); if(ps) ps.value="";
+        adminHapusFotoUlasan();
         alert("✅ Ulasan berhasil ditambahkan.");
     } catch(e) {
         alert("❌ Gagal menambahkan ulasan: " + e.message);
     }
 }
+
+adminMuatPilihanProdukUlasan();
 
 async function adminHapusUlasan(id){
     if (!id) return;
@@ -2686,11 +2892,12 @@ async function adminHapusUlasan(id){
   };
 
   window.muatBiteshipCenter = function(onlyActive=false){
+    return window.adminAuthReady.then(async function(){
     const box=document.getElementById("daftarBiteshipCenter"); if(!box || !window.database) return;
     const filter=document.getElementById("filterBiteshipStatus")?.value || "semua";
     const q=(document.getElementById("cariBiteshipCenter")?.value||"").trim().toLowerCase();
     box.innerHTML="⏳ Memuat pengiriman...";
-    window.database.ref("pesanan").once("value").then(snap=>{
+    window.adminDbGet("pesanan").then(snap=>{
       let arr=Object.entries(snap.val()||{}).map(([id,o])=>({id,o:o||{}})).filter(x=>x.o.biteshipOrderId);
       const all=arr.map(x=>x.o);
       document.getElementById("bsTotalOrder").textContent=String(arr.length);
@@ -2713,6 +2920,7 @@ async function adminHapusUlasan(id){
         return `<tr><td><b>${esc(o.nama||"Pelanggan")}</b><br><small>${esc(o.whatsapp||"")}</small></td><td><b>${esc(o.invoice||id)}</b><br><small>${esc(o.biteshipOrderId||"")}</small></td><td>${esc(o.biteshipCourier||o.kurirNama||"-")}<br><small>${esc(o.biteshipCourierType||o.layananNama||"-")}</small></td><td><b>${esc(o.resi||"Menunggu")}</b></td><td><span class="biteship-raw">${esc(rs)}</span></td><td><span class="status-badge">${esc(adminSt)}</span></td><td>${rupiah(o.biteshipShippingPrice||o.ongkir)}</td><td>${rupiah(o.total)}</td><td>${esc(o.biteshipLastWebhookAt||o.biteshipLastSyncAt||"-")}</td><td style="white-space:nowrap;">${link?`<a href="${esc(link)}" target="_blank" rel="noopener" style="display:inline-block;margin-bottom:5px;">🔗 Tracking</a><br>`:""}<button type="button" onclick="lihatTrackingBiteship('${esc(id)}')">📍 Detail</button> <button type="button" onclick="sinkronkanStatusBiteship('${esc(id)}',false)">🔄 Sync</button> <button type="button" onclick="cetakLabelPengiriman('${esc(id)}')">🖨️ Label</button>${["confirmed","scheduled","allocated","picking_up"].includes(rs)?`<br><button type="button" onclick="batalkanPengirimanBiteship('${esc(id)}')" style="background:#c62828;margin-top:5px;">❌ Batalkan</button>`:""}</td></tr>`;
       }).join('')+'</tbody></table></div>';
     }).catch(e=>{box.innerHTML='<div style="padding:14px;color:#c62828;">❌ Gagal memuat Biteship Center: '+esc(e.message)+'</div>';});
+    });
   };
   if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",()=>window.muatBiteshipCenter()); else window.muatBiteshipCenter();
 })();
@@ -2787,6 +2995,7 @@ async function adminHapusUlasan(id){
   function tanggalAt(order){ return Number(order.danaSelesaiAt || order.codDibayarAt || order.dikonfirmasiAt || order.waktu || 0); }
 
   window.muatKeuanganAdmin = function(){
+    return window.adminAuthReady.then(async function(){
     const box=document.getElementById("daftarKeuanganAdmin");
     if(!box || !window.database) return;
     const jenis=document.getElementById("filterKeuanganJenis")?.value || "selesai";
@@ -2796,7 +3005,7 @@ async function adminHapusUlasan(id){
     const maxAt=sampai ? new Date(sampai+"T23:59:59.999").getTime() : Infinity;
     box.innerHTML="⏳ Memuat data keuangan...";
 
-    window.database.ref("pesanan").once("value").then(snap=>{
+    window.adminDbGet("pesanan").then(snap=>{
       const data=snap.val()||{};
       let arr=Object.entries(data).map(([id,o])=>({id,order:o||{}}));
       arr=arr.filter(x=>{
@@ -2836,6 +3045,7 @@ async function adminHapusUlasan(id){
         </tr>`;
       }).join("")}</tbody></table></div>`;
     }).catch(e=>{box.innerHTML='<div style="padding:14px;color:#c62828;">❌ Gagal memuat keuangan: '+keuEsc(e.message)+'</div>';});
+    });
   };
 
   if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",()=>window.muatKeuanganAdmin());
@@ -2851,11 +3061,12 @@ async function adminHapusUlasan(id){
   function wdDanaSelesai(o){ const st=String(o?.statusPembayaran||"").toLowerCase(); return wdIsCOD(o) ? (o.status==="COD Lunas" || st.includes("lunas (cod)") || st==="lunas") : st.includes("lunas"); }
   function wdCompletedTotal(data){ let n=0; Object.values(data||{}).forEach(o=>{ if(wdDanaSelesai(o)) n += Math.max(0,Number(o.total||0)); }); return n; }
   async function wdGet(){
-    const [ps,ws]=await Promise.all([window.database.ref("pesanan").once("value"),window.database.ref("penarikan").once("value")]);
+    const [ps,ws]=await Promise.all([window.adminDbGet("pesanan"),window.adminDbGet("penarikan")]);
     return {orders:ps.val()||{}, withdrawals:ws.val()||{}};
   }
   function wdReserved(ws){ let n=0; Object.values(ws||{}).forEach(w=>{ if(["Menunggu","Diproses","Berhasil"].includes(String(w.status||""))) n+=Math.max(0,Number(w.jumlah||0)); }); return n; }
   async function muatPenarikanDana(){
+    await window.adminAuthReady;
     if(!window.database) return;
     const info=document.getElementById("wdSaldoInfo"), box=document.getElementById("wdRiwayat"); if(!info||!box) return;
     try{
@@ -2894,7 +3105,7 @@ async function adminHapusUlasan(id){
       if(!yakin) return;
 
       if(btn){btn.disabled=true; btn.textContent="⏳ Menyimpan...";}
-      const ref=window.database.ref("penarikan").push(); const now=Date.now();
+      const ref=window.adminRef("penarikan").push(); const now=Date.now();
       await ref.set({bank,namaPemilik:nama,nomorRekening:rekening,jumlah,status:"Menunggu",diajukanAt:now,diajukanPada:new Date(now).toLocaleString("id-ID"),catatan:"Pencairan manual"});
       document.getElementById("wdRekening").value=""; document.getElementById("wdJumlah").value="";
       showNotice(true,"✅ Pengajuan penarikan berhasil! "+wdRp(jumlah)+" sedang menunggu proses transfer.");
@@ -2908,9 +3119,9 @@ async function adminHapusUlasan(id){
       if(btn){btn.disabled=false; btn.textContent="💸 Ajukan Penarikan";}
     }
   };
-  window.prosesPenarikanDana=async function(id){ if(!confirm("Ubah penarikan ini menjadi Diproses?")) return; await window.database.ref("penarikan/"+id).update({status:"Diproses",diprosesAt:Date.now(),diprosesPada:new Date().toLocaleString("id-ID")}); await muatPenarikanDana(); };
-  window.berhasilPenarikanDana=async function(id){ if(!confirm("Pastikan transfer bank sudah benar-benar dilakukan. Tandai penarikan sebagai BERHASIL?")) return; await window.database.ref("penarikan/"+id).update({status:"Berhasil",berhasilAt:Date.now(),berhasilPada:new Date().toLocaleString("id-ID")}); await muatPenarikanDana(); };
-  window.tolakPenarikanDana=async function(id){ if(!confirm("Tolak pengajuan penarikan ini? Saldo akan kembali tersedia.")) return; await window.database.ref("penarikan/"+id).update({status:"Ditolak",ditolakAt:Date.now(),ditolakPada:new Date().toLocaleString("id-ID")}); await muatPenarikanDana(); };
+  window.prosesPenarikanDana=async function(id){ if(!confirm("Ubah penarikan ini menjadi Diproses?")) return; await window.adminRef("penarikan/"+id).update({status:"Diproses",diprosesAt:Date.now(),diprosesPada:new Date().toLocaleString("id-ID")}); await muatPenarikanDana(); };
+  window.berhasilPenarikanDana=async function(id){ if(!confirm("Pastikan transfer bank sudah benar-benar dilakukan. Tandai penarikan sebagai BERHASIL?")) return; await window.adminRef("penarikan/"+id).update({status:"Berhasil",berhasilAt:Date.now(),berhasilPada:new Date().toLocaleString("id-ID")}); await muatPenarikanDana(); };
+  window.tolakPenarikanDana=async function(id){ if(!confirm("Tolak pengajuan penarikan ini? Saldo akan kembali tersedia.")) return; await window.adminRef("penarikan/"+id).update({status:"Ditolak",ditolakAt:Date.now(),ditolakPada:new Date().toLocaleString("id-ID")}); await muatPenarikanDana(); };
   if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",muatPenarikanDana); else muatPenarikanDana();
 })();
 </script>
@@ -2944,15 +3155,16 @@ async function adminHapusUlasan(id){
   }
 
   window.muatPembayaranAdmin = function(){
+    return window.adminAuthReady.then(async function(){
     const box = document.getElementById("daftarPembayaranAdmin");
     const filter = document.getElementById("filterPembayaranAdmin")?.value || "semua";
     if(!box || !window.database) return;
 
     box.innerHTML = "⏳ Memuat pembayaran...";
 
-    window.database.ref("pembayaran").once("value").then(async snap => {
+    window.adminDbGet("pembayaran").then(async snap => {
       const pembayaran = snap.val() || {};
-      const ordersSnap = await window.database.ref("pesanan").once("value");
+      const ordersSnap = await window.adminDbGet("pesanan");
       const orders = ordersSnap.val() || {};
 
       let arr = Object.entries(pembayaran).map(([id,p]) => ({id,p:p||{},order:orders[id]||{}}));
@@ -3001,6 +3213,7 @@ async function adminHapusUlasan(id){
       }).join("");
     }).catch(e => {
       box.innerHTML = '<div style="padding:14px;color:#c62828;">❌ Gagal memuat pembayaran: '+esc(e.message)+'</div>';
+    });
     });
   };
 
@@ -3290,7 +3503,10 @@ function renderProdukAdmin(){
       if(typeof muatNotifikasiTokoAdmin === "function") muatNotifikasiTokoAdmin();
     }, 0);
   }
-  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init);else init();
+  function startAdminAfterAuth(){
+    window.adminAuthReady.then(function(){ init(); });
+  }
+  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",startAdminAfterAuth); else startAdminAfterAuth();
 
 function renderProdukAdmin(){
   if(typeof window.renderAdminDaftarProduk === "function") window.renderAdminDaftarProduk();
@@ -3301,13 +3517,13 @@ function renderProdukAdmin(){
 <script id="admin-pro-functions">
 function showAdminProSection(sec){const tab=document.querySelector('.admin-tab[data-section="'+sec+'"]');if(tab)tab.click();}window.showAdminProSection=showAdminProSection;
 function proRp(n){return "Rp "+Number(n||0).toLocaleString("id-ID");}
-async function muatProDashboard(){if(typeof database==="undefined")return;try{const [ps,prod,pay,ret]=await Promise.all([database.ref("pesanan").once("value"),database.ref("produk").once("value"),database.ref("pembayaran").once("value"),database.ref("pengembalian").once("value")]);const orders=Object.values(ps.val()||{}),products=Object.values(prod.val()||{}),payments=Object.values(pay.val()||{}),returns=Object.values(ret.val()||{});const status=o=>String(o?.status||"").toLowerCase();const newOrders=orders.filter(o=>/menunggu|baru/i.test(status(o))).length;const low=products.filter(p=>{const v=Array.isArray(p.variants)?p.variants.reduce((n,x)=>n+Number(x?.stok||0),0):Number(p.stok||0);return v>0&&v<=10;}).length;const paid=payments.filter(p=>/lunas|berhasil|paid|success/i.test(String(p.status||""))).length;const revenue=orders.filter(o=>/lunas|selesai|cod/i.test(status(o))||o.pembayaranStatus==="lunas").reduce((n,o)=>n+Number(o.totalBayar||o.total||o.grandTotal||0),0);const refundDone=returns.filter(r=>/selesai|dana dikembalikan/i.test(String(r.refundStatus||r.status||""))).length;const shipping=orders.filter(o=>/dikirim|buat pengiriman|diproses|dikemas/i.test(status(o))).length;const set=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};set("proDashOrders",orders.length);set("proDashNew",newOrders+" pesanan baru");set("proDashProducts",products.length);set("proDashLowStock",low+" stok rendah");set("proDashPayments",payments.length);set("proDashPaid",paid+" lunas");set("proDashRevenue",proRp(revenue));set("proDashReturns",returns.length);set("proDashRefund",refundDone+" refund selesai");set("proDashShipping",shipping);set("proDashUpdated","Diperbarui: "+new Date().toLocaleString("id-ID"));}catch(e){const el=document.getElementById("proDashUpdated");if(el)el.textContent="Gagal memuat ringkasan: "+e.message;}}
+async function muatProDashboard(){await window.adminAuthReady;if(typeof database==="undefined")return;try{const [ps,prod,pay,ret]=await Promise.all([window.adminDbGet("pesanan"),database.ref("produk").once("value"),window.adminDbGet("pembayaran"),window.adminDbGet("pengembalian")]);const orders=Object.values(ps.val()||{}),products=Object.values(prod.val()||{}),payments=Object.values(pay.val()||{}),returns=Object.values(ret.val()||{});const status=o=>String(o?.status||"").toLowerCase();const newOrders=orders.filter(o=>/menunggu|baru/i.test(status(o))).length;const low=products.filter(p=>{const v=Array.isArray(p.variants)?p.variants.reduce((n,x)=>n+Number(x?.stok||0),0):Number(p.stok||0);return v>0&&v<=10;}).length;const paid=payments.filter(p=>/lunas|berhasil|paid|success/i.test(String(p.status||""))).length;const revenue=orders.filter(o=>/lunas|selesai|cod/i.test(status(o))||o.pembayaranStatus==="lunas").reduce((n,o)=>n+Number(o.totalBayar||o.total||o.grandTotal||0),0);const refundDone=returns.filter(r=>/selesai|dana dikembalikan/i.test(String(r.refundStatus||r.status||""))).length;const shipping=orders.filter(o=>/dikirim|buat pengiriman|diproses|dikemas/i.test(status(o))).length;const set=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};set("proDashOrders",orders.length);set("proDashNew",newOrders+" pesanan baru");set("proDashProducts",products.length);set("proDashLowStock",low+" stok rendah");set("proDashPayments",payments.length);set("proDashPaid",paid+" lunas");set("proDashRevenue",proRp(revenue));set("proDashReturns",returns.length);set("proDashRefund",refundDone+" refund selesai");set("proDashShipping",shipping);set("proDashUpdated","Diperbarui: "+new Date().toLocaleString("id-ID"));}catch(e){const el=document.getElementById("proDashUpdated");if(el)el.textContent="Gagal memuat ringkasan: "+e.message;}}
 window.muatProDashboard=muatProDashboard;
 function escProNotif(v){return String(v==null?"":v).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;"}[c]));}
 function renderNotifikasiTokoAdmin(data){const box=document.getElementById("proNotifList");if(!box)return;const rows=Object.entries(data||{}).map(([id,v])=>({id,v:v||{}})).sort((a,b)=>Number(b.v.createdAt||0)-Number(a.v.createdAt||0));if(!rows.length){box.innerHTML='<div style="padding:14px;border:1px dashed #ccc;border-radius:12px;color:#777;text-align:center">Belum ada notifikasi toko.</div>';return;}box.innerHTML=rows.map(x=>'<div class="pro-notif-item"><div class="row"><b>'+escProNotif(x.v.title||"Informasi Toko")+'</b><span class="pro-notif-badge">'+escProNotif(x.v.type||"Info")+' · '+(x.v.active===false?"Disembunyikan":"Aktif")+'</span></div><p>'+escProNotif(x.v.message||"")+'</p><small>'+(x.v.createdAt?new Date(Number(x.v.createdAt)).toLocaleString("id-ID"):"")+'</small><br><button type="button" onclick="hapusNotifikasiToko(\''+escProNotif(x.id)+'\')">🗑️ Hapus</button></div>').join("");}
-async function muatNotifikasiTokoAdmin(){if(typeof database==="undefined")return;database.ref("notifikasiToko").on("value",s=>renderNotifikasiTokoAdmin(s.val()||{}));}
-async function simpanNotifikasiToko(){const title=document.getElementById("proNotifTitle")?.value.trim(),message=document.getElementById("proNotifMessage")?.value.trim(),type=document.getElementById("proNotifType")?.value||"Info",active=document.getElementById("proNotifActive")?.checked!==false;if(!title||!message)return alert("Judul dan isi informasi wajib diisi.");try{await database.ref("notifikasiToko").push({title,message,type,active,createdAt:Date.now(),createdBy:window.userLogin?.email||"admin"});document.getElementById("proNotifTitle").value="";document.getElementById("proNotifMessage").value="";alert("✅ Informasi toko dipublikasikan.");}catch(e){alert("❌ Gagal menyimpan informasi: "+e.message);}}
-async function hapusNotifikasiToko(id){if(!confirm("Hapus informasi ini?"))return;try{await database.ref("notifikasiToko/"+id).remove();}catch(e){alert("❌ Gagal menghapus: "+e.message);}}
+async function muatNotifikasiTokoAdmin(){await window.adminAuthReady;if(typeof database==="undefined")return;database.ref("notifikasiToko").once("value").then(s=>renderNotifikasiTokoAdmin(s.val()||{})).catch(e=>console.error("Gagal memuat notifikasi toko:",e));}
+async function simpanNotifikasiToko(){const title=document.getElementById("proNotifTitle")?.value.trim(),message=document.getElementById("proNotifMessage")?.value.trim(),type=document.getElementById("proNotifType")?.value||"Info",active=document.getElementById("proNotifActive")?.checked!==false;if(!title||!message)return alert("Judul dan isi informasi wajib diisi.");try{await adminRef("notifikasiToko").push({title,message,type,active,createdAt:Date.now(),createdBy:window.userLogin?.email||"admin"});document.getElementById("proNotifTitle").value="";document.getElementById("proNotifMessage").value="";alert("✅ Informasi toko dipublikasikan.");}catch(e){alert("❌ Gagal menyimpan informasi: "+e.message);}}
+async function hapusNotifikasiToko(id){if(!confirm("Hapus informasi ini?"))return;try{await adminRef("notifikasiToko/"+id).remove();}catch(e){alert("❌ Gagal menghapus: "+e.message);}}
 window.simpanNotifikasiToko=simpanNotifikasiToko;window.hapusNotifikasiToko=hapusNotifikasiToko;window.muatNotifikasiTokoAdmin=muatNotifikasiTokoAdmin;
 </script>
 <script src="fitur-toko.js"></script>
@@ -3317,9 +3533,10 @@ window.simpanNotifikasiToko=simpanNotifikasiToko;window.hapusNotifikasiToko=hapu
 ========================= */
 function formatRupiahAdmin(n){ return "Rp "+Number(n||0).toLocaleString("id-ID"); }
 async function muatPengembalianAdmin(){
+  await window.adminAuthReady;
   const box=document.getElementById("daftarPengembalian"); if(!box) return;
   try{
-    const snap=await database.ref("pengembalian").once("value"), data=snap.val()||{};
+    const snap=await window.adminDbGet("pengembalian"), data=snap.val()||{};
     const rows=Object.entries(data).sort((a,b)=>String(b[1]?.updatedAt||"").localeCompare(String(a[1]?.updatedAt||"")));
     if(!rows.length){box.innerHTML="<p>Belum ada pengajuan pengembalian.</p>";return;}
     box.innerHTML=rows.map(([id,o])=>{
@@ -3349,14 +3566,14 @@ async function muatPengembalianAdmin(){
 }
 async function simpanStatusPengembalian(id){
   try{
-    const ref=database.ref("pengembalian/"+id), snap=await ref.once("value"), req=snap.val();
+    const ref=adminRef("pengembalian/"+id), snap=await ref.once("value"), req=snap.val();
     if(!req) return alert("Pengajuan tidak ditemukan.");
     const status=document.getElementById("ret-status-"+id)?.value||req.status||"Diajukan";
     const refundStatus=document.getElementById("ret-refund-"+id)?.value||req.refundStatus||"Belum Diproses";
     const now=new Date().toLocaleString("id-ID");
     await ref.update({status,refundStatus,updatedAt:now,adminDiperbaruiPada:now});
     if(req.orderId){
-      const orderRef=database.ref("pesanan/"+req.orderId);
+      const orderRef=adminRef("pesanan/"+req.orderId);
       const orderSnap=await orderRef.once("value"), order=orderSnap.val()||{};
       const updates={statusPengembalian:status,refundStatus};
       if(status==="Dana Dikembalikan" || refundStatus==="Selesai"){
@@ -3364,7 +3581,7 @@ async function simpanStatusPengembalian(id){
         updates.danaDikembalikan=true;
       }
       await orderRef.update(updates);
-      if(order.invoice) await database.ref("pelacakan/"+order.invoice).update({statusPengembalian:status,refundStatus,updatedAt:now});
+      if(order.invoice) await adminRef("pelacakan/"+order.invoice).update({statusPengembalian:status,refundStatus,updatedAt:now});
     }
     alert("✅ Status pengembalian diperbarui.");
     muatPengembalianAdmin();
@@ -3381,7 +3598,7 @@ function refundEsc(v){return String(v==null?"":v).replace(/[&<>"']/g,function(c)
 async function muatPengembalianAdmin(){
  const box=document.getElementById("daftarPengembalian"); if(!box||typeof database==="undefined")return;
  try{
-  const snap=await database.ref("pengembalian").once("value"), data=snap.val()||{};
+  const snap=await window.adminDbGet("pengembalian"), data=snap.val()||{};
   const rows=Object.entries(data).sort(function(a,b){return Number(b[1]?.updatedAtMs||0)-Number(a[1]?.updatedAtMs||0);});
   if(!rows.length){box.innerHTML="<p>Belum ada pengajuan pengembalian.</p>";return;}
   const statuses=["Diajukan","Disetujui","Ditolak","Menunggu Pengembalian","Pengembalian Diterima","Dana Dikembalikan"];
@@ -3396,15 +3613,53 @@ async function muatPengembalianAdmin(){
 }
 async function simpanStatusPengembalian(id){
  try{
-  const ref=database.ref("pengembalian/"+id),snap=await ref.once("value"),req=snap.val();if(!req)return alert("Pengajuan tidak ditemukan.");
+  const ref=adminRef("pengembalian/"+id),snap=await ref.once("value"),req=snap.val();if(!req)return alert("Pengajuan tidak ditemukan.");
   const status=document.getElementById("ret-status-"+id)?.value||req.status||"Diajukan",refundStatus=document.getElementById("ret-refund-"+id)?.value||req.refundStatus||"Belum Diproses",now=Date.now();
   await ref.update({status:status,refundStatus:refundStatus,updatedAtMs:now,updatedAt:new Date(now).toLocaleString("id-ID")});
-  if(req.orderId){await database.ref("pesanan/"+req.orderId).update({statusPengembalian:status,refundStatus:refundStatus,danaDikembalikan:status==="Dana Dikembalikan"||refundStatus==="Selesai",pengembalianSelesaiPada:(status==="Dana Dikembalikan"||refundStatus==="Selesai")?now:null});}
+  if(req.orderId){await adminRef("pesanan/"+req.orderId).update({statusPengembalian:status,refundStatus:refundStatus,danaDikembalikan:status==="Dana Dikembalikan"||refundStatus==="Selesai",pengembalianSelesaiPada:(status==="Dana Dikembalikan"||refundStatus==="Selesai")?now:null});}
   alert("✅ Status pengembalian diperbarui.");muatPengembalianAdmin();
  }catch(e){alert("❌ Gagal menyimpan: "+e.message);}
 }
 window.muatPengembalianAdmin=muatPengembalianAdmin;window.simpanStatusPengembalian=simpanStatusPengembalian;
 </script>
+
+<script id="status-order-dashboard-fix">
+(function(){
+  function esc(v){return String(v==null?"":v).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;"}[c]));}
+  const defs=[
+    ["Belum Bayar","💳","Menunggu pembayaran"],
+    ["Menunggu Konfirmasi COD","🤝","Menunggu konfirmasi COD"],
+    ["Dikemas","📦","Pesanan diproses"],
+    ["Buat Pengiriman","🚚","Order kurir dibuat"],
+    ["Dikirim","🚚","Paket sedang dikirim"],
+    ["COD Lunas","💰","COD sudah diterima"],
+    ["Beri Penilaian","⭐","Pesanan selesai / menunggu ulasan"],
+    ["Selesai","✅","Pesanan selesai"]
+  ];
+  function render(snap){
+    const box=document.getElementById("statusOrderSummary"); if(!box)return;
+    const data=snap.val()||{}, counts={};
+    Object.values(data).forEach(o=>{
+      let st=String(o?.status||"Menunggu Pembayaran");
+      if(st==="Menunggu Pembayaran") st="Belum Bayar";
+      if(st==="Lunas") st="Dikemas";
+      counts[st]=(counts[st]||0)+1;
+    });
+    box.innerHTML=defs.map(([st,icon,desc])=>{
+      const n=counts[st]||0;
+      return `<button type="button" onclick="bukaPesananDenganFilter(${JSON.stringify(st)})" style="text-align:left;padding:14px;border:1px solid #dfe8e2;border-radius:12px;background:${smtStatusFilter===st?"#e7f4ec":"#fff"};color:#173f30;cursor:pointer;box-shadow:0 2px 7px rgba(0,0,0,.04)"><div style="font-size:22px">${icon}</div><div style="font-weight:800;font-size:17px;margin-top:4px">${n}</div><div style="font-weight:800">${esc(st)}</div><small style="color:#6b7771">${esc(desc)}</small></button>`;
+    }).join("");
+  }
+  function start(){
+    if(typeof database==="undefined") return;
+    window.adminAuthReady.then(function(){
+      window.adminDbGet("pesanan").then(render);
+    });
+  }
+  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",start); else start();
+})();
+</script>
+
 </body>
 
 </html>

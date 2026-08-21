@@ -878,22 +878,8 @@ ulasan pelanggan
 <p>Belum ada ulasan.</p>
 </div>
 <hr style="margin:25px 0;"/>
-<h3>Tulis Ulasan</h3>
-<input id="namaUlasan" placeholder="Nama Anda"/>
-<select id="rating">
-<option value="5">⭐⭐⭐⭐⭐ Sangat Puas</option>
-<option value="4">⭐⭐⭐⭐ Puas</option>
-<option value="3">⭐⭐⭐ Cukup</option>
-<option value="2">⭐⭐ Kurang</option>
-<option value="1">⭐ Buruk</option>
-</select>
-<textarea id="isiUlasan" placeholder="Bagaimana pengalaman Anda?">
-</textarea>
-<button onclick="kirimUlasan()">
-
-⭐ Kirim Ulasan
-
-</button>
+<h3>⭐ Ulasan hanya dari pelanggan yang sudah menyelesaikan pesanan</h3>
+<p style="color:#66716c;line-height:1.6">Ulasan tidak dapat dibuat dari halaman umum. Setelah pesanan berstatus <b>Selesai</b>, buka <b>Pesanan Saya → ⭐ Nilai Produk</b> untuk memberi ulasan pada produk yang benar-benar dibeli.</p>
 </div>
 </section>
 <!-- =========================
@@ -3139,6 +3125,25 @@ async function smtCanonicalizeCartFromFirebase(db) {
     renderKeranjang();
 }
 
+function smtCreateReviewToken(){
+    try{
+        if(window.crypto && crypto.randomUUID) return crypto.randomUUID().replace(/-/g,"");
+        if(window.crypto && crypto.getRandomValues){
+            const a=new Uint32Array(8); crypto.getRandomValues(a);
+            return Array.from(a).map(x=>x.toString(36)).join("");
+        }
+    }catch(e){}
+    return String(Date.now())+Math.random().toString(36).slice(2)+Math.random().toString(36).slice(2);
+}
+function smtSaveLocalOrder(orderId, orderData, reviewToken){
+    try{
+        const list=JSON.parse(localStorage.getItem("smt_order_history")||"[]");
+        const item={orderId,invoice:orderData.invoice,nama:orderData.nama,whatsapp:orderData.whatsapp,total:orderData.total,tanggal:orderData.tanggal,status:orderData.status,reviewToken,produk:orderData.produk||[]};
+        const idx=list.findIndex(x=>x.orderId===orderId || (x.invoice && x.invoice===orderData.invoice));
+        if(idx>=0) list[idx]={...list[idx],...item}; else list.unshift(item);
+        localStorage.setItem("smt_order_history",JSON.stringify(list.slice(0,20)));
+    }catch(e){ console.warn("Riwayat lokal:",e); }
+}
 async function simpanPesanan() {
     pastikanKeranjangArray();
     if (finalOrderProcessing) return;
@@ -3244,8 +3249,13 @@ async function simpanPesanan() {
             changed.push({id:item.id, variantId:item.variantId || "", jumlah:Number(item.jumlah || 0)});
         }
 
+        const reviewToken = smtCreateReviewToken();
+        const produkIds = {};
+        keranjang.forEach(item => { produkIds[String(item.id)] = true; });
         const orderData = {
             invoice: "SMT-" + Date.now(),
+            reviewToken,
+            produkIds,
             nama, alamat, rt, rw, kodePos, whatsapp,
             provinsi: document.getElementById("provinsi")?.selectedOptions?.[0]?.textContent?.trim() || "",
             kabupaten: document.getElementById("kabupaten")?.selectedOptions?.[0]?.textContent?.trim() || "",
@@ -3292,6 +3302,7 @@ async function simpanPesanan() {
 
         finalLastOrderId = orderKey;
         localStorage.setItem("smt_last_order_id", orderKey);
+        smtSaveLocalOrder(orderKey, orderData, reviewToken);
 
         keranjang = [];
         simpanKeranjang();

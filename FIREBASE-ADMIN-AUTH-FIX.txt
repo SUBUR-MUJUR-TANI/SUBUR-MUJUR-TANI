@@ -1,0 +1,32 @@
+FIREBASE ADMIN AUTH + RULES FIX
+===============================
+
+Masalah utama:
+- admin.html membaca /pesanan dan /pembayaran sebagai koleksi (parent path).
+- Rules versi sebelumnya hanya memberi .read pada child $id, sehingga read ke parent tetap permission_denied.
+- Firebase Auth juga dipulihkan secara asynchronous, sehingga admin.html bisa melakukan request sebelum user admin siap.
+
+Perbaikan:
+1. database.rules.json memberi .read = auth != null pada parent /pesanan dan /pembayaran.
+2. Child rules tetap dipertahankan untuk akses order individual/customer dan write checkout.
+3. admin.html memiliki adminAuthReady dan semua pembacaan admin yang dilindungi menunggu Firebase Auth.
+4. getAdminIdToken() menunggu user admin valid sebelum mengambil ID token untuk Netlify Functions.
+5. login.html memakai Firebase Auth Persistence.SESSION sebelum sign-in.
+6. Login tidak lagi menjalankan signOut asynchronous yang bisa beradu dengan proses signIn.
+7. Data /pembayaran tetap private; tidak dibuka menjadi publik.
+8. COD dan Non-COD tetap dapat membuat pesanan/pembayaran baru karena write rule untuk data baru tetap mengizinkan checkout tanpa login.
+
+WAJIB SETELAH DEPLOY:
+- Firebase Console > Realtime Database > Rules
+- Tempel database.rules.json versi ini
+- Klik Publish
+- Deploy project Netlify yang berisi admin.html + database.rules.json
+
+
+VERSI ADMIN AUTH FIX V2
+- admin.html sekarang tidak membaca /pesanan, /pembayaran, /penarikan, /pengembalian sebagai anonymous.
+- Jika sesi Auth tidak ada, admin.html mengarahkan ke login.html terlebih dahulu.
+- Firebase Auth persistence LOCAL dipastikan sebelum query admin dimulai.
+- Sinkronisasi Biteship massal juga menunggu Auth.
+- Checkout pelanggan tetap boleh membuat pesanan baru tanpa login sesuai Rules; admin tetap wajib login.
+- Jika domain admin Netlify berbeda dari domain toko, login admin harus dilakukan pada domain admin tersebut karena sesi browser berbasis origin.

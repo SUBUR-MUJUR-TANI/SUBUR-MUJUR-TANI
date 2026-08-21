@@ -1,0 +1,15 @@
+PERBAIKAN ADMIN + FIREBASE AUTH + CHECKOUT
+==========================================
+
+Perbaikan pada ZIP ini:
+1. admin.html tidak lagi menjalankan query /pesanan, /pembayaran, /penarikan, dll sebelum Firebase Auth selesai dipulihkan.
+2. Jika sesi admin hilang, admin.html sekarang menampilkan login langsung di halaman, bukan membiarkan query anonymous menghasilkan permission_denied.
+3. Sesi Firebase Auth admin menggunakan LOCAL persistence agar tetap ada setelah reload/pindah halaman pada domain yang sama.
+4. login.html juga menggunakan LOCAL persistence.
+5. Struktur database.rules.json tetap memakai auth != null untuk data admin/private dan tetap mengizinkan checkout baru tanpa login pada child pesanan/pembayaran.
+6. COD dan non-COD pada checkout tetap menggunakan /pesanan dan /pembayaran seperti sebelumnya.
+
+PENTING:
+- Deploy ZIP ini ke SITE NETLIFY yang sama dengan yang digunakan untuk login/admin.
+- Firebase Console > Realtime Database > Rules harus berisi database.rules.json dari ZIP ini, lalu Publish.
+- Jika membuka admin melalui domain Netlify berbeda dari domain saat login, login ulang pada domain tersebut. Sesi Firebase Auth memang terikat ke origin/domain.

@@ -232,54 +232,24 @@ appId: "1:338009458768:web:c562a610cee4940b856955"
 
 firebase.initializeApp(firebaseConfig);
 
-// Setiap kali halaman Login Admin dibuka, sesi lama dibersihkan.
-// Dashboard hanya boleh dibuka setelah login berhasil dari halaman ini.
-try { sessionStorage.removeItem("smt_admin_login_verified"); } catch(e) {}
-firebase.auth().signOut().catch(function(){});
-
-function login(){
-
-
-let email =
-document.getElementById("email").value;
-
-
-let password =
-document.getElementById("password").value;
-
-
-
-firebase.auth()
-
-.signInWithEmailAndPassword(
-email,
-password
-)
-
-
-.then(function(){
-
-
-try { sessionStorage.setItem("smt_admin_login_verified", "1"); } catch(e) {}
-window.location="admin.html";
-
-
-})
-
-
-.catch(function(error){
-
-
-document.getElementById("pesan").innerHTML =
-
-"Login gagal: " + error.message;
-
-
-});
-
-
+// Sesi Firebase Auth disimpan di perangkat agar admin tetap terautentikasi saat berpindah halaman.
+// Jangan signOut otomatis hanya karena halaman login dibuka ulang.
+async function login(){
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value;
+  const pesan = document.getElementById("pesan");
+  if(!email || !password){ pesan.textContent = "Email dan password wajib diisi."; return; }
+  try {
+    await firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+    await firebase.auth().signInWithEmailAndPassword(email, password);
+    try { sessionStorage.setItem("smt_admin_login_verified", "1"); } catch(e) {}
+    const params = new URLSearchParams(window.location.search);
+    const target = params.get("return") === "admin.html" ? "admin.html" : "admin.html";
+    window.location.replace(target);
+  } catch(error) {
+    pesan.textContent = "Login gagal: " + error.message;
+  }
 }
-
 
 </script>
 <script src="navigasi.js"></script>
