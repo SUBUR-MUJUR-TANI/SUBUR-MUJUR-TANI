@@ -924,6 +924,17 @@ gram
 <!-- =========================
      CHECKOUT PEMBELI
 ========================= -->
+<div id="checkoutGuide" style="margin:0 0 14px;padding:15px;border:1px solid #cfe6da;border-radius:16px;background:linear-gradient(135deg,#f2faf5,#ffffff);box-shadow:0 5px 18px rgba(0,0,0,.05);">
+  <div style="font-weight:900;color:#0b5d49;font-size:17px;margin-bottom:6px">🧭 Panduan Checkout</div>
+  <div style="display:grid;gap:7px;color:#42534c;line-height:1.5">
+    <div><b>1️⃣ Isi data penerima</b> — silahkan isi nama, nomor WhatsApp, dan <b>alamat lengkap</b> sampai desa/kelurahan dan kode pos.</div>
+    <div><b>2️⃣ Pilih pengiriman</b> — pilih jenis, kurir, dan layanan. Setelah alamat lengkap, tekan <b>🚚 Hitung Ongkir</b>.</div>
+    <div><b>3️⃣ Periksa pesanan</b> — pastikan produk, alamat, ongkir, metode pembayaran, dan total sudah benar.</div>
+    <div><b>4️⃣ Buat pesanan</b> — jika semua sudah benar, tekan <b>🛒 Buat Pesanan</b>.</div>
+    <div><b>5️⃣ Setelah dikirim</b> — buka <b>🔎 Lacak Pesanan</b> untuk melihat status, nomor resi, riwayat perjalanan, dan <b>📍 lokasi terakhir paket</b> jika data lokasi tersedia dari kurir.</div>
+  </div>
+</div>
+
 <section class="container" id="checkout">
 <div class="box">
 <h2>📦 Data Pembeli</h2>
@@ -3569,7 +3580,9 @@ document.addEventListener("DOMContentLoaded", muatUlasan);
 <section class="container" id="trackingBox">
 <div class="box">
 <h2>🔎 Lacak Pesanan</h2>
-<p>Masukkan nomor invoice dan 4 digit terakhir nomor WhatsApp.</p>
+<div style="margin:0 0 12px;padding:12px 14px;background:#f2faf5;border:1px solid #d5e9df;border-radius:12px;line-height:1.55;color:#42534c">
+  <b>📌 Cara cek pengiriman:</b> masukkan nomor invoice dan 4 digit terakhir WhatsApp, lalu tekan <b>🔎 Cek Status Pesanan</b>. Setelah pesanan dikirim, bagian ini akan menampilkan <b>status, resi, kurir, riwayat perjalanan, dan lokasi paket terakhir</b> bila kurir mengirimkan data lokasi.
+</div>
 <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px">
   <input id="trackingInvoice" placeholder="Contoh: SMT-123456789"/>
   <input id="trackingLast4" maxlength="4" inputmode="numeric" placeholder="4 digit terakhir WhatsApp"/>

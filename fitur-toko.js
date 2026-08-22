@@ -263,29 +263,54 @@
       return;
     }
 
+    if (box) box.innerHTML = '<div style="padding:15px;background:#f5faf7;border-radius:12px">⏳ Mengambil status dan lokasi pengiriman...</div>';
     try {
-      const snap = await db().ref("pelacakan").child(invoice).once("value");
-      if (!snap.exists()) throw new Error("Pesanan tidak ditemukan.");
-      const data = snap.val() || {};
-      if (String(data.whatsappLast4 || "") !== last4) {
-        throw new Error("Data verifikasi tidak cocok.");
-      }
-      const history = Array.isArray(data.riwayatStatus) ? data.riwayatStatus : [];
+      const r = await fetch("/.netlify/functions/tracking-pesanan", {
+        method: "POST",
+        headers: {"Content-Type":"application/json"},
+        body: JSON.stringify({invoice, whatsappLast4:last4})
+      });
+      const payload = await r.json().catch(()=>({}));
+      if (!r.ok || payload.success === false) throw new Error(payload.message || "Gagal mengambil detail pengiriman.");
+      const data = payload.data || {};
+      const history = Array.isArray(data.riwayatLokasi) ? data.riwayatLokasi : [];
+      const active = ["Dikirim","Dalam Perjalanan","Dikemas","Buat Pengiriman"].includes(String(data.status || ""));
+      const location = data.lokasiSekarang || "Lokasi terakhir belum dikirim oleh kurir.";
+      const historyHtml = history.length ? history.slice().reverse().map((h, i) => `
+        <div style="position:relative;padding:11px 0 11px 28px;border-bottom:1px solid #edf1ee">
+          <span style="position:absolute;left:5px;top:15px;width:10px;height:10px;border-radius:50%;background:${i===0?'#0b5d49':'#9cc9b8'};box-shadow:0 0 0 4px #e8f4ef"></span>
+          <div style="font-weight:800;color:#164e41">${esc(h.status || "Pembaruan pengiriman")}</div>
+          ${h.lokasi ? `<div style="margin-top:3px">📍 <b>${esc(h.lokasi)}</b></div>` : ""}
+          ${h.catatan && h.catatan !== h.status ? `<div style="margin-top:3px;color:#66736d">${esc(h.catatan)}</div>` : ""}
+          <small style="color:#7b8781">${esc(h.waktu || "Waktu tidak tersedia")}</small>
+        </div>`).join("") : '<p style="color:#69756f">Belum ada riwayat lokasi dari kurir.</p>';
+
       box.innerHTML = `
-        <div style="padding:15px;background:#e8f5e9;border-radius:10px">
-          <b>Invoice:</b> ${esc(data.invoice)}<br>
-          <b>Nama:</b> ${esc(data.nama || "-")}<br>
-          <b>Status:</b> <strong>${esc(data.status || "-")}</strong><br>
-          <b>Resi:</b> ${esc(data.resi || "Belum tersedia")}<br>
-          <b>Terakhir diperbarui:</b> ${esc(data.updatedAt || "-")}
+        <div style="padding:16px;background:linear-gradient(135deg,#e9f7ef,#f8fcfa);border:1px solid #cde7d8;border-radius:16px">
+          <div style="font-size:13px;color:#66736d">📦 Detail Pengiriman</div>
+          <div style="font-size:21px;font-weight:900;color:#0b5d49;margin:3px 0 10px">${esc(data.status || "-")}</div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px">
+            <div style="background:#fff;padding:10px;border-radius:10px"><small>Invoice</small><br><b>${esc(data.invoice || invoice)}</b></div>
+            <div style="background:#fff;padding:10px;border-radius:10px"><small>Resi</small><br><b>${esc(data.resi || "Belum tersedia")}</b></div>
+            <div style="background:#fff;padding:10px;border-radius:10px"><small>Kurir</small><br><b>${esc(data.kurir || "-")}</b></div>
+            ${data.eta ? `<div style="background:#fff;padding:10px;border-radius:10px"><small>Perkiraan Tiba</small><br><b>${esc(data.eta)}</b></div>` : ""}
+          </div>
+          <div style="margin-top:10px;padding:12px;background:#fff;border-radius:11px;border-left:4px solid #0b5d49">
+            <div style="font-size:12px;color:#69756f">📍 Posisi paket terakhir</div>
+            <b>${esc(location)}</b>
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">
+            <button type="button" onclick="cekStatusPesanan()">🔄 Perbarui Posisi</button>
+            ${data.trackingUrl ? `<a href="${esc(data.trackingUrl)}" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;padding:10px 13px;border-radius:9px;background:#e1f1ea;color:#0b5d49;font-weight:800;text-decoration:none">🗺️ Buka Live Tracking</a>` : ""}
+          </div>
+          ${active ? `<div style="margin-top:9px;font-size:12px;color:#69756f">🔄 Status dapat berubah mengikuti pembaruan dari kurir.</div>` : ""}
         </div>
-        <h4>Riwayat Status</h4>
-        ${history.length
-          ? history.map(h => `<div style="padding:9px;border-bottom:1px solid #eee"><b>${esc(h.status)}</b><br><small>${esc(h.waktu || "")}</small></div>`).join("")
-          : "<p>Belum ada riwayat status.</p>"}
-      `;
+        <div style="margin-top:14px;padding:14px;background:#fff;border:1px solid #e2e8e4;border-radius:14px">
+          <h4 style="margin:0 0 8px;color:#164e41">📍 Perjalanan Paket</h4>
+          ${historyHtml}
+        </div>`;
     } catch (e) {
-      if (box) box.innerHTML = `<span style="color:#c62828">❌ ${esc(e.message)}</span>`;
+      if (box) box.innerHTML = `<div style="padding:13px;background:#fff3f3;border-radius:10px;color:#b42318">❌ ${esc(e.message)}</div>`;
     }
   }
 
