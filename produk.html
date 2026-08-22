@@ -3297,46 +3297,81 @@ function muatUlasan() {
     if(sum)sum.textContent='⭐ '+avg.toFixed(1)+' · '+rows.length+' ulasan';
     box.innerHTML=rows.map(x=>{const u=x.u;return `<article style="border:1px solid #e2e8e3;border-radius:12px;padding:12px;margin-top:9px;background:#fff;"><div><b>👤 ${esc(u.nama||'Pelanggan')}</b> <span style="color:#ff9800">${'⭐'.repeat(Math.max(1,Math.min(5,Number(u.rating)||5)))}</span></div><small style="color:#777">${esc(u.tanggal||'')}</small><p style="white-space:pre-wrap;margin:7px 0;">${esc(u.isi||'')}</p>${u.foto?`<img src="${esc(u.foto)}" alt="Foto ulasan" loading="lazy" style="display:block;width:100%;max-width:420px;max-height:260px;object-fit:cover;border-radius:10px;border:1px solid #ddd;">`:''}</article>`}).join('');
   }
+  async function smtFetchReviewsViaNetlify(pid,pname){
+    const qs='?productId='+encodeURIComponent(String(pid||''))+'&productName='+encodeURIComponent(String(pname||''));
+    const controller = new AbortController();
+    const timer = setTimeout(()=>controller.abort(), 8000);
+    try{
+      const response=await fetch('/.netlify/functions/product-reviews'+qs,{cache:'no-store',headers:{'Accept':'application/json'},signal:controller.signal});
+      const result=await response.json().catch(()=>({}));
+      if(!response.ok || result.success===false) throw new Error(result.message||('HTTP '+response.status));
+      return sanitizeReviewData(result.data||{});
+    }finally{
+      clearTimeout(timer);
+    }
+  }
+
+  async function smtFetchReviewsViaFirebase(pid,pname){
+    const d=db();
+    if(!d) throw new Error('Firebase Database belum siap.');
+    const ref=d.ref('ulasan');
+    const snap=await Promise.race([
+      ref.once('value'),
+      new Promise((_,reject)=>setTimeout(()=>reject(new Error('Timeout membaca Firebase.')),6000))
+    ]);
+    return snap.val()||{};
+  }
+
   window.smtLoadProductReviews=function(pid,pname){
     currentReviewProductId=String(pid||'');
     const currentProductName=String(pname||'');
+    const requestProductId=currentReviewProductId;
+    const requestProductName=currentProductName;
     const box=document.getElementById('smtProductReviewList');
     const sum=document.getElementById('smtProductReviewSummary');
     if(box) box.innerHTML='<small style="color:#777;">⏳ Memuat ulasan...</small>';
     if(sum) sum.textContent='';
     if(reviewListenerRef){try{reviewListenerRef.off();}catch(e){}reviewListenerRef=null;}
-    const d=db();
-    if(!d){
-      if(box) box.innerHTML='<div style="padding:12px;border:1px solid #f0caca;border-radius:11px;color:#c62828;font-size:13px;">❌ Firebase belum siap. Silakan refresh halaman.</div>';
-      return;
-    }
-    const ref=d.ref('ulasan');
-    reviewListenerRef=ref;
-    // Ambil sekali terlebih dahulu agar daftar tidak pernah tertahan di
-    // "Memuat ulasan..." walaupun listener mengalami keterlambatan.
-    ref.once('value').then(snap=>{
-      renderReviews(snap.val(),currentReviewProductId,currentProductName);
-    }).catch(async err=>{
-      console.warn('Baca ulasan Firebase langsung gagal, memakai fallback Netlify:',err);
+
+    // Prioritaskan endpoint Netlify. Endpoint ini memakai Firebase Admin,
+    // sehingga halaman pelanggan tidak bergantung pada izin baca Firebase
+    // client dan tidak akan menggantung pada status koneksi listener.
+    (async()=>{
       try{
-        const response=await fetch('/.netlify/functions/product-reviews?productId='+encodeURIComponent(currentReviewProductId)+'&productName='+encodeURIComponent(currentProductName),{cache:'no-store'});
-        const result=await response.json().catch(()=>({}));
-        if(!response.ok || result.success===false) throw new Error(result.message||'Gagal memuat ulasan.');
-        renderReviews(sanitizeReviewData(result.data||{}),currentReviewProductId,currentProductName);
-      }catch(fallbackErr){
-        console.error('Fallback ulasan produk gagal:',fallbackErr);
-        if(box) box.innerHTML='<div style="padding:12px;border:1px solid #f0caca;border-radius:11px;color:#c62828;font-size:13px;">❌ Ulasan belum dapat dimuat. Silakan coba lagi.</div>';
+        const data=await smtFetchReviewsViaNetlify(requestProductId,requestProductName);
+        if(requestProductId!==currentReviewProductId) return;
+        renderReviews(data,requestProductId,requestProductName);
+      }catch(netlifyErr){
+        console.warn('Endpoint ulasan Netlify gagal, mencoba Firebase:',netlifyErr);
+        try{
+          const data=await smtFetchReviewsViaFirebase(requestProductId,requestProductName);
+          if(requestProductId!==currentReviewProductId) return;
+          renderReviews(data,requestProductId,requestProductName);
+        }catch(firebaseErr){
+          console.error('Semua metode memuat ulasan gagal:',firebaseErr);
+          if(requestProductId===currentReviewProductId && box){
+            box.innerHTML='<div style="padding:12px;border:1px solid #f0caca;border-radius:11px;color:#c62828;font-size:13px;">❌ Ulasan belum dapat dimuat. Coba refresh halaman.</div>';
+          }
+        }
       }
-    });
-    ref.on('value',snap=>renderReviews(snap.val(),currentReviewProductId,currentProductName),err=>{
-      console.warn('Listener ulasan Firebase tidak tersedia:',err);
-    });
+    })();
+
+    // Listener hanya sebagai pembaruan langsung setelah data awal tampil.
+    const d=db();
+    if(d){
+      const ref=d.ref('ulasan');
+      reviewListenerRef=ref;
+      ref.on('value',snap=>{
+        if(requestProductId!==currentReviewProductId) return;
+        renderReviews(snap.val()||{},requestProductId,requestProductName);
+      },err=>console.warn('Listener ulasan Firebase tidak tersedia:',err));
+    }
 
     const wrap=document.getElementById('smtReviewFormWrap'); if(wrap)wrap.style.display='none';
     loadContextForProduct(currentReviewProductId).then(ctx=>{
       if(!ctx)return;
       const existsPath='ulasan/'+ctx.orderId+'__'+currentReviewProductId;
-      d.ref(existsPath).once('value').then(snap=>{
+      d?.ref(existsPath).once('value').then(snap=>{
         if(snap.exists()){
           if(wrap)wrap.style.display='block';
           const msg=document.getElementById('smtReviewFormMsg'); if(msg)msg.textContent='✅ Kamu sudah memberi ulasan untuk produk ini.';
