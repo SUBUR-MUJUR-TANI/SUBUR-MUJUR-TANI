@@ -2248,7 +2248,7 @@ function pmRenderGallery(){
           </button>`;
     }
 
-    if(typeof smtLoadProductReviews === "function") smtLoadProductReviews(product.id);
+    if(typeof smtLoadProductReviews === "function") smtLoadProductReviews(product.id, product.nama);
     thumbs.innerHTML = images.map((src,i)=>`
       <button type="button" class="smt-photo-thumb ${i===st.index?'active':''}" onclick="pmGalleryGo(${i})" aria-label="Lihat foto ${i+1}">
         <img src="${pmEscape(src)}" alt="Foto ${i+1}" loading="lazy">
@@ -3267,16 +3267,39 @@ function muatUlasan() {
       return reviewContext;
     }catch(e){return null;}
   }
-  function renderReviews(data,pid){
+  function normalizeName(v){
+    return String(v||'').trim().toLowerCase().replace(/\s+/g,' ');
+  }
+  function reviewBelongsToProduct(u,pid,pname){
+    const reviewId=String(u?.productId||'').trim();
+    if(reviewId && reviewId===String(pid||'').trim()) return true;
+    const reviewName=normalizeName(u?.productName||'');
+    const productName=normalizeName(pname||'');
+    return !!reviewName && !!productName && reviewName===productName;
+  }
+  function sanitizeReviewData(data){
+    const out={};
+    Object.entries(data||{}).forEach(([id,u])=>{
+      if(!u || typeof u!=='object') return;
+      out[id]={
+        nama:u.nama||'Pelanggan', productId:u.productId||'', productName:u.productName||'',
+        rating:Number(u.rating||5), isi:u.isi||'', foto:u.foto||'',
+        waktu:Number(u.waktu||0), tanggal:u.tanggal||'', dibuatOlehAdmin:!!u.dibuatOlehAdmin
+      };
+    });
+    return out;
+  }
+  function renderReviews(data,pid,pname){
     const box=document.getElementById('smtProductReviewList'),sum=document.getElementById('smtProductReviewSummary'); if(!box)return;
-    const rows=Object.entries(data||{}).map(([id,u])=>({id,u:u||{}})).filter(x=>String(x.u.productId||'')===String(pid)).sort((a,b)=>Number(b.u.waktu||0)-Number(a.u.waktu||0));
+    const rows=Object.entries(data||{}).map(([id,u])=>({id,u:u||{}})).filter(x=>reviewBelongsToProduct(x.u,pid,pname)).sort((a,b)=>Number(b.u.waktu||0)-Number(a.u.waktu||0));
     if(!rows.length){box.innerHTML='<div style="padding:12px;border:1px dashed #d8dfda;border-radius:11px;color:#777;font-size:13px;">Belum ada ulasan untuk produk ini.</div>';if(sum)sum.textContent='Belum ada ulasan';return;}
     const avg=rows.reduce((n,x)=>n+Number(x.u.rating||0),0)/rows.length;
     if(sum)sum.textContent='⭐ '+avg.toFixed(1)+' · '+rows.length+' ulasan';
     box.innerHTML=rows.map(x=>{const u=x.u;return `<article style="border:1px solid #e2e8e3;border-radius:12px;padding:12px;margin-top:9px;background:#fff;"><div><b>👤 ${esc(u.nama||'Pelanggan')}</b> <span style="color:#ff9800">${'⭐'.repeat(Math.max(1,Math.min(5,Number(u.rating)||5)))}</span></div><small style="color:#777">${esc(u.tanggal||'')}</small><p style="white-space:pre-wrap;margin:7px 0;">${esc(u.isi||'')}</p>${u.foto?`<img src="${esc(u.foto)}" alt="Foto ulasan" loading="lazy" style="display:block;width:100%;max-width:420px;max-height:260px;object-fit:cover;border-radius:10px;border:1px solid #ddd;">`:''}</article>`}).join('');
   }
-  window.smtLoadProductReviews=function(pid){
+  window.smtLoadProductReviews=function(pid,pname){
     currentReviewProductId=String(pid||'');
+    const currentProductName=String(pname||'');
     const box=document.getElementById('smtProductReviewList');
     const sum=document.getElementById('smtProductReviewSummary');
     if(box) box.innerHTML='<small style="color:#777;">⏳ Memuat ulasan...</small>';
@@ -3292,13 +3315,21 @@ function muatUlasan() {
     // Ambil sekali terlebih dahulu agar daftar tidak pernah tertahan di
     // "Memuat ulasan..." walaupun listener mengalami keterlambatan.
     ref.once('value').then(snap=>{
-      renderReviews(snap.val(),currentReviewProductId);
-    }).catch(err=>{
-      console.error('Gagal membaca ulasan produk:',err);
-      if(box) box.innerHTML='<div style="padding:12px;border:1px solid #f0caca;border-radius:11px;color:#c62828;font-size:13px;">❌ Ulasan belum dapat dimuat. Silakan coba lagi.</div>';
+      renderReviews(snap.val(),currentReviewProductId,currentProductName);
+    }).catch(async err=>{
+      console.warn('Baca ulasan Firebase langsung gagal, memakai fallback Netlify:',err);
+      try{
+        const response=await fetch('/.netlify/functions/product-reviews?productId='+encodeURIComponent(currentReviewProductId)+'&productName='+encodeURIComponent(currentProductName),{cache:'no-store'});
+        const result=await response.json().catch(()=>({}));
+        if(!response.ok || result.success===false) throw new Error(result.message||'Gagal memuat ulasan.');
+        renderReviews(sanitizeReviewData(result.data||{}),currentReviewProductId,currentProductName);
+      }catch(fallbackErr){
+        console.error('Fallback ulasan produk gagal:',fallbackErr);
+        if(box) box.innerHTML='<div style="padding:12px;border:1px solid #f0caca;border-radius:11px;color:#c62828;font-size:13px;">❌ Ulasan belum dapat dimuat. Silakan coba lagi.</div>';
+      }
     });
-    ref.on('value',snap=>renderReviews(snap.val(),currentReviewProductId),err=>{
-      console.error('Listener ulasan produk:',err);
+    ref.on('value',snap=>renderReviews(snap.val(),currentReviewProductId,currentProductName),err=>{
+      console.warn('Listener ulasan Firebase tidak tersedia:',err);
     });
 
     const wrap=document.getElementById('smtReviewFormWrap'); if(wrap)wrap.style.display='none';
