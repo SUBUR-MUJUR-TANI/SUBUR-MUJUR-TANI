@@ -1,4 +1,4 @@
-const CACHE = 'subur-mujur-tani-pwa-v10-admin-final';
+const CACHE = 'subur-mujur-tani-pwa-v11-review-fix';
 const SHELL = [
   '/index.html',
   '/login.html',

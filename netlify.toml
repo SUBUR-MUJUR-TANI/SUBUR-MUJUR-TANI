@@ -42,3 +42,10 @@
   [headers.values]
     Cache-Control = "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0"
     Pragma = "no-cache"
+
+# Pastikan halaman produk selalu mengambil versi terbaru setelah deploy.
+[[headers]]
+  for = "/produk.html"
+  [headers.values]
+    Cache-Control = "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0"
+    Pragma = "no-cache"

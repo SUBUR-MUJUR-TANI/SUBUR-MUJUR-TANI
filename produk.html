@@ -2230,9 +2230,9 @@ function pmRenderGallery(){
             : `<div style="color:#888;font-style:italic;">Belum ada deskripsi/keterangan produk.</div>`;
     }
 
+    const product = st.product || {};
     const actions = document.getElementById("smtPhotoActions");
     if(actions){
-        const product = st.product || {};
         const variants = Array.isArray(product.variants) ? product.variants.filter(v => v && v.nama) : [];
         const hasVariants = variants.length > 0;
         const stock = hasVariants
@@ -2248,7 +2248,16 @@ function pmRenderGallery(){
           </button>`;
     }
 
-    if(typeof smtLoadProductReviews === "function") smtLoadProductReviews(product.id, product.nama);
+    // smt-product-review-system berada di bawah fungsi galeri.
+    // Jangan hanya cek sekali, karena saat galeri pertama kali dibuka
+    // fungsi ulasan bisa belum terdaftar. Coba ulang sebentar sampai siap.
+    (function loadProductReviewsWhenReady(){
+        if(typeof window.smtLoadProductReviews === "function"){
+            window.smtLoadProductReviews(product.id, product.nama);
+            return;
+        }
+        setTimeout(loadProductReviewsWhenReady, 50);
+    })();
     thumbs.innerHTML = images.map((src,i)=>`
       <button type="button" class="smt-photo-thumb ${i===st.index?'active':''}" onclick="pmGalleryGo(${i})" aria-label="Lihat foto ${i+1}">
         <img src="${pmEscape(src)}" alt="Foto ${i+1}" loading="lazy">
