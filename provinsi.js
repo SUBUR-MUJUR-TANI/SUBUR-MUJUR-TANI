@@ -1,0 +1,18 @@
+const headers = {
+  "Content-Type": "application/json; charset=utf-8",
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "Content-Type",
+  "Access-Control-Allow-Methods": "GET, OPTIONS"
+};
+
+exports.handler = async (event) => {
+  if (event.httpMethod === "OPTIONS") return { statusCode: 204, headers, body: "" };
+  try {
+    const response = await fetch("https://www.emsifa.com/api-wilayah-indonesia/api/provinces.json");
+    if (!response.ok) throw new Error(`Wilayah API HTTP ${response.status}`);
+    const value = await response.json();
+    return { statusCode: 200, headers, body: JSON.stringify({ success: true, data: value, options: value.map(x => `<option value="${x.id}">${x.name}</option>`).join("") }) };
+  } catch (err) {
+    return { statusCode: 502, headers, body: JSON.stringify({ success:false, message: err.message }) };
+  }
+};
