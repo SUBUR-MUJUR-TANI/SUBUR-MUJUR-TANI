@@ -2568,11 +2568,16 @@ function adminEsc(v){
 function adminMuatPilihanProdukUlasan(){
     const sel=document.getElementById("adminProdukUlasan");
     if(!sel) return;
-    window.adminRef("produk").once("value").then(snap=>{
+    const db=window.FirebaseApp?.database||window.database;
+    if(!db) return;
+    db.ref("produk").once("value").then(snap=>{
         const data=snap.val()||{};
         const opts=Object.entries(data).map(([id,p])=>`<option value="${adminEsc(id)}">${adminEsc(p?.nama||id)}</option>`).join("");
         sel.innerHTML='<option value="">Pilih produk untuk ulasan</option>'+opts;
-    }).catch(()=>{});
+    }).catch(e=>{
+        console.error("Gagal memuat pilihan produk ulasan:",e);
+        sel.innerHTML='<option value="">Produk belum dapat dimuat</option>';
+    });
 }
 
 function adminRenderUlasan(data){
@@ -2611,14 +2616,21 @@ function adminRenderUlasan(data){
     }).join("");
 }
 
-// Dengarkan ulasan secara realtime.
-// Ulasan yang dikirim dari index.html otomatis muncul di sini.
-window.adminRef("ulasan").on("value", snapshot => {
-    adminRenderUlasan(snapshot.val());
-}, error => {
-    const box = document.getElementById("adminDaftarUlasan");
-    if (box) box.innerHTML = `<p style="color:#c62828">❌ Tidak dapat memuat ulasan: ${adminEsc(error.message)}</p>`;
-});
+async function muatUlasanAdmin(){
+    const box=document.getElementById("adminDaftarUlasan");
+    if(!box) return;
+    box.innerHTML='<p style="color:#777">⏳ Memuat ulasan...</p>';
+    try{
+        await window.adminAuthReady;
+        const snap=await window.adminDbGet("ulasan");
+        adminRenderUlasan(snap.val());
+    }catch(e){
+        console.error("Gagal memuat ulasan admin:",e);
+        box.innerHTML=`<p style="color:#c62828">❌ Tidak dapat memuat ulasan: ${adminEsc(e.message||e)}</p>
+        <button type="button" onclick="muatUlasanAdmin()" style="max-width:220px">🔄 Coba Lagi</button>`;
+    }
+}
+window.muatUlasanAdmin=muatUlasanAdmin;
 
 function adminPreviewFotoUlasan(event){
     const file=event?.target?.files?.[0];
@@ -2692,6 +2704,7 @@ async function adminTambahUlasan(){
         document.getElementById("adminRatingUlasan").value = "5";
         const ps=document.getElementById("adminProdukUlasan"); if(ps) ps.value="";
         adminHapusFotoUlasan();
+        await muatUlasanAdmin();
         alert("✅ Ulasan berhasil ditambahkan.");
     } catch(e) {
         alert("❌ Gagal menambahkan ulasan: " + e.message);
@@ -2706,6 +2719,7 @@ async function adminHapusUlasan(id){
 
     try {
         await window.adminRef("ulasan/" + id).remove();
+        await muatUlasanAdmin();
         alert("✅ Ulasan berhasil dihapus.");
     } catch(e) {
         alert("❌ Gagal menghapus ulasan: " + e.message);
@@ -3479,6 +3493,7 @@ function renderProdukAdmin(){
       biteship: function(){ return typeof window.muatBiteshipCenter === "function" ? window.muatBiteshipCenter() : Promise.resolve(); },
       pengembalian: function(){ return typeof window.muatPengembalianAdmin === "function" ? window.muatPengembalianAdmin() : Promise.resolve(); },
       notifikasi: function(){ return typeof window.muatNotifikasiTokoAdmin === "function" ? window.muatNotifikasiTokoAdmin() : Promise.resolve(); },
+      ulasan: function(){ return typeof window.muatUlasanAdmin === "function" ? window.muatUlasanAdmin() : Promise.resolve(); },
       penarikan: function(){ return typeof window.muatPenarikanDana === "function" ? window.muatPenarikanDana() : Promise.resolve(); }
     };
     const loader = loaders[sec];
@@ -3555,7 +3570,62 @@ function renderProdukAdmin(){
 <script id="admin-pro-functions">
 function showAdminProSection(sec){const tab=document.querySelector('.admin-tab[data-section="'+sec+'"]');if(tab)tab.click();}window.showAdminProSection=showAdminProSection;
 function proRp(n){return "Rp "+Number(n||0).toLocaleString("id-ID");}
-async function muatProDashboard(){await window.adminAuthReady;if(typeof database==="undefined")return;try{const [ps,prod,pay,ret]=await Promise.all([window.adminDbGet("pesanan"),window.adminRef("produk").once("value"),window.adminDbGet("pembayaran"),window.adminDbGet("pengembalian")]);const orders=Object.values(ps.val()||{}),products=Object.values(prod.val()||{}),payments=Object.values(pay.val()||{}),returns=Object.values(ret.val()||{});const status=o=>String(o?.status||"").toLowerCase();const newOrders=orders.filter(o=>/menunggu|baru/i.test(status(o))).length;const low=products.filter(p=>{const v=Array.isArray(p.variants)?p.variants.reduce((n,x)=>n+Number(x?.stok||0),0):Number(p.stok||0);return v>0&&v<=10;}).length;const paid=payments.filter(p=>/lunas|berhasil|paid|success/i.test(String(p.status||""))).length;const revenue=orders.filter(o=>/lunas|selesai|cod/i.test(status(o))||o.pembayaranStatus==="lunas").reduce((n,o)=>n+Number(o.totalBayar||o.total||o.grandTotal||0),0);const refundDone=returns.filter(r=>/selesai|dana dikembalikan/i.test(String(r.refundStatus||r.status||""))).length;const shipping=orders.filter(o=>/dikirim|buat pengiriman|diproses|dikemas/i.test(status(o))).length;const set=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};set("proDashOrders",orders.length);set("proDashNew",newOrders+" pesanan baru");set("proDashProducts",products.length);set("proDashLowStock",low+" stok rendah");set("proDashPayments",payments.length);set("proDashPaid",paid+" lunas");set("proDashRevenue",proRp(revenue));set("proDashReturns",returns.length);set("proDashRefund",refundDone+" refund selesai");set("proDashShipping",shipping);set("proDashUpdated","Diperbarui: "+new Date().toLocaleString("id-ID"));}catch(e){const el=document.getElementById("proDashUpdated");if(el)el.textContent="Gagal memuat ringkasan: "+e.message;}}
+async function muatProDashboard(){
+  await window.adminAuthReady;
+  const set=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};
+  const status=o=>String(o?.status||"").toLowerCase();
+  const readProducts=async()=>{
+    const db=window.FirebaseApp?.database||window.database;
+    if(!db) throw new Error("Firebase Database belum siap.");
+    // Produk memang publik untuk katalog, jadi jangan membuat Dashboard
+    // bergantung pada endpoint admin-data untuk statistik produk.
+    const snap=await db.ref("produk").once("value");
+    return snap.val()||{};
+  };
+  try{
+    const results=await Promise.allSettled([
+      window.adminDbGet("pesanan"),
+      readProducts(),
+      window.adminDbGet("pembayaran"),
+      window.adminDbGet("pengembalian")
+    ]);
+    const [ps,prod,pay,ret]=results;
+    const failed=results.find(r=>r.status==="rejected");
+    if(failed){
+      console.error("Dashboard PRO sebagian data gagal:",failed.reason);
+    }
+    const orders=ps.status==="fulfilled"?Object.values(ps.value.val()||{}):[];
+    const products=prod.status==="fulfilled"?Object.values(prod.value||{}):[];
+    const payments=pay.status==="fulfilled"?Object.values(pay.value.val()||{}):[];
+    const returns=ret.status==="fulfilled"?Object.values(ret.value.val()||{}):[];
+    const newOrders=orders.filter(o=>/menunggu|baru/i.test(status(o))).length;
+    const low=products.filter(p=>{
+      const variants=Array.isArray(p.variants)?p.variants:Object.values(p.variants||{});
+      const v=variants.length?variants.reduce((n,x)=>n+Number(x?.stok||0),0):Number(p.stok||0);
+      return v>0&&v<=10;
+    }).length;
+    const paid=payments.filter(p=>/lunas|berhasil|paid|success/i.test(String(p.status||""))).length;
+    const revenue=orders.filter(o=>/lunas|selesai|cod/i.test(status(o))||/lunas|berhasil|paid|success/i.test(String(o.statusPembayaran||o.pembayaranStatus||""))).reduce((n,o)=>n+Number(o.totalBayar||o.total||o.grandTotal||0),0);
+    const refundDone=returns.filter(r=>/selesai|dana dikembalikan/i.test(String(r.refundStatus||r.status||""))).length;
+    const shipping=orders.filter(o=>/dikirim|buat pengiriman|diproses|dikemas/i.test(status(o))).length;
+    set("proDashOrders",orders.length);
+    set("proDashNew",newOrders+" pesanan baru");
+    set("proDashProducts",products.length);
+    set("proDashLowStock",low+" stok rendah");
+    set("proDashPayments",payments.length);
+    set("proDashPaid",paid+" lunas");
+    set("proDashRevenue",proRp(revenue));
+    set("proDashReturns",returns.length);
+    set("proDashRefund",refundDone+" refund selesai");
+    set("proDashShipping",shipping);
+    set("proDashUpdated",failed
+      ? "Sebagian data belum dapat dimuat. Coba refresh."
+      : "Diperbarui: "+new Date().toLocaleString("id-ID"));
+  }catch(e){
+    console.error("Dashboard PRO:",e);
+    set("proDashUpdated","Gagal memuat ringkasan: "+(e.message||e));
+  }
+}
 window.muatProDashboard=muatProDashboard;
 function escProNotif(v){return String(v==null?"":v).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;"}[c]));}
 function renderNotifikasiTokoAdmin(data){const box=document.getElementById("proNotifList");if(!box)return;const rows=Object.entries(data||{}).map(([id,v])=>({id,v:v||{}})).sort((a,b)=>Number(b.v.createdAt||0)-Number(a.v.createdAt||0));if(!rows.length){box.innerHTML='<div style="padding:14px;border:1px dashed #ccc;border-radius:12px;color:#777;text-align:center">Belum ada notifikasi toko.</div>';return;}box.innerHTML=rows.map(x=>'<div class="pro-notif-item"><div class="row"><b>'+escProNotif(x.v.title||"Informasi Toko")+'</b><span class="pro-notif-badge">'+escProNotif(x.v.type||"Info")+' · '+(x.v.active===false?"Disembunyikan":"Aktif")+'</span></div><p>'+escProNotif(x.v.message||"")+'</p><small>'+(x.v.createdAt?new Date(Number(x.v.createdAt)).toLocaleString("id-ID"):"")+'</small><br><button type="button" onclick="hapusNotifikasiToko(\''+escProNotif(x.id)+'\')">🗑️ Hapus</button></div>').join("");}
