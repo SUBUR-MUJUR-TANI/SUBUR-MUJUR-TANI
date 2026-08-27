@@ -1,0 +1,33 @@
+PERBAIKAN FINAL ERROR permission_denied
+=======================================
+
+Masalah:
+Halaman Admin sebelumnya membaca /pesanan, /pembayaran, /penarikan dan /pengembalian
+langsung dari Firebase Client SDK. Jika sesi Auth atau Rules tidak sinkron, muncul:
+"permission_denied at /pesanan".
+
+Perbaikan final:
+- Ditambahkan netlify/functions/admin-data.js.
+- Data admin yang sensitif dibaca melalui Firebase Admin SDK di server.
+- Request wajib membawa Firebase ID token admin.
+- Path dibatasi hanya: pesanan, pembayaran, penarikan, pengembalian.
+- Tidak membuka Firebase Rules menjadi public read.
+- Frontend admin sudah diarahkan memakai endpoint server untuk pembacaan data tersebut.
+
+WAJIB DI NETLIFY:
+Environment Variables Firebase Admin harus tetap ada:
+FIREBASE_PROJECT_ID
+FIREBASE_CLIENT_EMAIL
+FIREBASE_PRIVATE_KEY
+atau
+FIREBASE_SERVICE_ACCOUNT_JSON
+
+Jika BITESHIP_ADMIN_EMAILS sudah digunakan, akun email admin yang login harus ada di sana.
+Jika BITESHIP_ADMIN_EMAILS kosong, endpoint menerima akun Firebase yang berhasil login.
+
+Setelah deploy:
+1. Login Admin.
+2. Buka Pembayaran Masuk.
+3. Buka Keuangan/Penarikan.
+4. Tekan Muat Ulang.
+5. Error permission_denied pada pembacaan data tersebut seharusnya tidak muncul lagi.

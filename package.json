@@ -1,0 +1,9 @@
+{
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "firebase-admin": "^13.4.0",
+    "google-auth-library": "^11.0.2"
+  }
+}

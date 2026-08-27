@@ -1,0 +1,10 @@
+PERBAIKAN AKSES AWAL & ADMIN
+
+1. Start URL PWA sekarang /index.html (Beranda), bukan /admin.html.
+2. Service worker tidak lagi menjadikan admin.html sebagai fallback offline.
+3. Dashboard admin hanya dapat dibuka setelah login berhasil melalui login.html pada tab tersebut.
+4. Sesi Firebase lama tidak cukup untuk membuka admin.html secara langsung.
+5. Saat halaman login dibuka, verifikasi sesi admin lama di tab tersebut dibersihkan.
+6. Saat logout, verifikasi admin juga dibersihkan.
+
+Setelah deploy, pengguna yang memasang PWA versi lama mungkin perlu memperbarui/reinstall PWA agar start_url baru diterapkan.

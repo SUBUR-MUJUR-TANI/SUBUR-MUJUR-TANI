@@ -1,0 +1,23 @@
+PERBAIKAN ERROR "Maximum call stack size exceeded"
+
+Akar masalah yang ditemukan:
+- admin.html sebelumnya mengganti (monkey-patch) database.ref milik Firebase Client SDK.
+- Penggantian method tersebut dapat membuat pemanggilan internal Firebase berputar/rekursif dan menghasilkan "Maximum call stack size exceeded".
+
+Perbaikan:
+- Monkey-patch database.ref DIHAPUS.
+- Akses Admin ke pesanan, pembayaran, penarikan, pengembalian, pelacakan, dan notifikasiToko sekarang menggunakan adminRef() secara eksplisit.
+- adminRef() memanggil Netlify Function admin-data yang menggunakan Firebase Admin SDK.
+- Akses produk, ulasan, dan data publik tetap memakai Firebase Client SDK seperti sebelumnya.
+- Push(value) pada adminRef dibuat awaitable seperti ThenableReference Firebase.
+- Cache admin.html tetap no-store agar deployment baru tidak tertahan cache.
+
+Validasi lokal:
+- Tidak ada lagi database.ref override / __firebaseRefOriginal di admin.html.
+- Tidak ada lagi pemanggilan database.ref langsung untuk root sensitif.
+- Semua inline script admin.html lolos node --check.
+- netlify/functions/admin-data.js dan firebaseAdmin.js lolos node --check.
+
+Catatan:
+- Perbaikan ini tidak mengubah Firebase Security Rules menjadi publik.
+- Netlify tetap membutuhkan FIREBASE_SERVICE_ACCOUNT_JSON yang valid.

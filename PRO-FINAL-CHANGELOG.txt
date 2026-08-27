@@ -1,0 +1,24 @@
+SUBUR MUJUR TANI — PRO FINAL
+================================
+Perbaikan dari ZIP asli yang diunggah.
+
+1. Varian:
+- Nama varian dipaksa hitam pekat agar selalu terbaca.
+- Harga, stok, dan berat mengikuti varian.
+- Kartu produk menampilkan jumlah varian.
+- Pilih Varian & Beli / Keranjang.
+
+2. Kecepatan produk:
+- Skeleton loading.
+- Cache katalog localStorage ditampilkan lebih dulu.
+- Firebase sinkron di background.
+- Tidak menunggu window.load.
+- Gambar produk memakai lazy loading + decoding async.
+
+3. Favorit:
+- Tombol favorit pada kartu produk.
+- Tersimpan lokal di perangkat/browser.
+
+4. Pencarian & kategori yang sudah ada dipertahankan.
+
+5. File Firebase, Netlify Functions, Biteship, checkout, admin, PWA, dan aset asli dipertahankan.
