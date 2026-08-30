@@ -49,3 +49,8 @@
   [headers.values]
     Cache-Control = "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0"
     Pragma = "no-cache"
+
+[[headers]]
+  for = "/api/biteship-health"
+  [headers.values]
+    Cache-Control = "no-store"
