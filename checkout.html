@@ -1015,10 +1015,9 @@ Untuk CARGO, beberapa layanan seperti JNE Trucking, SiCepat GOKIL, dan Indah Car
 ========================= -->
 <section class="container" id="voucherSection">
 <div class="box">
-<h2>🏷️ Voucher Diskon</h2>
-<div style="display:flex;gap:10px;flex-wrap:wrap">
-  <input id="voucherCode" placeholder="Masukkan kode voucher" style="flex:1;min-width:220px;text-transform:uppercase"/>
-  <button type="button" onclick="terapkanVoucher()" style="max-width:220px">🎟️ Gunakan Voucher</button>
+<h2>🏷️ Promo Gratis Ongkir</h2>
+<div style="padding:12px 14px;border-radius:12px;background:#f2f8ef;border:1px solid #c8dfc0;color:#245b2b;font-weight:700">
+  🎉 Jika toko sedang mengaktifkan promo gratis ongkir, potongan akan diterapkan <b>otomatis</b> setelah ongkir tersedia. Tidak perlu memasukkan kode voucher.
 </div>
 <div id="voucherMessage" style="margin-top:8px;font-weight:700"></div>
 <div id="voucherApplied" style="margin-top:5px;color:#1b5e20"></div>
@@ -1539,6 +1538,7 @@ Pilih Kurir
 </option>
 <option value="jne">JNE / JNE Trucking (JTR)</option>
 <option value="jnt">J&amp;T Express</option>
+<option value="jntcargo">J&amp;T Cargo</option>
 <option value="sicepat">SiCepat / SiCepat GOKIL</option>
 <option value="anteraja">AnterAja</option>
 <option value="ninja">Ninja Xpress</option>
@@ -2342,7 +2342,9 @@ function updateCourierFilterOptions() {
         const code = String(rate.courier_code || rate.company || "").trim();
         if (!code || seen.has(code)) return;
         seen.add(code);
-        const name = String(rate.courier_name || code).replace(/[<>]/g, "");
+        const rawName = String(rate.courier_name || code);
+        const normalizedCode = code.toLowerCase().replace(/[-_]/g, "");
+        const name = (normalizedCode === "jntcargo" ? "J&T Cargo" : rawName).replace(/[<>]/g, "");
         opts.push(`<option value="${code.replace(/"/g, '&quot;')}">${name}</option>`);
     });
 

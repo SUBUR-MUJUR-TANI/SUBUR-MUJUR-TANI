@@ -56,8 +56,12 @@
     maxDiscount: 0,
     discount: 0,
     expiresAt: "",
-    active: true
+    active: true,
+    automatic: false
   };
+
+  const EMPTY_VOUCHER = () => ({code:"",type:"percent",value:0,minPurchase:0,maxDiscount:0,discount:0,expiresAt:"",active:true,automatic:false});
+  const AUTO_FREE_SHIPPING_KEY = "AUTO_FREE_SHIPPING";
 
   function productTotal() {
     return getCart().reduce((sum, item) => {
@@ -77,12 +81,21 @@
 
   function calculateVoucherDiscount(v) {
     const subtotal = productTotal();
-    if (!v || !v.active || !v.code || subtotal < Number(v.minPurchase || 0)) return 0;
-    let d = v.type === "fixed"
-      ? Number(v.value || 0)
-      : Math.round(subtotal * Number(v.value || 0) / 100);
-    if (Number(v.maxDiscount || 0) > 0) d = Math.min(d, Number(v.maxDiscount));
-    return Math.max(0, Math.min(d, subtotal));
+    if (!v || !v.active || subtotal < Number(v.minPurchase || 0)) return 0;
+    let d = 0;
+    if (v.type === "free_shipping") {
+      // Gratis ongkir memotong biaya pengiriman, bukan harga produk.
+      const shipping = Math.max(0, getOngkir());
+      d = shipping;
+      if (Number(v.maxDiscount || 0) > 0) d = Math.min(d, Number(v.maxDiscount));
+    } else {
+      d = v.type === "fixed"
+        ? Number(v.value || 0)
+        : Math.round(subtotal * Number(v.value || 0) / 100);
+      if (Number(v.maxDiscount || 0) > 0) d = Math.min(d, Number(v.maxDiscount));
+      d = Math.min(d, subtotal);
+    }
+    return Math.max(0, d);
   }
 
   function isExpired(v) {
@@ -98,66 +111,55 @@
   }
 
   async function terapkanVoucher() {
-    const input = document.getElementById("voucherCode");
-    const code = (input?.value || "").trim().toUpperCase();
-    if (!code) {
-      voucher = {code:"",type:"percent",value:0,minPurchase:0,maxDiscount:0,discount:0,expiresAt:"",active:true};
-      setVoucherMessage("Masukkan kode voucher.", false);
-      updateTotalsWithVoucher();
-      return;
-    }
+    // Voucher pelanggan sekarang otomatis. Fungsi ini tetap dipertahankan
+    // agar tombol lama tidak merusak halaman jika masih tersimpan di cache.
+    await terapkanGratisOngkirOtomatis(true);
+  }
 
+  async function terapkanGratisOngkirOtomatis(showMessage = false) {
     const database = db();
-    if (!database) {
-      setVoucherMessage("Firebase belum siap. Refresh halaman.", false);
-      return;
-    }
-
+    if (!database) return;
     try {
-      const snap = await database.ref("voucher").child(code).once("value");
-      if (!snap.exists()) {
-        voucher = {code:"",type:"percent",value:0,minPurchase:0,maxDiscount:0,discount:0,expiresAt:"",active:true};
-        setVoucherMessage("❌ Voucher tidak ditemukan.", false);
+      const snap = await database.ref("voucher").once("value");
+      const data = snap.val() || {};
+      const candidates = Object.entries(data)
+        .map(([id, v]) => ({id, ...(v || {})}))
+        .filter(v => v.type === "free_shipping" && v.active !== false && !isExpired(v));
+
+      // Pilih voucher otomatis yang syaratnya paling mudah dipenuhi.
+      candidates.sort((a,b) => Number(a.minPurchase||0) - Number(b.minPurchase||0));
+      const selected = candidates.find(v => productTotal() >= Number(v.minPurchase || 0));
+
+      if (!selected) {
+        voucher = EMPTY_VOUCHER();
+        if (showMessage) setVoucherMessage("Belum ada promo gratis ongkir yang memenuhi syarat.", false);
         updateTotalsWithVoucher();
         return;
       }
 
-      const v = snap.val() || {};
-      v.code = code;
-      v.active = v.active !== false;
-
-      if (!v.active) throw new Error("Voucher sedang tidak aktif.");
-      if (isExpired(v)) throw new Error("Voucher sudah kedaluwarsa.");
-
-      const subtotal = productTotal();
-      const min = Number(v.minPurchase || 0);
-      if (subtotal < min) {
-        throw new Error("Minimum pembelian voucher Rp " + rupiah(min) + ".");
-      }
-
-      const discount = calculateVoucherDiscount(v);
-      if (discount <= 0) throw new Error("Voucher tidak memberikan potongan.");
-
       voucher = {
-        code,
-        type: v.type === "fixed" ? "fixed" : "percent",
-        value: Number(v.value || 0),
-        minPurchase: min,
-        maxDiscount: Number(v.maxDiscount || 0),
-        discount,
-        expiresAt: v.expiresAt || "",
-        active: true
+        code: String(selected.code || selected.id || AUTO_FREE_SHIPPING_KEY),
+        type: "free_shipping",
+        value: 0,
+        minPurchase: Number(selected.minPurchase || 0),
+        maxDiscount: Number(selected.maxDiscount || 0),
+        discount: 0,
+        expiresAt: selected.expiresAt || "",
+        active: true,
+        automatic: true
       };
 
-      setVoucherMessage(
-        `✅ Voucher ${code} berhasil. Hemat Rp ${rupiah(discount)}.`,
-        true
-      );
+      const discount = calculateVoucherDiscount(voucher);
+      if (discount > 0) {
+        setVoucherMessage(`🎉 Gratis ongkir otomatis diterapkan. Hemat Rp ${rupiah(discount)}.`, true);
+      } else if (getOngkir() > 0) {
+        setVoucherMessage("Promo gratis ongkir tersedia, tetapi belum dapat diterapkan.", false);
+      } else {
+        setVoucherMessage("🎉 Promo gratis ongkir tersedia. Pilih layanan pengiriman untuk menerapkannya otomatis.", true);
+      }
       updateTotalsWithVoucher();
     } catch (e) {
-      voucher = {code:"",type:"percent",value:0,minPurchase:0,maxDiscount:0,discount:0,expiresAt:"",active:true};
-      setVoucherMessage("❌ " + (e.message || "Voucher tidak dapat digunakan."), false);
-      updateTotalsWithVoucher();
+      console.warn("Gagal memuat promo gratis ongkir otomatis:", e);
     }
   }
 
@@ -179,8 +181,10 @@
     const box = document.getElementById("voucherApplied");
     if (box) {
       box.textContent = voucherDiscount > 0
-        ? `Voucher ${voucher.code}: -Rp ${rupiah(voucherDiscount)}`
-        : "Belum ada voucher.";
+        ? (voucher.type === "free_shipping"
+          ? `🎉 Gratis ongkir otomatis -Rp ${rupiah(voucherDiscount)}`
+          : `Voucher ${voucher.code}: -Rp ${rupiah(voucherDiscount)}`)
+        : (voucher.type === "free_shipping" && voucher.active ? "🎉 Promo gratis ongkir tersedia, pilih layanan pengiriman." : "Belum ada voucher.");
     }
   }
 
@@ -519,7 +523,7 @@
     }
     if (!database) return alert("Firebase tidak dapat terhubung. Periksa koneksi internet lalu coba lagi.");
     const codeEl = document.getElementById("voucherAdminCode");
-    const code = (codeEl?.value || "").trim().toUpperCase().replace(/[^A-Z0-9_-]/g, "");
+    let code = (codeEl?.value || "").trim().toUpperCase().replace(/[^A-Z0-9_-]/g, "");
     const type = document.getElementById("voucherAdminType")?.value || "percent";
     const value = Number(document.getElementById("voucherAdminValue")?.value || 0);
     const minPurchase = Number(document.getElementById("voucherAdminMin")?.value || 0);
@@ -527,8 +531,12 @@
     const expiresAt = document.getElementById("voucherAdminExpiry")?.value || "";
     const active = document.getElementById("voucherAdminActive")?.checked !== false;
 
-    if (!code) return alert("Kode voucher wajib diisi.");
-    if (value <= 0) return alert("Nilai voucher harus lebih dari 0.");
+    if (type === "free_shipping") {
+      code = AUTO_FREE_SHIPPING_KEY;
+    } else {
+      if (!code) return alert("Kode voucher wajib diisi.");
+      if (value <= 0) return alert("Nilai voucher harus lebih dari 0.");
+    }
     if (type === "percent" && value > 100) return alert("Diskon persen maksimal 100%.");
 
     try {
@@ -537,7 +545,9 @@
         maxDiscount: Math.max(0, maxDiscount),
         expiresAt, active, updatedAt: now(), waktu: Date.now()
       });
-      alert("✅ Voucher " + code + " berhasil disimpan.");
+      alert(type === "free_shipping"
+        ? "✅ Promo gratis ongkir otomatis berhasil disimpan. Pelanggan tidak perlu memasukkan kode."
+        : "✅ Voucher " + code + " berhasil disimpan.");
       document.getElementById("voucherAdminCode").value = "";
       document.getElementById("voucherAdminValue").value = "";
       document.getElementById("voucherAdminMin").value = "";
@@ -562,9 +572,11 @@
       }
       box.innerHTML = ids.sort().map(id => {
         const v = data[id] || {};
-        const tipe = v.type === "fixed" ? "Rp " + rupiah(v.value) : v.value + "%";
+        const tipe = v.type === "free_shipping"
+          ? "🎉 Gratis Ongkir"
+          : (v.type === "fixed" ? "Rp " + rupiah(v.value) : v.value + "%");
         return `<div class="card" style="margin-bottom:10px">
-          <b>🏷️ ${esc(id)}</b>
+          <b>🏷️ ${v.type === "free_shipping" ? "🎉 GRATIS ONGKIR OTOMATIS" : esc(id)}</b>
           <p>Diskon: ${esc(tipe)}</p>
           <p>Minimum: Rp ${rupiah(v.minPurchase)}</p>
           <p>Maksimal potongan: ${v.maxDiscount ? "Rp " + rupiah(v.maxDiscount) : "Tidak dibatasi"}</p>
@@ -603,10 +615,16 @@
   window.adminToggleVoucher = adminToggleVoucher;
   window.adminHapusVoucher = adminHapusVoucher;
 
-  document.addEventListener("DOMContentLoaded", function () {
-    if (document.getElementById("voucherCode")) {
+  document.addEventListener("DOMContentLoaded", async function () {
+    // Checkout tidak lagi membutuhkan kode voucher. Promo gratis ongkir aktif
+    // akan dicari dan diterapkan otomatis.
+    if (document.getElementById("voucherSection")) {
       renderHistory();
       updateTotalsWithVoucher();
+      for (let i = 0; i < 30 && !db(); i++) await new Promise(r => setTimeout(r, 100));
+      if (db()) await terapkanGratisOngkirOtomatis(false);
+      const layanan = document.getElementById("layananOngkir");
+      if (layanan) layanan.addEventListener("change", () => terapkanGratisOngkirOtomatis(false));
     }
     if (document.getElementById("daftarVoucherAdmin")) {
       loadAdminVouchers();
