@@ -80,7 +80,7 @@ exports.handler = async event => {
         "tiki", "wahana", "sap", "idexpress", "rpx", "jdl"
       ],
       cargo: [
-        "jne", "sicepat", "lion", "idexpress", "sap", "sentralcargo", "deliveree"
+        "jne", "sicepat", "lion", "idexpress", "sap", "sentralcargo", "deliveree", "jntcargo"
       ],
       instant: [
         "paxel", "lalamove", "grab", "gosend", "gojek", "borzo", "deliveree"
