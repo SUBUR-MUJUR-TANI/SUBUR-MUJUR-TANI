@@ -1,4 +1,5 @@
 const { getFirebaseAdmin } = require("./firebaseAdmin");
+const { assertProductionConfig, authorization, requireAdminEmail } = require("./biteship-client");
 
 function json(statusCode, body) {
   return {
@@ -21,11 +22,7 @@ function safe(v, fallback = "") {
 async function verifyAdminToken(admin, token) {
   if (!token) throw new Error("Token admin tidak ditemukan. Silakan login ulang.");
   const decoded = await admin.auth().verifyIdToken(token);
-  const allow = String(process.env.BITESHIP_ADMIN_EMAILS || "")
-    .split(",").map(x => x.trim().toLowerCase()).filter(Boolean);
-  if (allow.length && !allow.includes(String(decoded.email || "").toLowerCase())) {
-    throw new Error("Akun ini tidak memiliki izin sinkronisasi Biteship.");
-  }
+  requireAdminEmail(decoded);
   return decoded;
 }
 
@@ -53,7 +50,7 @@ function normalizeStatus(raw, currentStatus, isCOD) {
 async function getBiteshipOrder(apiKey, orderId) {
   const response = await fetch(`https://api.biteship.com/v1/orders/${encodeURIComponent(orderId)}`, {
     method: "GET",
-    headers: { Authorization: apiKey, Accept: "application/json", "Content-Type": "application/json" }
+    headers: { Authorization: authorization(apiKey), Accept: "application/json", "Content-Type": "application/json" }
   });
   const raw = await response.text();
   let data = {};
@@ -72,7 +69,7 @@ async function syncOne(db, localId, tokenVerified = true) {
   const biteshipOrderId = safe(order.biteshipOrderId);
   if (!biteshipOrderId) throw new Error("Pesanan belum memiliki Biteship Order ID.");
 
-  const apiKey = safe(process.env.BITESHIP_API_KEY);
+  const { apiKey } = assertProductionConfig();
   if (!apiKey) throw new Error("BITESHIP_API_KEY belum diisi di Netlify.");
   const data = await getBiteshipOrder(apiKey, biteshipOrderId);
   const courier = data.courier || {};

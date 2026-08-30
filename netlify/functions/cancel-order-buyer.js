@@ -1,4 +1,5 @@
 const { getFirebaseAdmin } = require("./firebaseAdmin");
+const { assertProductionConfig, authorization } = require("./biteship-client");
 
 function json(statusCode, body) {
   return {
@@ -61,12 +62,12 @@ exports.handler = async (event) => {
         });
       }
 
-      const apiKey = String(process.env.BITESHIP_API_KEY || "").trim();
+      const { apiKey } = assertProductionConfig();
       if (!apiKey) return json(500, {success:false, message:"BITESHIP_API_KEY belum diisi di Netlify."});
 
       const r = await fetch(`https://api.biteship.com/v1/orders/${encodeURIComponent(biteshipId)}/cancel`, {
         method:"POST",
-        headers:{Authorization:apiKey, Accept:"application/json", "Content-Type":"application/json"}
+        headers:{Authorization:authorization(apiKey), Accept:"application/json", "Content-Type":"application/json"}
       });
       const raw = await r.text();
       let data = {};

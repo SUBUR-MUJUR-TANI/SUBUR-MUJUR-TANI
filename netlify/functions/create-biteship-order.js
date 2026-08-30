@@ -1,5 +1,6 @@
 const https = require("https");
 const { getFirebaseAdmin } = require("./firebaseAdmin");
+const { assertProductionConfig, authorization, requireAdminEmail } = require("./biteship-client");
 
 function json(statusCode, body) {
   return {
@@ -22,7 +23,7 @@ function callBiteship(apiKey, payload) {
       path: "/v1/orders",
       method: "POST",
       headers: {
-        Authorization: apiKey,
+        Authorization: authorization(apiKey),
         "Content-Type": "application/json",
         Accept: "application/json",
         "Content-Length": Buffer.byteLength(body)
@@ -71,13 +72,7 @@ function normalizePhone(phone) {
 async function verifyAdminToken(admin, token) {
   if (!token) throw new Error("Token admin tidak ditemukan. Silakan login ulang.");
   const decoded = await admin.auth().verifyIdToken(token);
-  const allow = String(process.env.BITESHIP_ADMIN_EMAILS || "")
-    .split(",")
-    .map(x => x.trim().toLowerCase())
-    .filter(Boolean);
-  if (allow.length && !allow.includes(String(decoded.email || "").toLowerCase())) {
-    throw new Error("Akun ini tidak memiliki izin membuat pengiriman.");
-  }
+  requireAdminEmail(decoded);
   return decoded;
 }
 
@@ -91,7 +86,7 @@ exports.handler = async event => {
     const token = String(input.idToken || "").trim();
     if (!orderId) return json(400, { success: false, message: "orderId wajib diisi." });
 
-    const apiKey = safe(process.env.BITESHIP_API_KEY);
+    const { apiKey } = assertProductionConfig();
     if (!apiKey) return json(500, { success: false, message: "BITESHIP_API_KEY belum diisi di Netlify." });
 
     const admin = getFirebaseAdmin();

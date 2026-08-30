@@ -1,3 +1,4 @@
+const { assertProductionConfig, authorization } = require("./biteship-client");
 
 // J&T Cargo (Biteship courier slug aliases)
 const JNT_CARGO_ALIASES = new Set(['jntcargo', 'jnt_cargo', 'jnt-cargo']);
@@ -11,7 +12,7 @@ function callBiteship(apiKey, payload) {
       path: "/v1/rates/couriers",
       method: "POST",
       headers: {
-        Authorization: apiKey,
+        Authorization: authorization(apiKey),
         "Content-Type": "application/json",
         Accept: "application/json",
         "Content-Length": Buffer.byteLength(body)
@@ -57,7 +58,7 @@ exports.handler = async event => {
 
   try {
     const input = JSON.parse(event.body || "{}");
-    const apiKey = String(process.env.BITESHIP_API_KEY || "").trim();
+    const { apiKey } = assertProductionConfig();
     const origin = String(process.env.BITESHIP_ORIGIN_POSTAL_CODE || "").trim();
     const destination = String(input.destinationPostalCode || input.destination || "").trim();
     const courier = String(input.courier || "all").trim().toLowerCase();

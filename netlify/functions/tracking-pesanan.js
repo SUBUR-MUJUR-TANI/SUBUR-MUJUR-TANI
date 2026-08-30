@@ -1,4 +1,5 @@
 const { getFirebaseAdmin } = require('./firebaseAdmin');
+const { assertProductionConfig, authorization } = require("./biteship-client");
 
 function json(statusCode, body) {
   return {
@@ -71,7 +72,7 @@ function normalizeHistory(history) {
 
 async function getJson(url, apiKey) {
   const r = await fetch(url, {
-    headers: { Authorization: apiKey, Accept: 'application/json', 'Content-Type': 'application/json' }
+    headers: { Authorization: authorization(apiKey), Accept: 'application/json', 'Content-Type': 'application/json' }
   });
   const raw = await r.text();
   let data = {};
@@ -94,7 +95,7 @@ exports.handler = async event => {
       return json(400, { success:false, message:'Nomor invoice dan 4 digit terakhir WhatsApp wajib diisi.' });
     }
 
-    const apiKey = safe(process.env.BITESHIP_API_KEY);
+    const { apiKey } = assertProductionConfig();
     if (!apiKey) return json(500, { success:false, message:'BITESHIP_API_KEY belum diatur di Netlify.' });
 
     const admin = getFirebaseAdmin();
