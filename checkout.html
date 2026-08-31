@@ -1096,7 +1096,7 @@ Pilih metode pembayaran. Untuk COD, pembayaran dilakukan saat barang diterima.
 </button>
 <!-- =========================
      PENGATURAN PEMBAYARAN
-     EDIT BAGIAN INI JIKA INGIN MENGGANTI DATA REKENING/QRIS
+     EDIT BAGIAN INI JIKA INGIN MENGGANTI DATA REKENING
 ========================= -->
 <script>
 // =========================
@@ -1108,8 +1108,7 @@ const DATA_PEMBAYARAN = {
     bri: {
         bank: "BRI",
         rekening: "414401025887534",
-        nama: "Muhamad Rizal Hakim",
-        qris: ""
+        nama: "Muhamad Rizal Hakim"
     }
 };
 </script>
@@ -1297,35 +1296,6 @@ const DATA_PEMBAYARAN = {
     color: #777;
 }
 
-.qris-placeholder {
-    text-align: center;
-    padding: 18px 10px;
-}
-
-.qris-placeholder strong {
-    display: block;
-    font-size: 20px;
-    margin-top: 5px;
-}
-
-.qris-image {
-    display: block;
-    width: min(280px, 90%);
-    max-height: 360px;
-    object-fit: contain;
-    margin: 15px auto;
-    border-radius: 10px;
-    background: #fff;
-}
-
-.qris-placeholder p {
-    margin: 8px 0 4px;
-}
-
-.qris-placeholder small {
-    color: #777;
-}
-
 @media (max-width: 600px) {
     .payment-toggle {
         padding: 14px;
@@ -1353,14 +1323,7 @@ const DATA_PEMBAYARAN = {
         content.className = "payment-content";
         content.innerHTML = `
             <p><b>${d.tipe === "ewallet" ? "Nomor HP / Akun:" : "Nomor Rekening:"}</b> <span>${d.rekening || "Belum diisi"}</span></p>
-            <p><b>Atas Nama:</b> <span>${d.nama || "Belum diisi"}</span></p>
-            <div class="qris-placeholder">
-                <strong>QRIS ${d.bank}</strong>
-                <img src="${d.qris}" alt="QRIS ${d.bank}" class="qris-image" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
-                <p class="qris-error" style="display:none;">File QRIS belum tersedia. Upload <b>${d.qris}</b> ke folder yang sama dengan index.html.</p>
-                <p>Scan QRIS ${d.bank} untuk melakukan pembayaran.</p>
-            </div>
-        `;
+            <p><b>Atas Nama:</b> <span>${d.nama || "Belum diisi"}</span></p>`;
 
         container.appendChild(button);
         container.appendChild(content);
@@ -2505,6 +2468,25 @@ function kategoriRate(rate) {
 
     return "reguler";
 }
+// Hanya tampilkan keluarga kurir JNE dan J&T pada checkout.
+function kurirDiizinkanCheckout(rate) {
+    const code = String(rate?.courier_code || rate?.company || "").toLowerCase().trim();
+    const name = String(rate?.courier_name || "").toLowerCase().trim();
+    const service = String(rate?.courier_service_code || rate?.type || "").toLowerCase().trim();
+
+    return (
+        code === "jne" ||
+        code === "jnt" ||
+        code === "jntcargo" ||
+        name.includes("jne") ||
+        name.includes("j&t") ||
+        name.includes("jnt") ||
+        service.includes("jtr") ||
+        service.includes("jntcargo") ||
+        service.includes("jnt_cargo")
+    );
+}
+
 function updateCourierFilterOptions() {
     const sel = document.getElementById("kurirOngkir");
     if (!sel) return;
@@ -2515,7 +2497,7 @@ function updateCourierFilterOptions() {
     const opts = ['<option value="all">Semua kurir yang tersedia</option>'];
 
     (daftarLayanan || []).forEach(rate => {
-        if (kategoriRate(rate) !== jenis) return;
+        if (kategoriRate(rate) !== jenis || !kurirDiizinkanCheckout(rate)) return;
         const code = String(rate.courier_code || rate.company || "").trim();
         if (!code || seen.has(code)) return;
         seen.add(code);
@@ -2540,6 +2522,7 @@ function renderLayananTerfilter() {
         .map((r, i) => ({ r, i }))
         .filter(x =>
             kategoriRate(x.r) === jenis &&
+            kurirDiizinkanCheckout(x.r) &&
             (courier === "all" || String(x.r.courier_code || x.r.company || "") === courier)
         )
         .sort((a, b) => Number(a.r.price || a.r.shipping_fee || 0) - Number(b.r.price || b.r.shipping_fee || 0));
