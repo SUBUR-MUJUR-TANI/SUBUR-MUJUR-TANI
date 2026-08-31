@@ -2921,6 +2921,9 @@ async function simpanPesanan() {
                 variantId:item.variantId || "",
                 variantNama:item.variantNama || "",
                 jumlah:Number(item.jumlah||0), berat:Number(item.berat||0),
+                panjang:Number(item.panjang ?? item.length ?? 0),
+                lebar:Number(item.lebar ?? item.width ?? 0),
+                tinggi:Number(item.tinggi ?? item.height ?? 0),
                 subtotal:Number(item.harga||0)*Number(item.jumlah||0)
             })),
             totalProduk: totals.totalProduk,
@@ -3623,7 +3626,10 @@ function muatUlasan() {
           gambar:current.gambar||product.gambar||"",
           stok:stok,
           jumlah:1,
-          berat:Number(v.berat||0)
+          berat:Number(v.berat||0),
+          panjang:Number(v.panjang ?? v.length ?? 0),
+          lebar:Number(v.lebar ?? v.width ?? 0),
+          tinggi:Number(v.tinggi ?? v.height ?? 0)
         });
       }
       simpanKeranjang();
@@ -3680,6 +3686,9 @@ function muatUlasan() {
       item.harga=Number(v.harga||0);
       item.hargaAsli=Number(v.harga||0);
       item.berat=Number(v.berat||0);
+      item.panjang=Number(v.panjang ?? v.length ?? 0);
+      item.lebar=Number(v.lebar ?? v.width ?? 0);
+      item.tinggi=Number(v.tinggi ?? v.height ?? 0);
       item.jumlah=Number(item.jumlah||0)+1;
       simpanKeranjang();renderKeranjang();
     }catch(e){alert("Gagal mengecek stok varian.");}

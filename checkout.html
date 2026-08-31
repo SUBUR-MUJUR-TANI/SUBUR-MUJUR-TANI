@@ -3138,6 +3138,9 @@ async function smtCanonicalizeCartFromFirebase(db) {
             item.hargaAsli = Number(v.harga || 0);
             item.diskon = 0;
             item.berat = Number(v.berat || p.berat || 0);
+            item.panjang = Number(v.panjang ?? v.length ?? p.panjang ?? p.length ?? 0);
+            item.lebar = Number(v.lebar ?? v.width ?? p.lebar ?? p.width ?? 0);
+            item.tinggi = Number(v.tinggi ?? v.height ?? p.tinggi ?? p.height ?? 0);
             item.stok = stok;
         } else {
             const stok = Number(p.stok || 0);
@@ -3679,6 +3682,9 @@ document.addEventListener("DOMContentLoaded", function(){
       item.harga=Number(v.harga||0);
       item.hargaAsli=Number(v.harga||0);
       item.berat=Number(v.berat||0);
+      item.panjang=Number(v.panjang ?? v.length ?? 0);
+      item.lebar=Number(v.lebar ?? v.width ?? 0);
+      item.tinggi=Number(v.tinggi ?? v.height ?? 0);
       item.jumlah=Number(item.jumlah||0)+1;
       simpanKeranjang();renderKeranjang();
     }catch(e){alert("Gagal mengecek stok varian.");}
@@ -3700,6 +3706,9 @@ document.addEventListener("DOMContentLoaded", function(){
         item.hargaAsli=Number(v.harga||0);
         item.diskon=0;
         item.berat=Number(v.berat||0);
+        item.panjang=Number(v.panjang ?? v.length ?? 0);
+        item.lebar=Number(v.lebar ?? v.width ?? 0);
+        item.tinggi=Number(v.tinggi ?? v.height ?? 0);
         item.variantNama=v.nama||item.variantNama||"";
         item.nama=(p.nama||item.nama||"")+" - "+item.variantNama;
         if(item.jumlah>item.stok)item.jumlah=item.stok;

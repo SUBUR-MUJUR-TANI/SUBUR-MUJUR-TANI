@@ -2498,7 +2498,7 @@ function kosongkanForm(){
 
 /* =========================================================
    VARIAN PRODUK
-   Setiap varian menyimpan harga, berat, stok, dan ID sendiri.
+   Setiap varian menyimpan harga, berat, panjang, lebar, tinggi, stok, dan ID sendiri.
 ========================================================= */
 let adminVariants = [];
 
@@ -2517,11 +2517,14 @@ function tambahBarisVarian(data){
     const row = document.createElement("div");
     row.className = "smt-varian-row";
     row.dataset.id = id;
-    row.style.cssText = "display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr auto;gap:8px;margin-bottom:9px;align-items:center;";
+    row.style.cssText = "display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr 1fr 1fr auto;gap:8px;margin-bottom:9px;align-items:center;";
     row.innerHTML = `
       <input class="varianNama" placeholder="Nama pilihan" value="${adminEscVar(data.nama || "")}">
       <input class="varianHarga" type="number" min="0" placeholder="Harga" value="${Number(data.harga || 0) || ""}">
       <input class="varianBerat" type="number" min="0" placeholder="Berat (g)" value="${Number(data.berat || 0) || ""}">
+      <input class="varianPanjang" type="number" min="0" step="0.1" placeholder="Panjang (cm)" value="${Number(data.panjang ?? data.length ?? 0) || ""}">
+      <input class="varianLebar" type="number" min="0" step="0.1" placeholder="Lebar (cm)" value="${Number(data.lebar ?? data.width ?? 0) || ""}">
+      <input class="varianTinggi" type="number" min="0" step="0.1" placeholder="Tinggi (cm)" value="${Number(data.tinggi ?? data.height ?? 0) || ""}">
       <input class="varianStok" type="number" min="0" placeholder="Stok" value="${Number(data.stok || 0) || ""}">
       <button type="button" onclick="this.closest('.smt-varian-row').remove()" style="padding:8px 10px;">🗑</button>
     `;
@@ -2542,6 +2545,9 @@ function bacaVarianProduk(){
         const nama = (row.querySelector(".varianNama")?.value || "").trim();
         const harga = Number(row.querySelector(".varianHarga")?.value || 0);
         const berat = Number(row.querySelector(".varianBerat")?.value || 0);
+        const panjang = Number(row.querySelector(".varianPanjang")?.value || 0);
+        const lebar = Number(row.querySelector(".varianLebar")?.value || 0);
+        const tinggi = Number(row.querySelector(".varianTinggi")?.value || 0);
         const stok = Number(row.querySelector(".varianStok")?.value || 0);
         if(!nama) return;
         if(harga <= 0){
@@ -2552,6 +2558,12 @@ function bacaVarianProduk(){
             nama: nama,
             harga: Math.round(harga),
             berat: Math.max(0, Math.round(berat)),
+            panjang: Math.max(0, Number(panjang)),
+            lebar: Math.max(0, Number(lebar)),
+            tinggi: Math.max(0, Number(tinggi)),
+            length: Math.max(0, Number(panjang)),
+            width: Math.max(0, Number(lebar)),
+            height: Math.max(0, Number(tinggi)),
             stok: Math.max(0, Math.round(stok))
         });
     });
@@ -3920,3 +3932,11 @@ window.simpanStatusPengembalian=simpanStatusPengembalian;
 </body>
 
 </html>
+
+<style>
+@media (max-width: 760px){
+  .smt-varian-row{grid-template-columns:1fr 1fr !important;}
+  .smt-varian-row .varianNama{grid-column:1 / -1;}
+  .smt-varian-row button{grid-column:1 / -1;}
+}
+</style>
