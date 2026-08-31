@@ -2346,7 +2346,10 @@ async function tambahKeranjang(produk) {
                 gambar: current.gambar || produk.gambar || "",
                 stok: stok,
                 jumlah: 1,
-                berat: Number(current.berat || produk.berat || 1000)
+                berat: Number(current.berat || produk.berat || 1000),
+                panjang: Number(current.panjang ?? current.length ?? produk.panjang ?? produk.length ?? 0),
+                lebar: Number(current.lebar ?? current.width ?? produk.lebar ?? produk.width ?? 0),
+                tinggi: Number(current.tinggi ?? current.height ?? produk.tinggi ?? produk.height ?? 0)
             });
         }
 

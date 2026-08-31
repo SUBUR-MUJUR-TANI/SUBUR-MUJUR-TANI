@@ -1777,7 +1777,7 @@ function tolakPembayaran(id){
           + '<div style="min-width:0;flex:1;">'
           + '<b style="font-size:16px;">'+esc(p.nama||"Tanpa nama")+'</b>'
           + '<div style="margin-top:4px;color:#17633f;font-weight:800;">Rp '+Number(p.harga||0).toLocaleString("id-ID")+'</div>'
-          + '<div style="font-size:13px;color:#66716c;margin-top:3px;">Stok: '+stok+' • Foto: '+images.length+'</div>'
+          + '<div style="font-size:13px;color:#66716c;margin-top:3px;">Stok: '+stok+' • Berat: '+Number(p.berat||0)+' g • Ukuran: '+Number(p.panjang||p.length||0)+' × '+Number(p.lebar||p.width||0)+' × '+Number(p.tinggi||p.height||0)+' cm • Foto: '+images.length+'</div>'
           + '</div></div>'
           + '<div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;">'
           + '<button type="button" onclick="editProduk(\''+esc(id)+'\')" style="flex:1;min-width:130px;">✏️ Edit Produk</button>'
@@ -2334,6 +2334,9 @@ async function tambahProduk(){
         const diskonInput = document.getElementById("diskonProduk").value || "";
         const stokInput = document.getElementById("stokProduk").value || "";
         const beratInput = document.getElementById("beratProduk").value || "";
+        const panjangInput = document.getElementById("panjangProduk").value || "";
+        const lebarInput = document.getElementById("lebarProduk").value || "";
+        const tinggiInput = document.getElementById("tinggiProduk").value || "";
         const deskripsi = document.getElementById("deskripsiProduk")?.value.trim() || "";
 
         const hargaNormal = parseInt(hargaInput.replace(/\D/g, ""), 10) || 0;
@@ -2346,7 +2349,10 @@ async function tambahProduk(){
 
         const daftarVarian = bacaVarianProduk();
         const stokDasar = parseInt(stokInput, 10) || 0;
-        const beratDasar = parseInt(beratInput, 10) || 0;
+        const beratDasar = Math.max(0, Math.round(Number(beratInput) || 0));
+        const panjangDasar = Math.max(0, Math.round(Number(panjangInput) || 0));
+        const lebarDasar = Math.max(0, Math.round(Number(lebarInput) || 0));
+        const tinggiDasar = Math.max(0, Math.round(Number(tinggiInput) || 0));
         const stokFinal = daftarVarian.length
             ? daftarVarian.reduce((total, v) => total + Number(v.stok || 0), 0)
             : stokDasar;
@@ -2397,6 +2403,12 @@ async function tambahProduk(){
             diskon: diskon,
             stok: stokFinal,
             berat: beratDasar,
+            panjang: panjangDasar,
+            lebar: lebarDasar,
+            tinggi: tinggiDasar,
+            length: panjangDasar,
+            width: lebarDasar,
+            height: tinggiDasar,
             deskripsi: deskripsi,
             gambar: gambar,
             gambarList: gambarList,
@@ -2462,6 +2474,9 @@ function kosongkanForm(){
     document.getElementById("diskonProduk").value = "";
     document.getElementById("stokProduk").value = "";
     document.getElementById("beratProduk").value = "";
+    document.getElementById("panjangProduk").value = "";
+    document.getElementById("lebarProduk").value = "";
+    document.getElementById("tinggiProduk").value = "";
     const deskripsiEl = document.getElementById("deskripsiProduk");
     if(deskripsiEl) deskripsiEl.value = "";
     document.getElementById("gambarProduk").value = "";
@@ -2587,6 +2602,9 @@ window.editProduk = async function(id){
         el("diskonProduk").value = Number(p.diskon || 0);
         el("stokProduk").value = Number(p.stok || 0);
         el("beratProduk").value = Number(p.berat || 0);
+        el("panjangProduk").value = Number(p.panjang ?? p.length ?? 0);
+        el("lebarProduk").value = Number(p.lebar ?? p.width ?? 0);
+        el("tinggiProduk").value = Number(p.tinggi ?? p.height ?? 0);
         if(el("deskripsiProduk")) el("deskripsiProduk").value = p.deskripsi || "";
 
         gambarProdukLamaList = gambarList.slice();
@@ -2969,7 +2987,13 @@ async function adminHapusUlasan(id){
   <input id="hargaProduk" type="number" min="0" inputmode="numeric" placeholder="Harga (Rp)">
   <input id="diskonProduk" type="number" min="0" max="100" inputmode="numeric" placeholder="Diskon (%) — isi 0 jika tidak ada">
   <input id="stokProduk" type="number" min="0" inputmode="numeric" placeholder="Stok">
-  <input id="beratProduk" type="number" min="0" inputmode="numeric" placeholder="Berat per produk (gram)">
+  <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:8px;">
+    <input id="beratProduk" type="number" min="0" inputmode="numeric" placeholder="Berat per produk (gram)">
+    <input id="panjangProduk" type="number" min="0" step="0.1" inputmode="decimal" placeholder="Panjang (cm)">
+    <input id="lebarProduk" type="number" min="0" step="0.1" inputmode="decimal" placeholder="Lebar (cm)">
+    <input id="tinggiProduk" type="number" min="0" step="0.1" inputmode="decimal" placeholder="Tinggi (cm)">
+  </div>
+  <div style="font-size:12px;color:#66716c;margin-top:6px;">📦 Isi ukuran <b>paket setelah dikemas</b>. Contoh: 30 × 20 × 15 cm.</div>
   <textarea id="deskripsiProduk" rows="4" placeholder="Deskripsi / keterangan produk (contoh: jenis tanaman, keunggulan, cara perawatan, isi paket, dll.)" style="width:100%;margin-top:8px;padding:12px;border:1px solid #ddd;border-radius:10px;box-sizing:border-box;resize:vertical;font-family:inherit;"></textarea>
 
   <div style="margin-top:14px;padding:14px;border:1px dashed #c7a15a;border-radius:12px;background:#fffdf8;">

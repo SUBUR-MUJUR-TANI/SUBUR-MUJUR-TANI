@@ -1417,6 +1417,9 @@ async function pilihMetodeCOD() {
         description: "Bibit tanaman",
         value: Math.max(1, Number(item.harga || 0)),
         weight: Math.max(1, Math.ceil(Number(item.berat || 1000))),
+        length: Math.max(0, Number(item.panjang ?? item.length ?? 0)),
+        width: Math.max(0, Number(item.lebar ?? item.width ?? 0)),
+        height: Math.max(0, Number(item.tinggi ?? item.height ?? 0)),
         quantity: Math.max(1, Number(item.jumlah || 1))
     }));
 
@@ -1749,7 +1752,10 @@ function normalisasiItemKeranjang(item) {
         hargaAsli: h.hargaAsli,
         diskon: h.diskon,
         jumlah: Math.max(1, angkaUang(item.jumlah ?? item.qty ?? item.quantity ?? 1)),
-        berat: Math.max(0, angkaUang(item.berat ?? item.weight ?? 1000))
+        berat: Math.max(0, angkaUang(item.berat ?? item.weight ?? 1000)),
+        panjang: Math.max(0, Number(item.panjang ?? item.length ?? 0) || 0),
+        lebar: Math.max(0, Number(item.lebar ?? item.width ?? 0) || 0),
+        tinggi: Math.max(0, Number(item.tinggi ?? item.height ?? 0) || 0)
     };
 }
 
@@ -2058,10 +2064,13 @@ async function sinkronkanHargaKeranjang() {
                     ? Math.round(hargaAsli * (1 - diskon / 100))
                     : hargaItem(item).harga;
                 const berat = Math.max(1, angkaUang(p.berat ?? item.berat ?? 1000));
+                const panjang = Math.max(0, Number(p.panjang ?? p.length ?? item.panjang ?? item.length ?? 0) || 0);
+                const lebar = Math.max(0, Number(p.lebar ?? p.width ?? item.lebar ?? item.width ?? 0) || 0);
+                const tinggi = Math.max(0, Number(p.tinggi ?? p.height ?? item.tinggi ?? item.height ?? 0) || 0);
                 const stok = Math.max(0, Number(p.stok ?? item.stok ?? 0));
 
                 if (Number(item.harga) !== harga || Number(item.hargaAsli) !== hargaAsli ||
-                    Number(item.diskon) !== diskon || Number(item.berat) !== berat || Number(item.stok) !== stok) {
+                    Number(item.diskon) !== diskon || Number(item.berat) !== berat || Number(item.panjang||0) !== panjang || Number(item.lebar||0) !== lebar || Number(item.tinggi||0) !== tinggi || Number(item.stok) !== stok) {
                     berubah = true;
                 }
 
@@ -2074,6 +2083,9 @@ async function sinkronkanHargaKeranjang() {
                     hargaAsli: hargaAsli || hargaItem(item).hargaAsli,
                     diskon: diskon,
                     berat: berat,
+                    panjang: panjang,
+                    lebar: lebar,
+                    tinggi: tinggi,
                     stok: stok
                 };
             } catch (e) {
@@ -2168,6 +2180,9 @@ function smtBuatKunciOngkir() {
     const items = cart.map(item => ({
         id: item.id || item.nama || "",
         berat: Number(item.berat || 1000),
+        panjang: Number(item.panjang ?? item.length ?? 0),
+        lebar: Number(item.lebar ?? item.width ?? 0),
+        tinggi: Number(item.tinggi ?? item.height ?? 0),
         jumlah: Number(item.jumlah || 1),
         harga: Number(item.harga || 0)
     }));
@@ -2447,6 +2462,9 @@ async function hitungOngkirAPI(courierOverride = null, forceRefresh = false) {
         description: "Bibit tanaman",
         value: Math.max(0, Number(item.harga || 0)),
         weight: Math.max(1, Math.ceil(Number(item.berat || 1000))),
+        length: Math.max(0, Number(item.panjang ?? item.length ?? 0)),
+        width: Math.max(0, Number(item.lebar ?? item.width ?? 0)),
+        height: Math.max(0, Number(item.tinggi ?? item.height ?? 0)),
         quantity: Math.max(1, Number(item.jumlah || 1))
     }));
 
@@ -3011,7 +3029,10 @@ async function tambahKeranjang(produk) {
                 gambar: current.gambar || produk.gambar || "",
                 stok: stok,
                 jumlah: 1,
-                berat: Number(current.berat || produk.berat || 1000)
+                berat: Number(current.berat || produk.berat || 1000),
+                panjang: Number(current.panjang ?? current.length ?? produk.panjang ?? produk.length ?? 0),
+                lebar: Number(current.lebar ?? current.width ?? produk.lebar ?? produk.width ?? 0),
+                tinggi: Number(current.tinggi ?? current.height ?? produk.tinggi ?? produk.height ?? 0)
             });
         }
 
@@ -3281,6 +3302,9 @@ async function simpanPesanan() {
                 variantId:item.variantId || "",
                 variantNama:item.variantNama || "",
                 jumlah:Number(item.jumlah||0), berat:Number(item.berat||0),
+                panjang:Number(item.panjang ?? item.length ?? 0),
+                lebar:Number(item.lebar ?? item.width ?? 0),
+                tinggi:Number(item.tinggi ?? item.height ?? 0),
                 subtotal:Number(item.harga||0)*Number(item.jumlah||0)
             })),
             totalProduk: totals.totalProduk,
