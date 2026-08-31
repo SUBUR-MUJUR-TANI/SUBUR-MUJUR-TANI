@@ -1425,12 +1425,19 @@ const DATA_PEMBAYARAN = {
 <!-- Rekening pembayaran dibuat otomatis dari DATA_PEMBAYARAN. -->
 </div>
 </div>
+<div id="transferPaymentBox" style="display:none;margin-top:16px;padding:16px;border:2px solid #e4e8e6;border-radius:12px;background:#f8faf9;">
+  <h3 style="margin:0 0 8px;">🏦 Pembayaran Transfer</h3>
+  <p style="margin:0 0 10px;color:#555;">Silakan transfer sesuai total pembayaran, lalu upload bukti transfer. <b>Pesanan belum dibuat</b> sampai pembayaran dikonfirmasi admin.</p>
+  <input id="buktiPembayaran" type="file" accept="image/jpeg,image/png,image/webp" style="width:100%;margin:8px 0;"/>
+  <button id="btnKirimBukti" type="button" onclick="kirimBuktiTransfer()">📤 Kirim Bukti Transfer</button>
+  <div id="statusPembayaranCheckout" style="margin-top:10px;padding:10px;border-radius:8px;background:#fff;color:#555;">Belum ada bukti transfer.</div>
+</div>
 <hr style="margin:25px 0;"/>
 <button onclick="pesanWhatsApp()">
 💬 Kirim Pesanan ke WhatsApp
 </button>
-<button onclick="simpanPesanan()">
-📦 Simpan Pesanan
+<button id="btnBuatPesanan" onclick="simpanPesanan()" disabled style="opacity:.55;cursor:not-allowed;">
+📦 Buat Pesanan
 </button>
 <button onclick="cetakInvoice()">
 🖨️ Cetak Invoice
@@ -1635,6 +1642,7 @@ function togglePembayaran(metode) {
         const metodeEl = document.getElementById("metodePembayaran");
         if (metodeEl && selected) {
             metodeEl.value = selected.bank;
+            if (typeof updateTransferPaymentUI === "function") updateTransferPaymentUI();
         }
     }
 }
@@ -2855,6 +2863,131 @@ function smtSaveLocalOrder(orderId, orderData, reviewToken){
         localStorage.setItem('smt_order_history',JSON.stringify(list.slice(0,20)));
     }catch(e){console.warn('Riwayat lokal:',e);}
 }
+let smtPendingPaymentId = localStorage.getItem("smt_pending_payment_id") || "";
+let smtPaymentPollTimer = null;
+
+function smtSetCreateButton(enabled, text) {
+    const btn = document.getElementById("btnBuatPesanan");
+    if (!btn) return;
+    btn.disabled = !enabled;
+    btn.style.opacity = enabled ? "1" : ".55";
+    btn.style.cursor = enabled ? "pointer" : "not-allowed";
+    btn.innerHTML = text || "📦 Buat Pesanan";
+}
+
+function smtSetPaymentNotice(text, ok) {
+    const el = document.getElementById("statusPembayaranCheckout");
+    if (!el) return;
+    el.textContent = text;
+    el.style.color = ok ? "#176b36" : "#555";
+    el.style.background = ok ? "#eaf8ef" : "#fff";
+}
+
+function updateTransferPaymentUI() {
+    const metode = String(document.getElementById("metodePembayaran")?.value || "").toUpperCase();
+    const box = document.getElementById("transferPaymentBox");
+    if (!box) return;
+    const isCOD = metode === "COD";
+    box.style.display = isCOD || !metode ? "none" : "block";
+    if (isCOD) {
+        smtSetCreateButton(true, "📦 Buat Pesanan");
+    } else if (!smtPendingPaymentId) {
+        smtSetCreateButton(false, "🔒 Buat Pesanan — Tunggu Verifikasi");
+    }
+}
+
+async function smtBuildCheckoutSnapshot() {
+    pastikanKeranjangArray();
+    const get = id => (document.getElementById(id)?.value || "").trim();
+    const nama=get("namaPembeli"), alamat=get("alamat"), rt=get("rt"), rw=get("rw"), kodePos=get("kodePos"), whatsapp=get("whatsapp");
+    const metode=document.getElementById("metodePembayaran")?.value || "";
+    if(!nama || !alamat || !whatsapp) throw new Error("Lengkapi nama, alamat, dan WhatsApp terlebih dahulu.");
+    if(!metode) throw new Error("Pilih metode pembayaran terlebih dahulu.");
+    if(!keranjang.length) throw new Error("Keranjang masih kosong.");
+    const totals=finalGetTotals();
+    return {
+      invoiceDraft:"SMT-"+Date.now(), nama, alamat, rt, rw, kodePos, whatsapp,
+      provinsi:document.getElementById("provinsi")?.selectedOptions?.[0]?.textContent?.trim()||"",
+      kabupaten:document.getElementById("kabupaten")?.selectedOptions?.[0]?.textContent?.trim()||"",
+      kecamatan:document.getElementById("kecamatanSelect")?.selectedOptions?.[0]?.textContent?.trim()||"",
+      desa:document.getElementById("desaSelect")?.selectedOptions?.[0]?.textContent?.trim()||"",
+      produk:keranjang.map(item=>({id:item.id,nama:item.nama,harga:Number(item.harga||0),hargaAsli:Number(item.hargaAsli||item.harga||0),diskon:Number(item.diskon||0),variantId:item.variantId||"",variantNama:item.variantNama||"",jumlah:Number(item.jumlah||0),berat:Number(item.berat||0),panjang:Number(item.panjang??item.length??0),lebar:Number(item.lebar??item.width??0),tinggi:Number(item.tinggi??item.height??0),subtotal:Number(item.harga||0)*Number(item.jumlah||0)})),
+      totalProduk:totals.totalProduk, ongkir:totals.ongkir, total:totals.total, metodePembayaran:metode,
+      kurir:document.getElementById("kurirOngkir")?.value||"",
+      kurirKode:(()=>{const x=daftarLayanan[Number(document.getElementById("layananOngkir")?.value)];return x?.courier_code||document.getElementById("kurirOngkir")?.value||""})(),
+      kurirNama:(()=>{const x=daftarLayanan[Number(document.getElementById("layananOngkir")?.value)];return x?.courier_name||""})(),
+      layananKode:(()=>{const x=daftarLayanan[Number(document.getElementById("layananOngkir")?.value)];return x?.courier_service_code||""})(),
+      layananNama:(()=>{const x=daftarLayanan[Number(document.getElementById("layananOngkir")?.value)];return x?.courier_service_name||""})(),
+      layananPengiriman:document.getElementById("layananOngkir")?.selectedOptions?.[0]?.textContent?.trim()||"",
+      shippingDuration:(()=>{const x=daftarLayanan[Number(document.getElementById("layananOngkir")?.value)];return x?.duration||""})(),
+      waktu:Date.now()
+    };
+}
+
+async function kirimBuktiTransfer() {
+    try {
+        const metode=String(document.getElementById("metodePembayaran")?.value||"").trim();
+        if(!metode || metode.toUpperCase()==="COD") return alert("Pilih Transfer Bank terlebih dahulu.");
+        const file=document.getElementById("buktiPembayaran")?.files?.[0];
+        if(!file) return alert("Pilih bukti transfer terlebih dahulu.");
+        const db=(window.FirebaseApp&&window.FirebaseApp.database)||window.database;
+        const upload=(window.FirebaseApp&&window.FirebaseApp.uploadBuktiPembayaranFirebase);
+        if(!db || !upload) return alert("Firebase belum siap. Silakan refresh halaman.");
+        const btn=document.getElementById("btnKirimBukti");
+        if(btn){btn.disabled=true;btn.innerHTML="⏳ Mengupload...";}
+        const checkout=await smtBuildCheckoutSnapshot();
+        const buktiUrl=await upload(file,checkout.nama);
+        const paymentId=db.ref("pembayaran").push().key;
+        const payment={...checkout,buktiPembayaranUrl:buktiUrl,status:"Menunggu Verifikasi Pembayaran",tipe:"NON_COD",paymentId};
+        delete payment.invoiceDraft;
+        await db.ref("pembayaran/"+paymentId).set(payment);
+        smtPendingPaymentId=paymentId;
+        localStorage.setItem("smt_pending_payment_id",paymentId);
+        localStorage.setItem("smt_pending_payment_total",String(checkout.total));
+        smtSetPaymentNotice("⏳ Bukti transfer sudah diterima. Menunggu admin memverifikasi pembayaran.",false);
+        smtSetCreateButton(false,"⏳ Menunggu Konfirmasi Pembayaran");
+        smtStartPaymentPolling();
+        alert("✅ Bukti transfer berhasil dikirim. Setelah admin mengonfirmasi, tombol Buat Pesanan akan aktif.");
+    } catch(e) {
+        console.error(e);
+        alert("❌ Gagal mengirim bukti transfer: "+e.message);
+    } finally {
+        const btn=document.getElementById("btnKirimBukti");
+        if(btn){btn.disabled=false;btn.innerHTML="📤 Kirim Bukti Transfer";}
+    }
+}
+
+function smtStartPaymentPolling(){
+    if(smtPaymentPollTimer) clearInterval(smtPaymentPollTimer);
+    if(!smtPendingPaymentId) return;
+    const check=async()=>{
+      try{
+        const db=(window.FirebaseApp&&window.FirebaseApp.database)||window.database;
+        const snap=await db.ref("pembayaran/"+smtPendingPaymentId).once("value");
+        if(!snap.exists()) return;
+        const p=snap.val()||{};
+        if(String(p.status||"").toLowerCase().includes("lunas")){
+          smtSetPaymentNotice("✅ Pembayaran sudah dikonfirmasi admin. Sekarang Anda bisa membuat pesanan.",true);
+          smtSetCreateButton(true,"📦 Buat Pesanan");
+          clearInterval(smtPaymentPollTimer); smtPaymentPollTimer=null;
+        } else if(String(p.status||"").toLowerCase().includes("ditolak")){
+          smtSetPaymentNotice("❌ Pembayaran ditolak. Silakan cek kembali bukti transfer dan kirim ulang.",false);
+          smtSetCreateButton(false,"🔒 Buat Pesanan — Pembayaran Ditolak");
+          clearInterval(smtPaymentPollTimer); smtPaymentPollTimer=null;
+        }
+      }catch(e){console.warn("Cek status pembayaran:",e);}
+    };
+    check();
+    smtPaymentPollTimer=setInterval(check,5000);
+}
+
+window.addEventListener("load",function(){
+  setTimeout(function(){
+    updateTransferPaymentUI();
+    if(smtPendingPaymentId) smtStartPaymentPolling();
+  },500);
+});
+
 async function simpanPesanan() {
     pastikanKeranjangArray();
     if (finalOrderProcessing) return;
@@ -2878,6 +3011,26 @@ async function simpanPesanan() {
     if (!metode) {
         alert("Pilih metode pembayaran terlebih dahulu.");
         return;
+    }
+
+    const isCOD = String(metode).toUpperCase() === "COD";
+    let verifiedPayment = null;
+    if (!isCOD) {
+        if (!smtPendingPaymentId) {
+            alert("🏦 Untuk Transfer Bank, kirim bukti transfer terlebih dahulu. Pesanan baru bisa dibuat setelah admin mengonfirmasi pembayaran.");
+            return;
+        }
+        const paymentSnap = await db.ref("pembayaran/" + smtPendingPaymentId).once("value");
+        verifiedPayment = paymentSnap.val();
+        if (!verifiedPayment || !/lunas/i.test(String(verifiedPayment.status || ""))) {
+            alert("⏳ Pembayaran belum dikonfirmasi admin. Tombol Buat Pesanan akan aktif otomatis setelah pembayaran diverifikasi.");
+            smtStartPaymentPolling();
+            return;
+        }
+        if (Number(verifiedPayment.total || 0) !== Number(finalGetTotals().total || 0)) {
+            alert("❌ Total pembayaran tidak cocok dengan total checkout. Silakan buat pengajuan pembayaran baru.");
+            return;
+        }
     }
 
     finalOrderProcessing = true;
@@ -2972,24 +3125,33 @@ async function simpanPesanan() {
             status: metode === "COD" ? "Menunggu Konfirmasi COD" : "Dikemas",
             statusPembayaran: metode === "COD" ? "COD - Belum Dibayar" : "Lunas",
             tipePembayaran: metode === "COD" ? "COD" : "NON_COD",
+            paymentId: isCOD ? "" : smtPendingPaymentId,
             tanggal: new Date().toLocaleString("id-ID"),
             waktu: Date.now()
         };
 
         await db.ref("pesanan/" + orderKey).set(orderData);
-        await db.ref("pembayaran/" + orderKey).set({
-            nama: orderData.nama,
-            whatsapp: orderData.whatsapp,
-            total: orderData.total,
-            metodePembayaran: orderData.metodePembayaran,
-            status: metode === "COD" ? "Menunggu Pembayaran COD" : "Lunas",
-            tipe: metode === "COD" ? "COD" : "NON_COD",
-            waktu: orderData.waktu
-        });
+        if (isCOD) {
+            await db.ref("pembayaran/" + orderKey).set({
+                nama: orderData.nama, whatsapp: orderData.whatsapp, total: orderData.total,
+                metodePembayaran: orderData.metodePembayaran, status: "Menunggu Pembayaran COD",
+                tipe: "COD", waktu: orderData.waktu
+            });
+        } else {
+            await db.ref("pembayaran/" + smtPendingPaymentId).update({
+                orderId: orderKey, status: "Lunas", statusOrder: "Dibuat", orderCreatedAt: Date.now()
+            });
+        }
 
         finalLastOrderId = orderKey;
         localStorage.setItem("smt_last_order_id", orderKey);
         smtSaveLocalOrder(orderKey, orderData, reviewToken);
+        if (!isCOD) {
+            localStorage.removeItem("smt_pending_payment_id");
+            localStorage.removeItem("smt_pending_payment_total");
+            smtPendingPaymentId = "";
+            if (smtPaymentPollTimer) { clearInterval(smtPaymentPollTimer); smtPaymentPollTimer=null; }
+        }
 
         keranjang = [];
         simpanKeranjang();

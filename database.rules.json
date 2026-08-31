@@ -31,16 +31,15 @@
     "pesanan": {
       "$id": {
         ".read": "auth != null || data.exists()",
-        ".write": "auth != null || (!data.exists() && newData.exists()) || (data.exists() && newData.exists() && newData.child('invoice').val() == data.child('invoice').val() && newData.child('nama').val() == data.child('nama').val() && newData.child('whatsapp').val() == data.child('whatsapp').val() && newData.child('total').val() == data.child('total').val() && newData.child('waktu').val() == data.child('waktu').val() && newData.child('status').val() == data.child('status').val())"
+        ".write": "auth != null || (!data.exists() && newData.exists() && newData.child('invoice').isString() && newData.child('nama').isString() && newData.child('whatsapp').isString() && newData.child('total').isNumber() && newData.child('waktu').isNumber() && ((newData.child('metodePembayaran').val() == 'COD' && newData.child('status').val() == 'Menunggu Konfirmasi COD' && newData.child('statusPembayaran').val() == 'COD - Belum Dibayar') || (newData.child('metodePembayaran').val() != 'COD' && newData.child('status').val() == 'Dikemas' && newData.child('statusPembayaran').val() == 'Lunas' && newData.child('paymentId').isString() && root.child('pembayaran').child(newData.child('paymentId').val()).child('status').val() == 'Lunas' && root.child('pembayaran').child(newData.child('paymentId').val()).child('total').val() == newData.child('total').val() && root.child('pembayaran').child(newData.child('paymentId').val()).child('metodePembayaran').val() == newData.child('metodePembayaran').val()))) || (data.exists() && newData.exists() && newData.child('invoice').val() == data.child('invoice').val() && newData.child('nama').val() == data.child('nama').val() && newData.child('whatsapp').val() == data.child('whatsapp').val() && newData.child('total').val() == data.child('total').val() && newData.child('waktu').val() == data.child('waktu').val() && newData.child('status').val() == data.child('status').val())"
       },
       ".read": "auth != null"
     },
     "pembayaran": {
       "$id": {
-        ".read": "auth != null",
-        ".write": "auth != null || (!data.exists() && newData.exists())"
-      },
-      ".read": "auth != null"
+        ".read": "auth != null || data.exists()",
+        ".write": "auth != null || (!data.exists() && newData.exists() && newData.child('nama').isString() && newData.child('whatsapp').isString() && newData.child('total').isNumber() && newData.child('metodePembayaran').isString() && newData.child('tipe').val() == 'NON_COD' && newData.child('status').val() == 'Menunggu Verifikasi Pembayaran' && newData.child('buktiPembayaranUrl').isString() && newData.child('buktiPembayaranUrl').val() != '') || (data.exists() && data.child('status').val() == 'Lunas' && newData.child('status').val() == 'Lunas' && newData.child('orderId').isString())"
+      }
     },
     "pelacakan": {
       "$invoice": {

@@ -90,6 +90,10 @@ function uploadGambar(file) {
 }
 
 function uploadBuktiPembayaranFirebase(file, namaPembeli) {
+    if (!file) return Promise.reject(new Error("File bukti transfer belum dipilih."));
+    if (!/^image\/(jpeg|png|webp)$/.test(file.type || "")) return Promise.reject(new Error("Bukti transfer harus JPG, PNG, atau WEBP."));
+    if (Number(file.size || 0) > 5 * 1024 * 1024) return Promise.reject(new Error("Ukuran bukti transfer maksimal 5 MB."));
+    if (!storage) return Promise.reject(new Error("Firebase Storage belum tersedia."));
     const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
     const safeBuyer = (namaPembeli || "pembeli").replace(/[^a-zA-Z0-9_-]/g, "_");
     const path = "bukti-pembayaran/" + Date.now() + "_" + safeBuyer + "_" + safeName;

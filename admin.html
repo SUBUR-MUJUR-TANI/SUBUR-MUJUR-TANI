@@ -1600,7 +1600,16 @@ async function verifikasiBayar(id){
         const orderRef = adminRef("pesanan/" + id);
         const snap = await orderRef.once("value");
         const order = snap.val();
-        if (!order) { alert("Pesanan tidak ditemukan."); return; }
+        if (!order) {
+            const paymentRefOnly = adminRef("pembayaran/" + id);
+            const paymentSnapOnly = await paymentRefOnly.once("value");
+            const paymentOnly = paymentSnapOnly.val();
+            if (!paymentOnly) { alert("Pembayaran tidak ditemukan."); return; }
+            const waktuOnly = new Date().toLocaleString("id-ID");
+            await paymentRefOnly.update({status:"Lunas",dikonfirmasiPada:waktuOnly,dikonfirmasiAt:Date.now()});
+            alert("✅ Pembayaran transfer dikonfirmasi. Konsumen sekarang dapat menekan Buat Pesanan.");
+            return;
+        }
 
         const waktuKonfirmasi = new Date().toLocaleString("id-ID");
         const waktuKonfirmasiAt = Date.now();
@@ -1702,7 +1711,15 @@ function tolakPembayaran(id){
     const alasan = prompt("Alasan penolakan pembayaran (opsional):", "Pembayaran belum valid");
     if (alasan === null) return;
     adminRef("pesanan/" + id).once("value").then(async function(snap){
-        const order = snap.val() || {};
+        const order = snap.val();
+        if (!order) {
+            const paymentRefOnly = adminRef("pembayaran/" + id);
+            const paymentSnapOnly = await paymentRefOnly.once("value");
+            if (!paymentSnapOnly.exists()) throw new Error("Pembayaran tidak ditemukan.");
+            await paymentRefOnly.update({status:"Ditolak",alasanPenolakan:alasan,ditolakPada:new Date().toLocaleString("id-ID")});
+            alert("❌ Pembayaran ditolak. Konsumen dapat mengirim bukti transfer baru.");
+            return;
+        }
         await adminRef("pesanan/" + id).update({
             status: "Pembayaran Ditolak",
             statusPembayaran: "Ditolak",
@@ -3447,9 +3464,10 @@ async function adminHapusUlasan(id){
             💳 ${esc(metode)}${isCOD ? " 🤝" : ""}<br>
             💰 <b>Rp ${total.toLocaleString("id-ID")}</b><br>
             🧾 ${esc(order.invoice || id)}
+            ${(!isCOD && (p.buktiPembayaranUrl || order.buktiPembayaranUrl)) ? `<br>📎 <a href="${esc(p.buktiPembayaranUrl || order.buktiPembayaranUrl)}" target="_blank" rel="noopener" style="font-weight:800;">Lihat Bukti Transfer</a>` : ""}
           </div>
           <div style="display:flex;gap:7px;flex-wrap:wrap;margin-top:10px;">
-            ${(!sudahLunas && !ditolak && !isCOD) ? `<button type="button" onclick="verifikasiBayar('${esc(id)}')">✅ Lunas</button>` : ""}
+            ${(!sudahLunas && !ditolak && !isCOD) ? `<button type="button" onclick="verifikasiBayar('${esc(id)}')">✅ Konfirmasi Pembayaran</button>` : ""}
             ${(!sudahLunas && !ditolak) ? `<button type="button" onclick="tolakPembayaran('${esc(id)}')">❌ Tolak</button>` : ""}
             ${isCOD && !sudahLunas ? `<button type="button" onclick="window.konfirmasiCOD('${esc(id)}')">🤝 Konfirmasi COD</button>` : ""}
             ${String(order.status||"") === "Dikemas" ? `<button type="button" onclick="buatPengiriman('${esc(id)}')">🚚 Buat Pengiriman</button>` : ""}
