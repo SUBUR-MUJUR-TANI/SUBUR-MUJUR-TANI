@@ -785,6 +785,7 @@ async function renderPesananMasuk(force = false) {
                 <span>💳 ${isCOD ? "COD" : escapeAdmin(order.metodePembayaran || "-")}</span>
               </div>
               <div class="order-total">Rp ${Number(order.total || 0).toLocaleString("id-ID")}</div>
+              ${!isCOD ? `<div style="margin-top:7px;font-size:12px;font-weight:800;color:${order.buktiPembayaranUrl ? '#1b6b4b' : '#9a6a00'};">${order.buktiPembayaranUrl ? '📎 Bukti transfer tersedia' : 'ℹ️ Bukti transfer belum diupload — bisa diproses manual'}</div>` : ""}
 
               <label for="status-${id}" style="font-size:12px;color:#66716c;">Atur status</label>
               <div class="status-tools">
@@ -1607,7 +1608,7 @@ async function verifikasiBayar(id){
             if (!paymentOnly) { alert("Pembayaran tidak ditemukan."); return; }
             const waktuOnly = new Date().toLocaleString("id-ID");
             await paymentRefOnly.update({status:"Lunas",dikonfirmasiPada:waktuOnly,dikonfirmasiAt:Date.now()});
-            alert("✅ Pembayaran transfer dikonfirmasi. Konsumen sekarang dapat menekan Buat Pesanan.");
+            alert("✅ Pembayaran transfer dikonfirmasi.");
             return;
         }
 
@@ -1641,12 +1642,23 @@ async function verifikasiBayar(id){
             });
         }
 
+        // Update record pembayaran yang memakai key orderId (order tanpa bukti)
+        // atau record pembayaran lama yang menyimpan orderId.
         const pembayaranRef = adminRef("pembayaran/" + id);
         const pembayaranSnap = await pembayaranRef.once("value");
         if (pembayaranSnap.exists()) {
-            await pembayaranRef.update({status:"Lunas", dikonfirmasiPada:waktuKonfirmasi});
+            await pembayaranRef.update({status:"Lunas", dikonfirmasiPada:waktuKonfirmasi, dikonfirmasiAt:waktuKonfirmasiAt});
+        } else {
+            const semuaPembayaranSnap = await adminDbGet("pembayaran");
+            const semuaPembayaran = semuaPembayaranSnap.val() || {};
+            for (const [paymentId, payment] of Object.entries(semuaPembayaran)) {
+                if (payment && String(payment.orderId || "") === String(id)) {
+                    await adminRef("pembayaran/" + paymentId).update({status:"Lunas", dikonfirmasiPada:waktuKonfirmasi, dikonfirmasiAt:waktuKonfirmasiAt});
+                    break;
+                }
+            }
         }
-        alert("✅ Pembayaran dikonfirmasi. Stok tidak dikurangi lagi.");
+        alert("✅ Pembayaran dikonfirmasi. Pesanan siap diproses.");
     } catch(error) {
         console.error(error);
         alert("❌ Gagal mengonfirmasi pembayaran: " + error.message);

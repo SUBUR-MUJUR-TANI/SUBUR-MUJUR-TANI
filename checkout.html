@@ -1124,11 +1124,11 @@ const DATA_PEMBAYARAN = {
 <div id="buktiTransferBox" style="display:none;margin-top:16px;padding:16px;border:1px solid #dfe7e2;border-radius:14px;background:#f8fbf9;">
   <h3 style="margin:0 0 8px;">🧾 Bukti Transfer</h3>
   <p style="margin:0 0 12px;color:#66716c;font-size:13px;line-height:1.5;">
-    Untuk pembayaran transfer, <b>transfer terlebih dahulu</b>. Setelah itu upload bukti transfer. Tombol <b>Buat Pesanan</b> baru aktif setelah bukti berhasil tersimpan.
+    Untuk pembayaran transfer, bukti transfer <b>boleh diupload</b>, tetapi <b>tidak wajib</b> untuk membuat pesanan. Jika belum upload, pesanan tetap masuk ke Admin dan dapat diproses secara manual.
   </p>
   <input id="buktiTransferFile" type="file" accept="image/jpeg,image/png,image/webp" style="width:100%;box-sizing:border-box;">
   <button id="btnUploadBuktiTransfer" type="button" onclick="uploadBuktiTransfer()" style="margin-top:10px;">📤 Upload Bukti Transfer</button>
-  <div id="statusBuktiTransfer" style="margin-top:10px;font-size:13px;font-weight:700;color:#b3261e;">❌ Bukti transfer belum diupload.</div>
+  <div id="statusBuktiTransfer" style="margin-top:10px;font-size:13px;font-weight:700;color:#b3261e;">ℹ️ Bukti transfer belum diupload (opsional).</div>
   <div id="previewBuktiTransfer" style="display:none;margin-top:10px;"></div>
 </div>
 
@@ -1393,59 +1393,57 @@ function resetBuktiTransfer() {
 }
 
 async function compressBuktiTransfer(file) {
-    // Foto HP sering 3–8 MB. Kompres di perangkat agar upload jauh lebih cepat,
-    // tanpa mengubah file asli yang dipilih pengguna.
-    if (!file || !/^image\/(jpeg|png|webp)$/.test(file.type || "")) return file;
-    if (file.size <= 700 * 1024) return file;
+    // Gunakan alur yang sama seperti upload foto produk:
+    // kompres ke JPEG 1600px dengan kualitas 0.82, lalu upload langsung
+    // ke Firebase Storage. Tidak memakai Netlify Function untuk file ini.
+    return new Promise((resolve, reject) => {
+        if(!file){ reject(new Error("File bukti transfer tidak ditemukan.")); return; }
+        if(!/^image\/(jpeg|png|webp)$/.test(file.type || "")){
+            reject(new Error("Bukti transfer harus JPG, PNG, atau WEBP.")); return;
+        }
 
-    return new Promise((resolve) => {
-        const img = new Image();
-        const objectUrl = URL.createObjectURL(file);
-        img.onload = () => {
-            try {
-                const maxSide = 1400;
-                const scale = Math.min(1, maxSide / Math.max(img.naturalWidth || img.width, img.naturalHeight || img.height));
-                const width = Math.max(1, Math.round((img.naturalWidth || img.width) * scale));
-                const height = Math.max(1, Math.round((img.naturalHeight || img.height) * scale));
-                const canvas = document.createElement("canvas");
-                canvas.width = width;
-                canvas.height = height;
-                const ctx = canvas.getContext("2d", { alpha: false });
-                if (!ctx) { URL.revokeObjectURL(objectUrl); resolve(file); return; }
-                ctx.drawImage(img, 0, 0, width, height);
+        const reader = new FileReader();
+        reader.onerror = () => reject(new Error("Gagal membaca foto dari HP."));
+        reader.onload = function(e){
+            const img = new Image();
+            img.onerror = () => reject(new Error("Foto bukti transfer tidak dapat diproses."));
+            img.onload = function(){
+                try{
+                    const MAX_SIDE = 1600;
+                    let w = img.naturalWidth || img.width;
+                    let h = img.naturalHeight || img.height;
+                    if(!w || !h) throw new Error("Ukuran foto tidak valid.");
 
-                const qualities = [0.78, 0.68, 0.58];
-                const tryQuality = (index) => {
-                    if (index >= qualities.length) {
-                        URL.revokeObjectURL(objectUrl);
-                        return resolve(file);
+                    if(w > MAX_SIDE || h > MAX_SIDE){
+                        const scale = Math.min(MAX_SIDE / w, MAX_SIDE / h);
+                        w = Math.max(1, Math.round(w * scale));
+                        h = Math.max(1, Math.round(h * scale));
                     }
-                    canvas.toBlob((blob) => {
-                        if (!blob) {
-                            URL.revokeObjectURL(objectUrl);
-                            return resolve(file);
-                        }
-                        // Target sekitar <= 700 KB supaya upload di jaringan seluler cepat.
-                        if (blob.size <= 700 * 1024 || index === qualities.length - 1) {
-                            URL.revokeObjectURL(objectUrl);
-                            if (blob.size >= file.size) return resolve(file);
-                            const compressed = new File([blob],
-                                (file.name || "bukti-transfer").replace(/\.[^.]+$/, "") + ".jpg",
-                                { type: "image/jpeg", lastModified: Date.now() }
-                            );
-                            return resolve(compressed);
-                        }
-                        tryQuality(index + 1);
-                    }, "image/jpeg", qualities[index]);
-                };
-                tryQuality(0);
-            } catch (_) {
-                URL.revokeObjectURL(objectUrl);
-                resolve(file);
-            }
+
+                    const canvas = document.createElement("canvas");
+                    canvas.width = w;
+                    canvas.height = h;
+                    const ctx = canvas.getContext("2d", {alpha:false});
+                    if(!ctx) throw new Error("Browser HP tidak mendukung pemrosesan foto.");
+                    ctx.fillStyle = "#ffffff";
+                    ctx.fillRect(0,0,w,h);
+                    ctx.drawImage(img,0,0,w,h);
+
+                    canvas.toBlob(function(blob){
+                        if(!blob) throw new Error("Foto gagal diproses.");
+                        const compressed = new File(
+                            [blob],
+                            (file.name || "bukti-transfer").replace(/\.[^.]+$/i, "") + ".jpg",
+                            {type:"image/jpeg", lastModified:Date.now()}
+                        );
+                        // Jika kompresi malah lebih besar, gunakan file asli.
+                        resolve(blob.size < file.size ? compressed : file);
+                    }, "image/jpeg", 0.82);
+                }catch(err){ reject(err); }
+            };
+            img.src = e.target.result;
         };
-        img.onerror = () => { URL.revokeObjectURL(objectUrl); resolve(file); };
-        img.src = objectUrl;
+        reader.readAsDataURL(file);
     });
 }
 
@@ -1455,12 +1453,13 @@ async function uploadBuktiTransfer() {
         alert("Pilih Transfer Bank terlebih dahulu.");
         return;
     }
+
     const originalFile = document.getElementById("buktiTransferFile")?.files?.[0];
     if (!originalFile) {
         alert("Pilih foto bukti transfer terlebih dahulu.");
         return;
     }
-    if (!/^image\/(jpeg|png|webp)$/.test(originalFile.type)) {
+    if (!/^image\/(jpeg|png|webp)$/.test(originalFile.type || "")) {
         alert("Bukti transfer harus berupa JPG, PNG, atau WEBP.");
         return;
     }
@@ -1481,37 +1480,64 @@ async function uploadBuktiTransfer() {
     const preview = document.getElementById("previewBuktiTransfer");
     const storage = (window.FirebaseApp && window.FirebaseApp.storage) || window.storage;
     const db = (window.FirebaseApp && window.FirebaseApp.database) || window.database;
+
     if (!storage || !db) {
         alert("Firebase belum siap. Silakan refresh halaman lalu coba lagi.");
         return;
     }
 
     try {
-        if (btn) { btn.disabled = true; btn.textContent = "⏳ Menyiapkan foto..."; }
-        if (status) { status.textContent = "⏳ Mengompres foto agar upload lebih cepat..."; status.style.color = "#7a5b00"; }
+        if(btn){ btn.disabled=true; btn.textContent="⏳ Menyiapkan foto..."; }
+        if(status){ status.textContent="⏳ Menyiapkan foto..."; status.style.color="#7a5b00"; }
 
+        // Sama seperti upload foto produk: kompres di HP sebelum dikirim.
         const file = await compressBuktiTransfer(originalFile);
-        const safeName = (file.name || originalFile.name).replace(/[^a-zA-Z0-9._-]/g, "_");
-        const safeBuyer = (nama || "pembeli").replace(/[^a-zA-Z0-9_-]/g, "_").slice(0,60);
+        const safeName = String(file.name || originalFile.name || "bukti-transfer")
+            .replace(/[^a-zA-Z0-9._-]/g,"_")
+            .replace(/\.[^.]+$/i,"") || "bukti-transfer";
+        const safeBuyer = String(nama || "pembeli")
+            .replace(/[^a-zA-Z0-9_-]/g,"_").slice(0,60) || "pembeli";
+
         const paymentRef = db.ref("pembayaran").push();
         const paymentId = paymentRef.key;
         const uploadedAt = Date.now();
-        const path = "bukti-pembayaran/" + uploadedAt + "_" + safeBuyer + "_" + safeName;
+        const storagePath = "bukti-pembayaran/" + paymentId + "/" + uploadedAt + "_" + safeBuyer + "_" + safeName + ".jpg";
 
-        if (btn) btn.textContent = "⏳ Mengupload bukti...";
-        if (status) status.textContent = "⏳ Mengupload bukti transfer...";
+        if(btn) btn.textContent="⏳ Upload bukti...";
+        if(status) status.textContent="⏳ Upload bukti transfer...";
 
-        // put() dipakai seperti sebelumnya agar Firebase Storage tetap kompatibel.
-        // File yang dikirim sudah dikompres sehingga jauh lebih ringan di jaringan seluler.
-        const snap = await storage.ref(path).put(file, {
-            contentType: file.type,
-            customMetadata: {
-                purpose: "payment-proof",
-                originalFileName: originalFile.name || "",
-                originalSize: String(originalFile.size || 0)
-            }
+        // Jalur upload dibuat sama dengan foto produk: Firebase Storage langsung.
+        // Ada timeout 15 detik agar UI tidak menggantung tanpa batas.
+        const blob = await (await fetch(file instanceof File ? URL.createObjectURL(file) : file)).blob().catch(()=>file);
+        let uploadData = blob;
+        if(file instanceof File){
+            uploadData = file;
+        }
+        const uploadTask = storage.ref(storagePath).put(uploadData, {
+            contentType: file.type || "image/jpeg",
+            cacheControl: "public,max-age=31536000"
         });
-        const url = await snap.ref.getDownloadURL();
+        const timeout = new Promise((_, reject) =>
+            setTimeout(() => reject(new Error("Upload terlalu lama")), 15000)
+        );
+
+        let url = "";
+        try {
+            const snap = await Promise.race([uploadTask, timeout]);
+            url = await snap.ref.getDownloadURL();
+        } catch(storageError) {
+            // Sama seperti foto produk: jika Storage bermasalah, simpan foto
+            // sebagai data URL supaya checkout tidak berhenti/menunggu terus.
+            console.warn("Upload Storage bukti transfer gagal, menggunakan cadangan data URL:", storageError);
+            if(status) status.textContent="⏳ Menyimpan bukti...";
+            const reader = new FileReader();
+            const dataUrl = await new Promise((resolve,reject)=>{
+                reader.onload=()=>resolve(reader.result);
+                reader.onerror=()=>reject(new Error("Gagal menyiapkan cadangan foto."));
+                reader.readAsDataURL(file);
+            });
+            url = dataUrl;
+        }
 
         const totals = finalGetTotals();
         const paymentData = {
@@ -1526,23 +1552,29 @@ async function uploadBuktiTransfer() {
             buktiPembayaranDiunggahAt: uploadedAt,
             waktu: uploadedAt
         };
+
         await paymentRef.set(paymentData);
-        smtPaymentProof = { url, fileName: originalFile.name, uploadedAt, paymentId, status: paymentData.status };
+        smtPaymentProof = {url, fileName:originalFile.name, uploadedAt, paymentId, status:paymentData.status};
         smtSavePaymentSession();
-        if (status) { status.textContent = "⏳ Bukti transfer sudah diterima. Menunggu admin memverifikasi pembayaran. Tombol Buat Pesanan masih terkunci."; status.style.color = "#7a5b00"; }
+
+        if(status){
+            status.textContent="⏳ Bukti transfer sudah diterima. Menunggu admin memverifikasi pembayaran. Tombol Buat Pesanan masih terkunci.";
+            status.style.color="#7a5b00";
+        }
         smtWatchPaymentStatus();
-        if (preview) {
-            preview.innerHTML = `<img src="${finalEscape(url)}" alt="Bukti transfer" style="display:block;max-width:100%;max-height:260px;border-radius:10px;border:1px solid #d7e1dc;object-fit:contain;background:#fff;">`;
-            preview.style.display = "block";
+
+        if(preview){
+            preview.innerHTML=`<img src="${finalEscape(url)}" alt="Bukti transfer" style="display:block;max-width:100%;max-height:260px;border-radius:10px;border:1px solid #d7e1dc;object-fit:contain;background:#fff;">`;
+            preview.style.display="block";
         }
         updateMetodePembayaranUI();
-    } catch (e) {
-        console.error("Upload bukti transfer:", e);
-        smtPaymentProof = { url: "", fileName: "", uploadedAt: 0, paymentId: "", status: "" };
-        if (status) { status.textContent = "❌ Upload gagal: " + (e.message || e); status.style.color = "#b3261e"; }
-        alert("❌ Bukti transfer gagal diupload: " + (e.message || e));
+    } catch(e) {
+        console.error("Upload bukti transfer:",e);
+        smtPaymentProof={url:"",fileName:"",uploadedAt:0,paymentId:"",status:""};
+        if(status){status.textContent="❌ Upload gagal: "+(e.message||e);status.style.color="#b3261e";}
+        alert("❌ Bukti transfer gagal diupload: "+(e.message||e));
     } finally {
-        if (btn) { btn.disabled = false; btn.textContent = "📤 Upload Bukti Transfer"; }
+        if(btn){btn.disabled=false;btn.textContent="📤 Upload Bukti Transfer";}
     }
 }
 
@@ -1553,13 +1585,13 @@ function updateTombolBuatPesanan() {
     const transfer = smtIsTransferMethod();
     const boleh = metode === "COD"
         ? window.smtSelectedShipping?.availableForCOD === true && window.smtSelectedShipping?.codVerified === true
-        : transfer && Boolean(smtPaymentProof.paymentId) && smtPaymentProof.status === "Lunas";
+        : transfer && smtPaymentProof.status !== "Ditolak";
     if (btn) btn.disabled = !boleh;
     if (status) {
         if (!metode) status.textContent = "⚠️ Pilih metode pembayaran.";
         else if (metode === "COD") status.textContent = boleh ? "✅ COD sudah diverifikasi. Silakan buat pesanan." : "⚠️ COD belum diverifikasi.";
-        else if (smtPaymentProof.paymentId && smtPaymentProof.status !== "Lunas") status.textContent = "⏳ Bukti transfer sudah diterima. Menunggu admin mengonfirmasi pembayaran.";
-        else status.textContent = "🔒 Transfer terlebih dahulu dan upload bukti transfer. Setelah admin mengonfirmasi, tombol Buat Pesanan akan aktif.";
+        else if (smtPaymentProof.paymentId && smtPaymentProof.status !== "Lunas") status.textContent = "⏳ Bukti transfer sudah diterima. Pesanan tetap bisa dibuat dan menunggu verifikasi Admin.";
+        else status.textContent = "ℹ️ Bukti transfer opsional. Pesanan tetap bisa dibuat dan masuk ke Admin untuk diproses manual.";
     }
 }
 
@@ -3432,17 +3464,13 @@ async function simpanPesanan() {
         return;
     }
 
-    if (metode !== "COD") {
-        if (!smtPaymentProof.paymentId || !smtPaymentProof.url) {
-            alert("🔒 Transfer terlebih dahulu lalu upload bukti transfer.");
-            updateMetodePembayaranUI();
-            return;
-        }
-        if (smtPaymentProof.status !== "Lunas") {
-            alert("⏳ Bukti transfer masih menunggu konfirmasi admin. Tombol Buat Pesanan belum dapat digunakan.");
-            updateMetodePembayaranUI();
-            return;
-        }
+    // Bukti transfer NON-COD bersifat opsional. Pesanan tetap boleh dibuat
+    // walaupun pembeli belum mengupload bukti; Admin dapat memeriksa dan
+    // mengonfirmasi pembayaran secara manual dari dashboard.
+    if (metode !== "COD" && smtPaymentProof.paymentId && smtPaymentProof.status === "Ditolak") {
+        alert("❌ Bukti transfer sebelumnya ditolak. Silakan upload bukti yang benar atau hubungi Admin.");
+        updateMetodePembayaranUI();
+        return;
     }
 
     if (metode === "COD") {
@@ -3549,11 +3577,11 @@ async function simpanPesanan() {
             total: totals.total,
             metodePembayaran: metode,
             tipePembayaran: metode === "COD" ? "COD" : "NON_COD",
-            statusPembayaran: metode === "COD" ? "COD - Belum Dibayar" : "Lunas",
-            paymentId: metode === "COD" ? "" : smtPaymentProof.paymentId,
-            buktiPembayaranUrl: metode === "COD" ? "" : smtPaymentProof.url,
-            buktiPembayaranNamaFile: metode === "COD" ? "" : smtPaymentProof.fileName,
-            buktiPembayaranDiunggahAt: metode === "COD" ? 0 : smtPaymentProof.uploadedAt,
+            statusPembayaran: metode === "COD" ? "COD - Belum Dibayar" : (smtPaymentProof.paymentId ? "Menunggu Verifikasi Pembayaran" : "Belum Bayar"),
+            paymentId: metode === "COD" ? "" : (smtPaymentProof.paymentId || orderKey),
+            buktiPembayaranUrl: metode === "COD" ? "" : (smtPaymentProof.url || ""),
+            buktiPembayaranNamaFile: metode === "COD" ? "" : (smtPaymentProof.fileName || ""),
+            buktiPembayaranDiunggahAt: metode === "COD" ? 0 : Number(smtPaymentProof.uploadedAt || 0),
             kurir: document.getElementById("kurirOngkir")?.value || "",
             kurirKode: String(window.smtSelectedShipping?.courierCode || document.getElementById("kurirOngkir")?.value || "").toLowerCase(),
             layananPengiriman: document.getElementById("layananOngkir")?.selectedOptions?.[0]?.textContent?.trim() || "",
@@ -3562,7 +3590,7 @@ async function simpanPesanan() {
             shippingCategory: String(window.smtSelectedShipping?.shippingCategory || window.smtJenisPengiriman || "reguler"),
             destinationLatitude: window.smtInstantLocation ? Number(window.smtInstantLocation.latitude) : null,
             destinationLongitude: window.smtInstantLocation ? Number(window.smtInstantLocation.longitude) : null,
-            status: metode === "COD" ? "Menunggu Konfirmasi COD" : "Dikemas",
+            status: metode === "COD" ? "Menunggu Konfirmasi COD" : (smtPaymentProof.paymentId ? "Menunggu Konfirmasi Pembayaran" : "Belum Bayar"),
             tanggal: new Date().toLocaleString("id-ID"),
             waktu: Date.now()
         };
@@ -3582,7 +3610,27 @@ async function simpanPesanan() {
                 waktu: orderData.waktu
             });
         } else {
-            await db.ref("pembayaran/" + smtPaymentProof.paymentId).update({ orderId: orderKey });
+            if (smtPaymentProof.paymentId) {
+                // Bukti sudah diupload sebelum order dibuat. Kaitkan pembayaran
+                // lama ke order agar Admin dapat menemukannya.
+                await db.ref("pembayaran/" + smtPaymentProof.paymentId).update({ orderId: orderKey });
+            } else {
+                // Tidak ada bukti transfer: tetap buat record pembayaran agar
+                // order langsung terlihat di menu Pembayaran Admin.
+                await db.ref("pembayaran/" + orderKey).set({
+                    orderId: orderKey,
+                    nama: orderData.nama,
+                    whatsapp: orderData.whatsapp,
+                    total: orderData.total,
+                    metodePembayaran: orderData.metodePembayaran,
+                    status: "Menunggu Bukti Transfer",
+                    tipe: "NON_COD",
+                    buktiPembayaranUrl: "",
+                    buktiPembayaranNamaFile: "",
+                    buktiPembayaranDiunggahAt: 0,
+                    waktu: orderData.waktu
+                });
+            }
         }
 
         finalLastOrderId = orderKey;
@@ -3595,7 +3643,9 @@ async function simpanPesanan() {
 
         alert(metode === "COD"
             ? "✅ Pesanan COD berhasil dibuat dan menunggu konfirmasi admin."
-            : "✅ Pesanan berhasil dibuat. Pembayaran transfer sudah dikonfirmasi admin dan pesanan siap diproses ke pengiriman.");
+            : (smtPaymentProof.paymentId
+                ? "✅ Pesanan berhasil dibuat. Bukti transfer tersimpan dan menunggu verifikasi Admin."
+                : "✅ Pesanan berhasil dibuat tanpa bukti transfer. Pesanan sudah masuk ke Admin untuk diproses dan pembayaran dapat diverifikasi manual."));
         cetakInvoice(orderData);
 
     } catch (error) {
