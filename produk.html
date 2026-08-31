@@ -3125,8 +3125,8 @@ function cetakInvoice(data) {
         "<div class='thanks'>Terima kasih telah berbelanja di SUBUR MUJUR TANI.</div>" +
         "<div class='actions'><button onclick='window.print()'>🖨️ Cetak / Simpan PDF</button></div>" +
         "</main>" +
-        "<script src=\"/pwa-register.js\"><\/script>\n<script src="/whatsapp-float.js"></script>
-</body></html>";
+        "<script src=\"/pwa-register.js\"><\/script>\n<script src=\"/whatsapp-float.js\"><\/script>" +
+        "</body></html>";
 
     const blob = new Blob([invoiceHtml], {type:"text/html;charset=utf-8"});
     const url = URL.createObjectURL(blob);
