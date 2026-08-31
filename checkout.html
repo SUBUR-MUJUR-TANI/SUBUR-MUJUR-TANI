@@ -1392,52 +1392,128 @@ function resetBuktiTransfer() {
     if (preview) { preview.innerHTML = ""; preview.style.display = "none"; }
 }
 
+async function compressBuktiTransfer(file) {
+    // Foto HP sering 3–8 MB. Kompres di perangkat agar upload jauh lebih cepat,
+    // tanpa mengubah file asli yang dipilih pengguna.
+    if (!file || !/^image\/(jpeg|png|webp)$/.test(file.type || "")) return file;
+    if (file.size <= 700 * 1024) return file;
+
+    return new Promise((resolve) => {
+        const img = new Image();
+        const objectUrl = URL.createObjectURL(file);
+        img.onload = () => {
+            try {
+                const maxSide = 1400;
+                const scale = Math.min(1, maxSide / Math.max(img.naturalWidth || img.width, img.naturalHeight || img.height));
+                const width = Math.max(1, Math.round((img.naturalWidth || img.width) * scale));
+                const height = Math.max(1, Math.round((img.naturalHeight || img.height) * scale));
+                const canvas = document.createElement("canvas");
+                canvas.width = width;
+                canvas.height = height;
+                const ctx = canvas.getContext("2d", { alpha: false });
+                if (!ctx) { URL.revokeObjectURL(objectUrl); resolve(file); return; }
+                ctx.drawImage(img, 0, 0, width, height);
+
+                const qualities = [0.78, 0.68, 0.58];
+                const tryQuality = (index) => {
+                    if (index >= qualities.length) {
+                        URL.revokeObjectURL(objectUrl);
+                        return resolve(file);
+                    }
+                    canvas.toBlob((blob) => {
+                        if (!blob) {
+                            URL.revokeObjectURL(objectUrl);
+                            return resolve(file);
+                        }
+                        // Target sekitar <= 700 KB supaya upload di jaringan seluler cepat.
+                        if (blob.size <= 700 * 1024 || index === qualities.length - 1) {
+                            URL.revokeObjectURL(objectUrl);
+                            if (blob.size >= file.size) return resolve(file);
+                            const compressed = new File([blob],
+                                (file.name || "bukti-transfer").replace(/\.[^.]+$/, "") + ".jpg",
+                                { type: "image/jpeg", lastModified: Date.now() }
+                            );
+                            return resolve(compressed);
+                        }
+                        tryQuality(index + 1);
+                    }, "image/jpeg", qualities[index]);
+                };
+                tryQuality(0);
+            } catch (_) {
+                URL.revokeObjectURL(objectUrl);
+                resolve(file);
+            }
+        };
+        img.onerror = () => { URL.revokeObjectURL(objectUrl); resolve(file); };
+        img.src = objectUrl;
+    });
+}
+
 async function uploadBuktiTransfer() {
     const metode = document.getElementById("metodePembayaran")?.value || "";
     if (!metode || metode === "COD") {
         alert("Pilih Transfer Bank terlebih dahulu.");
         return;
     }
-    const file = document.getElementById("buktiTransferFile")?.files?.[0];
-    if (!file) {
+    const originalFile = document.getElementById("buktiTransferFile")?.files?.[0];
+    if (!originalFile) {
         alert("Pilih foto bukti transfer terlebih dahulu.");
         return;
     }
-    if (!/^image\/(jpeg|png|webp)$/.test(file.type)) {
+    if (!/^image\/(jpeg|png|webp)$/.test(originalFile.type)) {
         alert("Bukti transfer harus berupa JPG, PNG, atau WEBP.");
         return;
     }
-    if (file.size > 5 * 1024 * 1024) {
+    if (originalFile.size > 5 * 1024 * 1024) {
         alert("Ukuran bukti transfer maksimal 5 MB.");
         return;
     }
 
     const nama = (document.getElementById("namaPembeli")?.value || "pembeli").trim();
+    const whatsapp = (document.getElementById("whatsapp")?.value || "").trim();
+    if (!nama || !whatsapp) {
+        alert("Nama dan WhatsApp wajib diisi sebelum upload bukti transfer.");
+        return;
+    }
+
     const btn = document.getElementById("btnUploadBuktiTransfer");
     const status = document.getElementById("statusBuktiTransfer");
     const preview = document.getElementById("previewBuktiTransfer");
     const storage = (window.FirebaseApp && window.FirebaseApp.storage) || window.storage;
-    if (!storage) {
-        alert("Firebase Storage belum siap. Silakan refresh halaman lalu coba lagi.");
+    const db = (window.FirebaseApp && window.FirebaseApp.database) || window.database;
+    if (!storage || !db) {
+        alert("Firebase belum siap. Silakan refresh halaman lalu coba lagi.");
         return;
     }
 
     try {
-        if (btn) { btn.disabled = true; btn.textContent = "⏳ Mengupload..."; }
-        if (status) { status.textContent = "⏳ Menyimpan bukti transfer..."; status.style.color = "#7a5b00"; }
-        const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
-        const safeBuyer = (nama || "pembeli").replace(/[^a-zA-Z0-9_-]/g, "_").slice(0,60);
-        const path = "bukti-pembayaran/" + Date.now() + "_" + safeBuyer + "_" + safeName;
-        const snap = await storage.ref(path).put(file, { contentType: file.type, customMetadata: { purpose: "payment-proof" } });
-        const url = await snap.ref.getDownloadURL();
+        if (btn) { btn.disabled = true; btn.textContent = "⏳ Menyiapkan foto..."; }
+        if (status) { status.textContent = "⏳ Mengompres foto agar upload lebih cepat..."; status.style.color = "#7a5b00"; }
 
-        const db = (window.FirebaseApp && window.FirebaseApp.database) || window.database;
-        if (!db) throw new Error("Firebase Database belum siap.");
-        const whatsapp = (document.getElementById("whatsapp")?.value || "").trim();
-        if (!nama || !whatsapp) throw new Error("Nama dan WhatsApp wajib diisi sebelum upload bukti transfer.");
-        const totals = finalGetTotals();
+        const file = await compressBuktiTransfer(originalFile);
+        const safeName = (file.name || originalFile.name).replace(/[^a-zA-Z0-9._-]/g, "_");
+        const safeBuyer = (nama || "pembeli").replace(/[^a-zA-Z0-9_-]/g, "_").slice(0,60);
         const paymentRef = db.ref("pembayaran").push();
         const paymentId = paymentRef.key;
+        const uploadedAt = Date.now();
+        const path = "bukti-pembayaran/" + uploadedAt + "_" + safeBuyer + "_" + safeName;
+
+        if (btn) btn.textContent = "⏳ Mengupload bukti...";
+        if (status) status.textContent = "⏳ Mengupload bukti transfer...";
+
+        // put() dipakai seperti sebelumnya agar Firebase Storage tetap kompatibel.
+        // File yang dikirim sudah dikompres sehingga jauh lebih ringan di jaringan seluler.
+        const snap = await storage.ref(path).put(file, {
+            contentType: file.type,
+            customMetadata: {
+                purpose: "payment-proof",
+                originalFileName: originalFile.name || "",
+                originalSize: String(originalFile.size || 0)
+            }
+        });
+        const url = await snap.ref.getDownloadURL();
+
+        const totals = finalGetTotals();
         const paymentData = {
             nama,
             whatsapp,
@@ -1446,12 +1522,12 @@ async function uploadBuktiTransfer() {
             status: "Menunggu Verifikasi Pembayaran",
             tipe: "NON_COD",
             buktiPembayaranUrl: url,
-            buktiPembayaranNamaFile: file.name,
-            buktiPembayaranDiunggahAt: Date.now(),
-            waktu: Date.now()
+            buktiPembayaranNamaFile: originalFile.name,
+            buktiPembayaranDiunggahAt: uploadedAt,
+            waktu: uploadedAt
         };
         await paymentRef.set(paymentData);
-        smtPaymentProof = { url, fileName: file.name, uploadedAt: paymentData.buktiPembayaranDiunggahAt, paymentId, status: paymentData.status };
+        smtPaymentProof = { url, fileName: originalFile.name, uploadedAt, paymentId, status: paymentData.status };
         smtSavePaymentSession();
         if (status) { status.textContent = "⏳ Bukti transfer sudah diterima. Menunggu admin memverifikasi pembayaran. Tombol Buat Pesanan masih terkunci."; status.style.color = "#7a5b00"; }
         smtWatchPaymentStatus();
