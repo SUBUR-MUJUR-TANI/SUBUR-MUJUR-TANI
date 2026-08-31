@@ -1,0 +1,48 @@
+SUBUR MUJUR TANI — AKTIVASI BITESHIP PRODUCTION
+
+PENTING:
+File ini tidak berisi API key. Jangan pernah menaruh API key Biteship di HTML/JS.
+
+1) Di Netlify > Project > Site configuration > Environment variables, buat:
+
+BITESHIP_ENV=production
+BITESHIP_API_KEY=ISI_API_KEY_LIVE_BITESHIP_DI_SINI
+BITESHIP_ADMIN_EMAILS=EMAIL_ADMIN_FIREBASE_ANDA
+BITESHIP_ORIGIN_POSTAL_CODE=KODE_POS_TOKO_5_DIGIT
+BITESHIP_ORIGIN_CONTACT_NAME=NAMA_PENGIRIM
+BITESHIP_ORIGIN_CONTACT_PHONE=NO_HP_PENGIRIM
+BITESHIP_ORIGIN_ADDRESS=ALAMAT_LENGKAP_TOKO
+BITESHIP_ORIGIN_ORGANIZATION=SUBUR MUJUR TANI
+FIREBASE_SERVICE_ACCOUNT_JSON=SERVICE_ACCOUNT_JSON_FIREBASE
+
+Untuk Instant/Kendaraan tambahkan:
+BITESHIP_ORIGIN_LATITUDE=LATITUDE_TOKO
+BITESHIP_ORIGIN_LONGITUDE=LONGITUDE_TOKO
+
+Opsional webhook signature:
+BITESHIP_WEBHOOK_SIGNATURE_KEY=NAMA_HEADER_SIGNATURE_DARI_BITESHIP
+BITESHIP_WEBHOOK_SIGNATURE_SECRET=SECRET_SIGNATURE_DARI_BITESHIP
+
+2) Setelah API Production Biteship aktif, deploy ulang site.
+
+3) Cek:
+https://DOMAIN-NETLIFY-ANDA/api/biteship-health
+
+Harus HTTP 200 dan success=true.
+Jangan membuat pengiriman nyata jika masih 503 atau production_key=false.
+
+4) Di Biteship Production > Integrasi > Untuk Developer > Webhook, buat webhook LIVE:
+https://DOMAIN-NETLIFY-ANDA/api/biteship-webhook
+Event:
+- order.status
+- order.waybill_id
+- order.price
+
+Jangan mencampur webhook Test dengan webhook Production.
+
+5) Alur order nyata di website:
+Pelanggan checkout -> pesanan masuk Firebase -> admin memproses pembayaran/COD -> status menjadi Dikemas -> Admin memilih layanan Biteship -> tombol Buat Pengiriman -> server Netlify membuat POST /v1/orders ke Biteship menggunakan API key Production -> resi/tracking disimpan ke Firebase -> webhook Biteship memperbarui status.
+
+6) Untuk transaksi nyata pertama, lakukan smoke test dengan 1 order kecil setelah Production aktif. Pastikan saldo/metode pembayaran Biteship dan kurir tujuan siap.
+
+7) Jika tombol Buat Pengiriman menampilkan error, buka /api/biteship-health terlebih dahulu. Jika health belum siap, jangan mencoba membuat order berkali-kali.
