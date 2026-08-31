@@ -186,7 +186,10 @@ exports.handler = async event => {
       description: "Bibit tanaman",
       value: Math.max(1, Math.round(Number(item.harga || item.subtotal || 1))),
       quantity: Math.max(1, Math.round(Number(item.jumlah || 1))),
-      weight: Math.max(1, Math.round(Number(item.berat || 1000)))
+      weight: Math.max(1, Math.round(Number(item.berat || 1000))),
+      length: Math.max(0, Number(item.panjang ?? item.length ?? 0)),
+      width: Math.max(0, Number(item.lebar ?? item.width ?? 0)),
+      height: Math.max(0, Number(item.tinggi ?? item.height ?? 0))
     })) : [];
 
     if (!items.length) return json(400, { success: false, message: "Produk pesanan kosong." });

@@ -112,6 +112,9 @@ exports.handler = async event => {
       description: String(item.description || "Bibit tanaman"),
       value: Math.max(1, Math.round(Number(item.value || 1))),
       weight: Math.max(1, Math.round(Number(item.weight || 1))),
+      length: Math.max(0, Number(item.length || 0)),
+      width: Math.max(0, Number(item.width || 0)),
+      height: Math.max(0, Number(item.height || 0)),
       quantity: Math.max(1, Math.round(Number(item.quantity || 1)))
     })) : [{
       name: "Paket Bibit Tanaman",
