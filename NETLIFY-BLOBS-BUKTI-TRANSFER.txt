@@ -1,0 +1,18 @@
+PERUBAHAN BUKTI TRANSFER - TANPA FIREBASE STORAGE
+
+Versi ini tidak menggunakan Firebase Cloud Storage untuk bukti transfer.
+
+Alur:
+1. Konsumen memilih Transfer Bank.
+2. Konsumen upload bukti transfer.
+3. Browser mengirim file ke Netlify Function upload-bukti-transfer.
+4. Netlify Blobs menyimpan file.
+5. URL bukti disimpan di Realtime Database pada pembayaran/{paymentId}.buktiPembayaranUrl.
+6. Admin dapat membuka bukti dari menu Pembayaran Masuk.
+7. Admin mengonfirmasi pembayaran menjadi Lunas.
+8. Setelah Lunas, konsumen dapat menekan Buat Pesanan.
+
+Firebase Storage tidak diperlukan untuk bukti transfer pada versi ini.
+Project Firebase tetap dapat menggunakan paket Spark untuk alur ini.
+
+Catatan: Netlify Blobs adalah layanan penyimpanan Netlify yang digunakan melalui Netlify Functions. Pastikan deployment functions berhasil.

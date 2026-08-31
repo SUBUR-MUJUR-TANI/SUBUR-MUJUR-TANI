@@ -2936,8 +2936,8 @@ async function kirimBuktiTransfer() {
         const btn=document.getElementById("btnKirimBukti");
         if(btn){btn.disabled=true;btn.innerHTML="⏳ Mengupload...";}
         const checkout=await smtBuildCheckoutSnapshot();
-        const buktiUrl=await upload(file,checkout.nama);
         const paymentId=db.ref("pembayaran").push().key;
+        const buktiUrl=await upload(file,checkout.nama,paymentId);
         const payment={...checkout,buktiPembayaranUrl:buktiUrl,status:"Menunggu Verifikasi Pembayaran",tipe:"NON_COD",paymentId};
         delete payment.invoiceDraft;
         await db.ref("pembayaran/"+paymentId).set(payment);

@@ -89,17 +89,30 @@ function uploadGambar(file) {
         .then(snapshot => snapshot.ref.getDownloadURL());
 }
 
-function uploadBuktiPembayaranFirebase(file, namaPembeli) {
-    if (!file) return Promise.reject(new Error("File bukti transfer belum dipilih."));
-    if (!/^image\/(jpeg|png|webp)$/.test(file.type || "")) return Promise.reject(new Error("Bukti transfer harus JPG, PNG, atau WEBP."));
-    if (Number(file.size || 0) > 5 * 1024 * 1024) return Promise.reject(new Error("Ukuran bukti transfer maksimal 5 MB."));
-    if (!storage) return Promise.reject(new Error("Firebase Storage belum tersedia."));
-    const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
-    const safeBuyer = (namaPembeli || "pembeli").replace(/[^a-zA-Z0-9_-]/g, "_");
-    const path = "bukti-pembayaran/" + Date.now() + "_" + safeBuyer + "_" + safeName;
+async function uploadBuktiPembayaranFirebase(file, namaPembeli, paymentId) {
+    if (!file) throw new Error("File bukti transfer belum dipilih.");
+    if (!/^image\/(jpeg|png|webp)$/.test(file.type || "")) throw new Error("Bukti transfer harus JPG, PNG, atau WEBP.");
+    if (Number(file.size || 0) > 5 * 1024 * 1024) throw new Error("Ukuran bukti transfer maksimal 5 MB.");
+    if (!paymentId) throw new Error("ID pembayaran belum tersedia.");
 
-    return storage.ref(path).put(file)
-        .then(snapshot => snapshot.ref.getDownloadURL());
+    // Bukti transfer TIDAK lagi disimpan di Firebase Storage.
+    // File dikirim ke Netlify Function lalu disimpan di Netlify Blobs.
+    // Ini menjaga project Firebase tetap di paket gratis/Spark.
+    const form = new FormData();
+    form.append("file", file, file.name || "bukti-transfer");
+    form.append("paymentId", paymentId);
+    form.append("namaPembeli", namaPembeli || "pembeli");
+
+    const response = await fetch("/.netlify/functions/upload-bukti-transfer", {
+        method: "POST",
+        body: form
+    });
+    let data = null;
+    try { data = await response.json(); } catch (_) {}
+    if (!response.ok || !data || !data.url) {
+        throw new Error((data && data.error) || "Upload bukti transfer gagal.");
+    }
+    return data.url;
 }
 
 window.FirebaseApp = {
