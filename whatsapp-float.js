@@ -2,7 +2,7 @@
   'use strict';
   if (document.getElementById('smtWhatsappFloat')) return;
 
-  var phone = '6287821697442';
+  var phone = '6285724913598';
   var page = document.title ? document.title.trim() : 'website';
   var message = 'Halo Subur Mujur Tani, saya mau bertanya tentang produk.';
   if (page) message += '\n\nSaya melihat halaman: ' + page;

@@ -329,7 +329,7 @@
     const o = list[index];
     if (!o) return;
     const phone = String(o.whatsapp || "").replace(/\D/g, "");
-    const target = phone || "6287821697442";
+    const target = phone || "6285724913598";
     const text = [
       "🌱 SUBUR MUJUR TANI",
       "Permintaan informasi pesanan",

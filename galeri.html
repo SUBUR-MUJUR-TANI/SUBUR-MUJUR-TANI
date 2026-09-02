@@ -2215,7 +2215,7 @@ async function pesanWhatsApp() {
     const totalProduk = keranjang.reduce((total, item) => total + Number(item.harga || 0) * Number(item.jumlah || 0), 0);
     lines.push("", "Metode Pembayaran: " + metode, "Total Produk: Rp " + totalProduk.toLocaleString("id-ID"), "Ongkir: Rp " + Number(ongkir || 0).toLocaleString("id-ID"), "Total Bayar: Rp " + (totalProduk + Number(ongkir || 0)).toLocaleString("id-ID"));
 
-    const url = "https://wa.me/6287821697442?text=" + encodeURIComponent(lines.join("\n"));
+    const url = "https://wa.me/6285724913598?text=" + encodeURIComponent(lines.join("\n"));
     window.open(url, "_blank", "noopener,noreferrer");
 }
 </script>
