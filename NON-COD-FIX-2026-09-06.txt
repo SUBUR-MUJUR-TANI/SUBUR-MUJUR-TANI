@@ -1,0 +1,34 @@
+PERBAIKAN NON-COD / TRANSFER
+============================
+
+Perbaikan utama:
+- Pengunjung tanpa login sekarang dapat membuat pesanan NON-COD dengan status
+  "Belum Bayar" atau "Menunggu Konfirmasi Pembayaran".
+- Bukti transfer tetap opsional saat membuat pesanan dari checkout.html.
+- Jika bukti transfer sudah diupload sebelum order dibuat, pembayaran dapat
+  dikaitkan ke order melalui orderId tanpa ditolak Firebase Rules.
+- Pembayaran NON-COD tanpa bukti dapat dibuat sebagai "Menunggu Bukti Transfer"
+  setelah pesanan berhasil dibuat.
+- Alur lama yang membuat pesanan NON-COD setelah pembayaran sudah Lunas tetap
+  didukung, dengan pemeriksaan kecocokan total dan metode pembayaran.
+- Admin yang login tetap dapat mengubah pesanan dan pembayaran karena memakai
+  auth != null.
+
+PENTING SETELAH DEPLOY:
+File database.rules.json hanya mengubah file di project. Rules di Firebase
+Realtime Database harus dipublish ke server Firebase.
+
+Jika memakai Firebase CLI:
+  firebase login
+  firebase use subur-mujur-tani-6ff54
+  firebase deploy --only database
+
+Atau lewat Firebase Console:
+  Realtime Database -> Rules -> paste isi database.rules.json -> Publish.
+
+Setelah itu refresh website dan uji NON-COD:
+1. Pilih Transfer Bank/e-wallet.
+2. Isi data checkout dan layanan pengiriman.
+3. Buat pesanan tanpa upload bukti transfer.
+4. Pastikan pesanan masuk dengan status "Belum Bayar".
+5. Pastikan record pembayaran masuk dengan status "Menunggu Bukti Transfer".
