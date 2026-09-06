@@ -1779,11 +1779,16 @@ function tolakPembayaran(id){
     return p.gambar ? [p.gambar] : [];
   }
 
-  window.renderAdminDaftarProduk = function(){
+  window.renderAdminDaftarProduk = async function(){
     const box=document.getElementById("adminDaftarProduk");
     if(!box || !window.database) return;
 
-    window.adminRef("produk").on("value", function(snap){
+    box.innerHTML='<div style="padding:15px;color:#777;">⏳ Memuat produk...</div>';
+    try {
+      await window.adminAuthReady;
+      if(!window.adminUser) throw new Error("Sesi admin belum aktif. Silakan login ulang.");
+      window.database.ref("produk").off("value", window.__produkAdminListener);
+      window.__produkAdminListener = function(snap){
       const data=snap.val() || {};
       const entries=Object.entries(data);
 
@@ -1813,13 +1818,22 @@ function tolakPembayaran(id){
           + '<button type="button" onclick="hapusProdukAdmin(\''+esc(id)+'\')" style="flex:1;min-width:130px;background:#c62828;">🗑️ Hapus</button>'
           + '</div></div>';
       }).join("");
-    });
+      };
+      window.database.ref("produk").on("value", window.__produkAdminListener, function(err){
+        console.error("Gagal memuat produk:", err);
+        box.innerHTML='<div style="padding:15px;border:1px solid #ffcdd2;border-radius:12px;color:#c62828;background:#ffebee;">❌ Gagal memuat produk: '+esc(err?.message || err || "Tidak diketahui")+'</div>';
+      });
+    } catch(e) {
+      console.error("Gagal menyiapkan daftar produk:", e);
+      box.innerHTML='<div style="padding:15px;border:1px solid #ffcdd2;border-radius:12px;color:#c62828;background:#ffebee;">❌ '+esc(e?.message || e)+'</div>';
+    }
   };
 
   window.hapusProdukAdmin = async function(id){
     if(!id || !confirm("Hapus produk ini? Produk akan dihapus dari katalog.")) return;
     try{
-      await window.adminRef("produk/"+id).remove();
+      await window.adminAuthReady;
+      await window.database.ref("produk/"+id).remove();
       alert("✅ Produk berhasil dihapus.");
       if(typeof editID !== "undefined" && editID === id) window.batalEditProduk();
     }catch(e){
@@ -1925,7 +1939,7 @@ window.adminAuthReady.then(function(){
 ========================= */
 
 
-window.adminRef("produk")
+window.database.ref("produk")
 
 .on(
 
@@ -2391,7 +2405,7 @@ async function tambahProduk(){
          * Storage yang sama. Untuk produk baru belum ada data yang
          * ditulis ke RTDB sampai semua foto berhasil di-upload.
          */
-        const productId = editID || window.adminRef("produk").push().key;
+        const productId = editID || window.database.ref("produk").push().key;
         if(!productId){
             throw new Error("Gagal membuat ID produk.");
         }
@@ -2446,7 +2460,8 @@ async function tambahProduk(){
 
         if(btn) btn.innerHTML = "⏳ Menyimpan produk...";
 
-        await window.adminRef("produk/" + productId).set(produk);
+        await window.adminAuthReady;
+        await window.database.ref("produk/" + productId).set(produk);
 
         alert(editID
             ? "✅ Produk berhasil diperbarui dengan " + gambarList.length + " foto."
@@ -2615,7 +2630,8 @@ window.editProduk = async function(id){
     if(!id || !window.database) return;
 
     try{
-        const snap = await window.adminRef("produk/" + id).once("value");
+        await window.adminAuthReady;
+        const snap = await window.database.ref("produk/" + id).once("value");
         const p = snap.val();
 
         if(!p){
