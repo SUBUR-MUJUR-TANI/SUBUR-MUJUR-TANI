@@ -1,0 +1,13 @@
+SUBUR MUJUR TANI — CATATAN PERBAIKAN DEPLOY & BITESHIP
+
+1. Deploy scanner: netlify.toml mengecualikan hanya BITESHIP_ORIGIN_ORGANIZATION dari secret scanning karena nama toko bukan kredensial. Jangan mengecualikan BITESHIP_API_KEY atau FIREBASE_SERVICE_ACCOUNT_JSON. Jika nilai yang terdeteksi bukan nama toko publik, hapus nilai tersebut dari file client/repository, bukan mengecualikannya.
+
+2. Error checkout “No account found with associated key” berasal dari autentikasi Biteship: API key tidak terkait dengan akun/lingkungan yang menerima permintaan. Periksa Netlify > Site configuration > Environment variables:
+   - BITESHIP_ENV=testing harus memakai API key sandbox/testing yang benar dari akun Biteship yang sama.
+   - BITESHIP_ENV=production harus memakai API key Live/Production dari akun yang sama.
+   - Jangan menyalin API key ke HTML/JavaScript. Jangan mengirimkan API key lewat chat.
+   - Setelah mengubah variabel, trigger deploy baru agar Functions menggunakan nilai terbaru.
+
+3. Setelah deploy, buka /api/biteship-health. Jika belum success=true, selesaikan konfigurasi environment sebelum mencoba menghitung ongkir.
+
+4. Jika pesan tetap muncul, buat/rotasi API key di dashboard Biteship yang benar lalu pasang di Netlify. Kode situs tidak dapat memperbaiki key yang tidak terkait dengan akun Biteship.

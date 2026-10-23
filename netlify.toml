@@ -4,6 +4,9 @@
 
 [build.environment]
   NODE_VERSION = "22"
+  # BITESHIP_ORIGIN_ORGANIZATION is a public shop name, not a credential.
+  # Exclude only this benign value if Netlify flags it in generated client output.
+  SECRETS_SCAN_OMIT_KEYS = "BITESHIP_ORIGIN_ORGANIZATION"
 
 [functions]
   node_bundler = "esbuild"
