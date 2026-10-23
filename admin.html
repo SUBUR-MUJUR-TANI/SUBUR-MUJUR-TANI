@@ -1112,7 +1112,7 @@ async function pilihTarifPengiriman(id, index, silent) {
 
         if (!silent) {
             const box = document.getElementById("rate-result-" + id);
-            if (box) box.innerHTML += `<div class="rate-hint">✅ ${escapeAdmin(rate.courier_name)} ${escapeAdmin(rate.courier_service_name)} dipilih — Ongkir Rp ${shipping.toLocaleString("id-ID")}. Total COD Rp ${totalCOD.toLocaleString("id-ID")}.</div>`;
+            if (box) box.innerHTML += `<div class="rate-hint">✅ ${escapeAdmin(rate.courier_name)} ${escapeAdmin(rate.courier_service_name)} dipilih — Ongkir Rp ${shipping.toLocaleString("id-ID")}. Total pesanan Rp ${totalCOD.toLocaleString("id-ID")}${String(order.metodePembayaran || "").toUpperCase() === "COD" ? " (COD)" : " (non-COD; tidak ditagihkan sebagai COD)"}.</div>`;
         }
     } catch (error) {
         alert("❌ Gagal menyimpan layanan: " + (error.message || error));
