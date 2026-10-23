@@ -1211,7 +1211,17 @@ async function buatPengiriman(id) {
         catch (_) { throw new Error("Server mengirim respons yang bukan JSON."); }
 
         if (!res.ok || data.success === false) {
-            throw new Error(data.message || `Gagal membuat pengiriman (HTTP ${res.status}).`);
+            const d = data.diagnostic || {};
+            const details = [
+                `HTTP: ${data.biteship_status || res.status}`,
+                d.category ? `Kategori: ${d.category}` : '',
+                data.biteship_code ? `Kode Biteship: ${data.biteship_code}` : '',
+                d.environment ? `Mode: ${d.environment}` : '',
+                d.courier_company ? `Kurir: ${d.courier_company} / ${d.courier_type || '-'}` : '',
+                d.guidance ? `Petunjuk: ${d.guidance}` : ''
+            ].filter(Boolean).join("\n");
+            console.error("Diagnostik pengiriman Biteship:", { status: res.status, diagnostic: d, code: data.biteship_code });
+            throw new Error((data.message || `Gagal membuat pengiriman (HTTP ${res.status}).`) + (details ? "\n\n" + details : ''));
         }
 
         alert("✅ Pengiriman berhasil dibuat.\n\nKurir: " + (data.courier_company || order.kurirNama || "-") +

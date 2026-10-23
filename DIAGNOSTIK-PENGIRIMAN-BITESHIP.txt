@@ -1,0 +1,9 @@
+PERBAIKAN DIAGNOSTIK PENGIRIMAN BITESHIP
+
+1. Deploy ZIP ini ke site Netlify yang sama.
+2. Di Netlify > Environment variables, pastikan BITESHIP_ENV=production dan BITESHIP_API_KEY menggunakan key LIVE dari akun dashboard yang memiliki saldo. Jangan membagikan nilai key.
+3. Buka /.netlify/functions/biteship-health untuk memeriksa kesiapan konfigurasi (pemeriksaan lokal; bukan validasi saldo/akun di API Biteship).
+4. Coba Buat Pengiriman dari Admin. Jika gagal, dialog kini menampilkan HTTP, kategori, mode, kurir dan petunjuk. Catat hasil tanpa membagikan rahasia.
+5. Periksa Netlify > Logs > Functions > create-biteship-order bila muncul SERVER_OR_CONFIG_ERROR.
+
+CATATAN: saldo Biteship tidak dapat dipastikan hanya dari screenshot. Diagnostik ini tidak melakukan top-up, tidak mengubah tarif, tidak membuat permintaan Biteship tambahan, dan tidak menjamin transaksi diterima.
