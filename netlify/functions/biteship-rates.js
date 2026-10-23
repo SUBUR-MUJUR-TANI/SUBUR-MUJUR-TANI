@@ -104,9 +104,9 @@ exports.handler = async event => {
     const order = snap.val();
 
     if (!order) return json(404, { success: false, message: "Pesanan tidak ditemukan." });
-    if (String(order.metodePembayaran || "").toUpperCase() !== "COD") {
-      return json(400, { success: false, message: "Fitur pengiriman Admin ini khusus pesanan COD." });
-    }
+    // Tarif tersedia untuk COD maupun pembayaran non-COD. Hanya COD yang
+    // mengirim parameter cash-on-delivery ke Biteship.
+    const isCOD = String(order.metodePembayaran || "").trim().toUpperCase() === "COD";
     if (!["Dikemas", "Buat Pengiriman"].includes(String(order.status || ""))) {
       return json(400, { success: false, message: "Pesanan harus berada pada tahap Dikemas sebelum tarif dihitung." });
     }
@@ -149,10 +149,12 @@ exports.handler = async event => {
       origin_postal_code: Number(originPostalCode),
       destination_postal_code: Number(destinationPostalCode),
       items,
-      couriers: "jne,jnt,jntcargo,sicepat,anteraja,ninja,lion,pos,tiki,wahana,sap,idexpress,rpx,sentralcargo,paxel,deliveree,lalamove,jdl,grab,gosend,borzo",
-      destination_cash_on_delivery: codAmount,
-      destination_cash_on_delivery_type: codType
+      couriers: "jne,jnt,jntcargo,sicepat,anteraja,ninja,lion,pos,tiki,wahana,sap,idexpress,rpx,sentralcargo,paxel,deliveree,lalamove,jdl,grab,gosend,borzo"
     };
+    if (isCOD) {
+      payload.destination_cash_on_delivery = codAmount;
+      payload.destination_cash_on_delivery_type = codType;
+    }
 
     const dLat = Number(order.destinationLatitude);
     const dLng = Number(order.destinationLongitude);
