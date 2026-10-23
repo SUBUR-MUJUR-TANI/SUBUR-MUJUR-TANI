@@ -3928,6 +3928,35 @@ document.addEventListener("DOMContentLoaded", muatUlasan);
 
 <script src="fitur-toko.js"></script>
 <script>
+// Fallback mandiri agar panel riwayat tidak tertahan pada teks loading
+// jika inisialisasi fitur toko gagal.
+(function () {
+  function pastikanRiwayatTampil() {
+    var box = document.getElementById("riwayatPesanan");
+    if (!box || !/Memuat riwayat/i.test(box.textContent || "")) return;
+    try {
+      var data = JSON.parse(localStorage.getItem("smt_order_history") || "[]");
+      if (!Array.isArray(data) || data.length === 0) {
+        box.innerHTML = '<p>Belum ada riwayat pesanan tersimpan di perangkat ini. Untuk melihat status pesanan terbaru, masukkan nomor invoice dan 4 digit terakhir WhatsApp pada bagian Lacak Pesanan.</p>';
+        return;
+      }
+      box.innerHTML = data.slice(0,20).map(function (o) {
+        var invoice = String(o.invoice || "-").replace(/[&<>"']/g, function(c){return ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"})[c];});
+        var status = String(o.status || "Menunggu Pembayaran").replace(/[&<>"']/g, function(c){return ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"})[c];});
+        var tanggal = String(o.tanggal || "").replace(/[&<>"']/g, function(c){return ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"})[c];});
+        var total = Number(o.total || 0).toLocaleString("id-ID");
+        return '<div style="border:1px solid #ddd;border-radius:12px;padding:14px;margin:10px 0"><b>'+invoice+'</b><div>'+tanggal+'</div><div>Status: <b>'+status+'</b></div><div>Total: <b>Rp '+total+'</b></div></div>';
+      }).join("");
+    } catch (e) {
+      box.innerHTML = '<p style="color:#b42318">Riwayat tidak dapat dibaca dari penyimpanan browser. Coba muat ulang halaman.</p>';
+    }
+  }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", pastikanRiwayatTampil);
+  else pastikanRiwayatTampil();
+  window.addEventListener("load", function(){ setTimeout(pastikanRiwayatTampil, 1200); });
+})();
+</script>
+<script>
 window.addEventListener("load", function(){
     if (window.location.hash === "#checkout") {
         setTimeout(function(){

@@ -774,6 +774,25 @@ async function renderPesananMasuk(force = false) {
                 </div>`;
             }
 
+            // Detail pembelian dan alamat konsumen ditampilkan di kartu admin.
+            // Mendukung struktur order.produk yang dibuat checkout.html.
+            const daftarProduk = Array.isArray(order.produk) ? order.produk :
+                (Array.isArray(order.items) ? order.items : (Array.isArray(order.cart) ? order.cart : []));
+            const produkHTML = daftarProduk.length ? daftarProduk.map((item) => {
+                const namaProduk = item.nama || item.name || item.namaProduk || "Produk";
+                const varian = item.variantNama || item.varian || item.variant || "";
+                const jumlah = Number(item.jumlah ?? item.qty ?? item.quantity ?? 1);
+                const harga = Number(item.harga ?? item.price ?? 0);
+                const subtotal = Number(item.subtotal ?? (harga * jumlah));
+                return `<div style="display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px dashed #e1e9e3;align-items:flex-start;">
+                    <div style="min-width:0;flex:1;"><b>${escapeAdmin(namaProduk)}</b>${varian ? `<div style="font-size:12px;color:#66716c;">Varian: ${escapeAdmin(varian)}</div>` : ""}<div style="font-size:12px;color:#66716c;">${jumlah} × Rp ${harga.toLocaleString("id-ID")}</div></div>
+                    <b style="white-space:nowrap;">Rp ${subtotal.toLocaleString("id-ID")}</b>
+                </div>`;
+            }).join("") : `<div style="font-size:12px;color:#9a6a00;">Detail produk tidak tersedia pada data pesanan ini.</div>`;
+            const alamatParts = [order.alamat, order.rt ? "RT " + order.rt : "", order.rw ? "RW " + order.rw : "", order.desa, order.kecamatan, order.kabupaten, order.provinsi, order.kodePos].filter(v => v !== undefined && v !== null && String(v).trim() !== "");
+            const alamatLengkap = alamatParts.length ? alamatParts.join(", ") : (order.alamatLengkap || order.address || order.penerimaAlamat || "Alamat belum tersimpan");
+            const totalProdukAdmin = Number(order.totalProduk ?? daftarProduk.reduce((sum, item) => sum + Number(item.subtotal ?? (Number(item.harga ?? item.price ?? 0) * Number(item.jumlah ?? item.qty ?? item.quantity ?? 1))), 0));
+
             hasil += `
             <div class="card order-card">
               <div class="order-head">
@@ -784,7 +803,19 @@ async function renderPesananMasuk(force = false) {
                 <span>📱 ${escapeAdmin(order.whatsapp || "-")}</span>
                 <span>💳 ${isCOD ? "COD" : escapeAdmin(order.metodePembayaran || "-")}</span>
               </div>
-              <div class="order-total">Rp ${Number(order.total || 0).toLocaleString("id-ID")}</div>
+              <div class="order-total">Total Bayar: Rp ${Number(order.total || 0).toLocaleString("id-ID")}</div>
+              <div style="margin:10px 0;padding:12px;border:1px solid #e0e9e3;border-radius:12px;background:#f8fbf9;">
+                <div style="font-weight:800;color:#123f30;margin-bottom:7px;">🛒 Detail Pesanan Konsumen</div>
+                <div>${produkHTML}</div>
+                <div style="display:flex;justify-content:space-between;gap:10px;padding-top:9px;font-size:12px;"><span>Total harga produk</span><b>Rp ${totalProdukAdmin.toLocaleString("id-ID")}</b></div>
+                <div style="display:flex;justify-content:space-between;gap:10px;padding-top:5px;font-size:12px;"><span>Ongkos kirim</span><b>Rp ${Number(order.ongkir || order.biteshipShippingPrice || 0).toLocaleString("id-ID")}</b></div>
+                <div style="display:flex;justify-content:space-between;gap:10px;padding-top:7px;margin-top:5px;border-top:1px solid #dce7df;color:#123f30;"><b>Total pembayaran</b><b>Rp ${Number(order.total || (totalProdukAdmin + Number(order.ongkir || 0))).toLocaleString("id-ID")}</b></div>
+              </div>
+              <div style="margin:10px 0;padding:12px;border:1px solid #e0e9e3;border-radius:12px;background:#fff;">
+                <div style="font-weight:800;color:#123f30;margin-bottom:5px;">📍 Alamat Pengiriman Konsumen</div>
+                <div style="font-size:13px;line-height:1.6;overflow-wrap:anywhere;">${escapeAdmin(alamatLengkap)}</div>
+                <div style="font-size:12px;color:#66716c;margin-top:5px;">Penerima: ${escapeAdmin(order.nama || "-")} · WhatsApp: ${escapeAdmin(order.whatsapp || "-")}</div>
+              </div>
               ${!isCOD ? `<div style="margin-top:7px;font-size:12px;font-weight:800;color:${order.buktiPembayaranUrl ? '#1b6b4b' : '#9a6a00'};">${order.buktiPembayaranUrl ? '📎 Bukti transfer tersedia' : 'ℹ️ Bukti transfer belum diupload — bisa diproses manual'}</div>` : ""}
 
               <label for="status-${id}" style="font-size:12px;color:#66716c;">Atur status</label>
