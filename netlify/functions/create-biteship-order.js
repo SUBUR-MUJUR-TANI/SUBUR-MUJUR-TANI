@@ -76,7 +76,37 @@ async function verifyAdminToken(admin, token) {
   return decoded;
 }
 
+function diagnoseBiteship(result, env, payload) {
+  const status = Number(result.status || 0);
+  const message = messageOf(result.data);
+  const code = String(result.data?.code || '');
+  const combined = `${message} ${code}`.toLowerCase();
+  let category = 'BITESHIP_API_REJECTED';
+  let guidance = 'Periksa detail error dan pengaturan layanan kurir di dashboard Biteship.';
+  if (/point|saldo|balance|credit|insufficient|wallet/.test(combined)) {
+    category = 'INSUFFICIENT_BITESHIP_BALANCE';
+    guidance = 'Biteship menolak karena saldo/points. Pastikan API key Production milik akun dashboard yang saldonya terlihat, saldo tersedia untuk transaksi, dan biaya kurir serta biaya tambahan tercukupi. Jangan menambah saldo sebelum memastikan akun dan tagihan.';
+  } else if (status === 401 || status === 403 || /unauthoriz|invalid.*key|forbidden/.test(combined)) {
+    category = 'BITESHIP_AUTH';
+    guidance = 'Periksa API key Biteship dan izin akun Production di Netlify; jangan kirim API key ke siapa pun.';
+  } else if (status === 400 || status === 422) {
+    category = 'BITESHIP_VALIDATION';
+    guidance = 'Periksa alamat, kode pos, kurir/layanan, berat barang, jenis pembayaran, dan jadwal pickup.';
+  } else if (status === 429) {
+    category = 'BITESHIP_RATE_LIMIT';
+    guidance = 'Batas permintaan Biteship tercapai; coba lagi setelah beberapa saat.';
+  } else if (status >= 500) {
+    category = 'BITESHIP_SERVER';
+    guidance = 'Layanan Biteship sedang bermasalah; cek dashboard dan coba kembali.';
+  }
+  return { category, guidance, environment: env, http_status: status,
+    courier_company: payload.courier_company, courier_type: payload.courier_type,
+    delivery_type: payload.delivery_type, cod: Boolean(payload.destination_cash_on_delivery),
+    shipping_price_estimate: null };
+}
+
 exports.handler = async event => {
+  let activeLockRef = null;
   if (event.httpMethod === "OPTIONS") return json(204, {});
   if (event.httpMethod !== "POST") return json(405, { success: false, message: "Method harus POST." });
 
@@ -86,7 +116,7 @@ exports.handler = async event => {
     const token = String(input.idToken || "").trim();
     if (!orderId) return json(400, { success: false, message: "orderId wajib diisi." });
 
-    const { apiKey } = assertProductionConfig();
+    const { apiKey, env } = assertProductionConfig();
     if (!apiKey) return json(500, { success: false, message: "BITESHIP_API_KEY belum diisi di Netlify." });
 
     const admin = getFirebaseAdmin();
@@ -157,6 +187,7 @@ exports.handler = async event => {
     // Lock singkat untuk mencegah dua klik Admin membuat dua order Biteship.
     // Lock tidak dibuka sampai request selesai; jika request gagal, dilepas.
     const lockRef = orderRef.child("biteshipCreateLock");
+    activeLockRef = lockRef;
     const lockNow = Date.now();
     const lockResult = await lockRef.transaction(current => {
       if (current && Number(current.until || 0) > lockNow) return;
@@ -264,7 +295,8 @@ exports.handler = async event => {
         message: messageOf(result.data),
         biteship_status: result.status,
         biteship_code: result.data?.code || null,
-        biteship_error: result.data?.error || null
+        biteship_error: typeof result.data?.error === "string" ? result.data.error.slice(0, 500) : null,
+        diagnostic: diagnoseBiteship(result, env, payload)
       });
     }
 
@@ -334,8 +366,8 @@ exports.handler = async event => {
   } catch (err) {
     console.error("create-biteship-order:", err);
     try {
-      if (typeof orderRef !== "undefined" && orderRef) await orderRef.child("biteshipCreateLock").remove();
+      if (activeLockRef) await activeLockRef.remove();
     } catch (_) {}
-    return json(500, { success: false, message: err.message || "Gagal membuat order Biteship." });
+    return json(500, { success: false, message: err.message || "Gagal membuat order Biteship.", diagnostic: { category: "SERVER_OR_CONFIG_ERROR", guidance: "Periksa konfigurasi Netlify dan log function create-biteship-order. Jangan bagikan token atau API key." } });
   }
 };
